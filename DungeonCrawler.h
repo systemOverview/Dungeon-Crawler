@@ -1,0 +1,55 @@
+//
+// Created by MBK on 13.11.25.
+//
+
+#ifndef PRAK_DUNGEONCRAWLER_H
+#define PRAK_DUNGEONCRAWLER_H
+#include "TerminalUI.h"
+#include "Level.h"
+#include "GraphicalUI.h"
+#include "list.h"
+class DungeonCrawler {
+
+public:
+    Level* currentLevel;
+    List<Level*> levels;
+    std::array <std::string, 2> gameStrings = {
+
+            "##########"
+            "#....$...#"
+            "#...<....#"
+            "#..___...#"
+            "#..___...#"
+            "#........#"
+            "#######X##"
+            "#........#"
+            "#...?....#"
+            "##########",
+
+                "##########"
+                "#....$...#"
+                "#...<....#"
+                "#..___...#"
+                "#..___...#"
+                "#........#"
+                "#######X##"
+                "#........#"
+                "#...?....#"
+                "##########"
+
+
+    };
+    GraphicalUI* GUI;
+
+public:
+    DungeonCrawler();
+
+
+
+    std::pair<int,int> translateMove(int step) const;
+    bool turn();
+    void move(std::pair <int,int> xypair);
+
+};
+
+#endif //PRAK_DUNGEONCRAWLER_H

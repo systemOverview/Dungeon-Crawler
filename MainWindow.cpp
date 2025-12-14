@@ -1,0 +1,122 @@
+#include "MainWindow.h"
+#include "ui_MainWindow.h"
+#include <QSlider>
+#include <sstream>
+#include <QPushButton>
+#include "GraphicalUI.h"
+#include "DungeonCrawler.h"
+
+MainWindow::MainWindow(Level* lvl,GraphicalUI* g,QWidget *parent)
+    : QMainWindow(parent)
+    , ui(new Ui::MainWindow), level{lvl}, GUI{g}
+{
+    ui->setupUi(this);
+    QWidget* gameField = ui->gameField;
+    QWidget* arrowField = ui->arrowField;
+
+    QGridLayout* gameLayout = new QGridLayout(gameField);
+    QGridLayout* arrowLayout = new QGridLayout(arrowField);
+    gameBoard = gameLayout;
+    // fill(gameLayout);
+    arrowField->setMaximumHeight(300);
+    generateArrowButtons(arrowLayout);
+
+
+
+
+}
+
+void MainWindow::fill(QGridLayout* gameField)
+{
+    std::vector <std::vector<Tile*>>* tiles = level->getTiles();
+    for (int i=0;i<level->getHeight();i++) {
+        for (int j=0; j<level->getWidth();j++) {
+            Tile* currentTile = (*tiles)[i][j];
+            QWidget* tileWidget = new QWidget();
+            tileWidget->setMinimumSize(50,50);
+            if (currentTile==nullptr) {
+            }
+
+            else {
+                // cast into its type
+                if (currentTile->hasCharacter()) {
+// #centralwidget{
+//                     border-image : url(:/pics/bloody_frame.png) 0 0 0 0 stretch stretch;
+//                 }
+                    std::ostringstream style ;
+                    style << "border-image : url(:" << "/pics/ textures/char/front/char_front_1.png" << ") 0 0 0 0 stretch stretch;";
+
+                    QString bgStyleFull = QString::fromStdString(style.str());
+                    tileWidget->setStyleSheet(bgStyleFull);
+
+                }
+                else {
+                    std::ostringstream style ;
+                    style << "border-image : url(" << currentTile->getTexturePath() << ") 0 0 0 0 stretch stretch;";
+
+                    QString bgStyleFull = QString::fromStdString(style.str());
+                    qDebug() << bgStyleFull;
+                    tileWidget->setStyleSheet(bgStyleFull);
+
+                }
+            }
+
+            gameField->addWidget(tileWidget, i,j);
+        }
+    }
+}
+
+void MainWindow::generateArrowButtons(QGridLayout* arrowsField)
+{
+    int counter = 0;
+    for (int i=0; i<3;i++){
+        for (int j=0;j<3;j++){
+            QPushButton* arrow = new QPushButton;
+
+            std::ostringstream style ;
+            std::pair <int, int> xymove = arrows[counter]->getMove();
+            style << "border-image : url(" << arrows[counter]->getPath() << ") 0 0 0 0 stretch stretch; height: 70px; width: 70px";
+            QString bgStyleFull = QString::fromStdString(style.str());
+            arrow->setStyleSheet(bgStyleFull);
+            connect(arrow, &QPushButton::clicked, [xymove, this](){
+                move(xymove);
+            });
+            arrowsField->addWidget(arrow, i, j);
+            counter++;
+        }
+    }
+}
+void MainWindow::move(std::pair<int, int> move){
+    int i=0;
+    for(int j=0; j<10; j++)
+    {
+        for(int k=0; k<10 ; k++)
+        {
+            i++;
+
+            qDebug() << "Removing item at: " << j << "," << k;
+            QLayoutItem* item = gameBoard->itemAtPosition(j, k);
+
+            if (!item) continue;
+
+            if (item->widget()) {
+                delete item->widget();
+            } else {
+                gameBoard->removeItem(item);
+            }
+            qDebug() << "Removed!";
+        }
+    }
+    qDebug()<<move;
+    GUI->move(move);
+}
+
+MainWindow::~MainWindow()
+{
+    delete ui;
+}
+
+QGridLayout *MainWindow::getGameBoard()
+{
+    return gameBoard;
+}
