@@ -35,5 +35,7 @@
         <file>textures/char/left/char_left_1.png</file>
         <file>textures/char/right/char_right_2.png</file>
         <file>textures/levelchanger.png</file>
+        <file>textures/zombie/zombie_left.png</file>
+        <file>textures/zombie/zombie_right.png</file>
     </qresource>
 </RCC>

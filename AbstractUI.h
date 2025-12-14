@@ -6,6 +6,7 @@
 #define PRAK_ABSTRACTUI_H
 #include <iostream>
 class Level;
+class Character;
 class AbstractUI {
 public:
     virtual void draw(Level*) = 0;
@@ -15,7 +16,9 @@ public:
 
 class AbstractController {
 public:
-    virtual int move() = 0 ;
+    // TODO : fix the move function across subclasses
+    virtual int move(Level*) = 0 ;
+    virtual void attachCharacter(Character* character){};
 };
 
 

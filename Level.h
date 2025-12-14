@@ -11,6 +11,7 @@ class Tile;
 class Level {
     std::vector <std::vector<Tile*>> tiles;
     std::vector <Character*> characters;
+    std::vector <Character*> nonPlayableCharacters;
     Character* playableCharacter;
     int gameHeight{};
     int gameWidth{};
@@ -25,6 +26,10 @@ public:
     Character* getPlayableCharacter() {
         return playableCharacter;
     }
+
+    std::vector <Character*> getNonPlayableCharacters();
+
+    void setPortals();
     void setDefaultTiles() {
         for (int i=0; i<gameHeight; i++) {
             std::vector<Tile*> row;

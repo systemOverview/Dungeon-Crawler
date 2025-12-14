@@ -28,7 +28,7 @@ void TerminalUI::draw(Level *level) {
     }
 }
 
-int TerminalUI::move() {
+int TerminalUI::move(Level* level) {
     int movement{};
     std::cout << "Please enter your move (1-9)";
     std::cin >> movement;

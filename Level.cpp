@@ -3,21 +3,16 @@
 //
 
 #include "Level.h"
+#include "StationaryController.h"
 
 Level::Level(int height, int width, std::string gameString) {
     gameHeight = height;
     gameWidth = width;
     setDefaultTiles();
-    /*
-    Level level(10,10);
-    */
+
     std::vector <Door*> doors;
     Switch* theSwitch = nullptr;
 
-
-    /*
-    auto tiles = level.getTiles();
-    */
 
 
 
@@ -61,20 +56,26 @@ Level::Level(int height, int width, std::string gameString) {
             Floor* floor = new Floor(row, column);
             (tiles)[row][column] = floor;
 
+            if (gameString[i]=='P'){
+                Character* crc = new Character("P","/pics/ textures/char/front/char_front_1.png");
+                placeCharacter(crc,row,column,true);
+
+            }
+
+            else if (gameString[i]=='S'){
+                StationaryController* stationaryController = new StationaryController;
+                Character* crc = new Zombie("S","/pics/textures/zombie/zombie_right.png",stationaryController);
+                placeCharacter(crc,row,column,false);
+
+            }
+
         }
 
     }
-    delete (tiles)[3][2];
-    delete (tiles)[5][7];
-    Portal* firstPortal = new Portal(3,2);
-    Portal* secondPortal = new Portal(5,7);
-    (tiles)[3][2] = firstPortal;
-    (tiles)[5][7] = secondPortal;
-    Character* crc = new Character("P");
-    placeCharacter(crc,9,2,true);
+    setPortals();
+    // Character* crc = new Character("P","/pics/ textures/char/front/char_front_1.png");
+    // placeCharacter(crc,9,2,true);
 
-    firstPortal->setPortal(secondPortal);
-    secondPortal->setPortal(firstPortal);
 
     for (auto door : doors) {
         theSwitch->attach(door);
@@ -107,4 +108,25 @@ void Level::placeCharacter(Character* c, int row, int col, bool isPlayable) {
     if (isPlayable) {
         playableCharacter = c;
     }
+    else{
+        nonPlayableCharacters.push_back(c);
+    }
+}
+
+std::vector<Character *> Level::getNonPlayableCharacters()
+{
+    return nonPlayableCharacters;
+}
+
+void Level::setPortals()
+{
+    delete (tiles)[3][2];
+    delete (tiles)[5][7];
+    Portal* firstPortal = new Portal(3,2);
+    Portal* secondPortal = new Portal(5,7);
+    (tiles)[3][2] = firstPortal;
+    (tiles)[5][7] = secondPortal;
+    firstPortal->setPortal(secondPortal);
+    secondPortal->setPortal(firstPortal);
+
 }

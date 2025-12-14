@@ -9,8 +9,24 @@
 
 
 
+void Character::setController(AbstractController *controller)
+{
+    m_controller = controller;
+
+}
+
 std::string_view Character::getTexture () const {
-    return Texture;
+    return m_texture;
+}
+
+std::string_view Character::getTexturePath() const
+{
+    return m_texturePath;
+}
+
+AbstractController *Character::getController()
+{
+    return m_controller;
 }
 
 Tile * Character::getTile() const {
@@ -21,14 +37,23 @@ void Character::setTile(Tile* newTile) {
     currentTile= newTile;
 }
 
-int Character::move(Level *currentLevel) {
+int Character::move(Level *currentLevel, std::pair <int, int> xymove) {
+    // TODO change member/local variable names
+
+    // int move = character->move(currentLevel);
+    // std::pair <int,int> xymove = translateMove(move);
+
+    if (xymove.first ==0 && xymove.second == 0) {
+        return 0; /*move number 5 does nothing*/
+    }
+    int newRow = currentTile->getRow()+xymove.first;
+    int newColumn = currentTile->getColumn()+xymove.second;
+    Tile* wantedTile = currentLevel->getTile(newRow, newColumn);
+    bool isMoveAllowed = currentTile->moveTo(wantedTile,this);
 
 
-    int step = controller->move();
-    return step;
 
-
-
-
+    // int step = m_controller->move(currentLevel);
+    // return step;
 
 }

@@ -48,7 +48,7 @@ void GraphicalUI::draw(Level *level)
             Tile* currentTile = (*tiles)[i][j];
             QWidget* tileWidget = new QWidget();
             tileWidget->setMinimumSize(50,50);
-            gameBoard->addWidget(nullptr, i,j);
+            // gameBoard->addWidget(nullptr, i,j);
 
             if (currentTile==nullptr) {
             }
@@ -60,7 +60,8 @@ void GraphicalUI::draw(Level *level)
                     //                     border-image : url(:/pics/bloody_frame.png) 0 0 0 0 stretch stretch;
                     //                 }
                     std::ostringstream style ;
-                    style << "border-image : url(:" << "/pics/ textures/char/front/char_front_1.png" << ") 0 0 0 0 stretch stretch;";
+                    qDebug()<<currentTile->getCharacter()->getTexturePath();
+                    style << "border-image : url(:" << currentTile->getCharacter()->getTexturePath() << ") 0 0 0 0 stretch stretch;";
 
                     QString bgStyleFull = QString::fromStdString(style.str());
                     tileWidget->setStyleSheet(bgStyleFull);
@@ -82,13 +83,16 @@ void GraphicalUI::draw(Level *level)
     }
 }
 
-int GraphicalUI::move()
+int GraphicalUI::move(Level*)
 {
     return 0;
 }
 
-int GraphicalUI::move(std::pair<int,int> xymove) {
 
+
+
+int GraphicalUI::move(std::pair<int,int> xymove) {
+    lastMove = xymove;
     dc->move(xymove);
 }
 
@@ -130,6 +134,11 @@ std::pair<int, int> GraphicalUI::translateMove(int step) {
 void GraphicalUI::start()
 {
     mainWindow->show();
+}
+
+std::pair<int, int> GraphicalUI::getLastMove()
+{
+    return lastMove;
 }
 
 
