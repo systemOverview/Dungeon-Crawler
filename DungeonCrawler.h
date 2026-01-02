@@ -20,9 +20,9 @@ public:
             "#...<..S.#"
             "#..___...#"
             "#..___...#"
-            "#S.......#"
+            "#G.......#"
             "#######X##"
-            "#........#"
+            "#...G....#"
             "#P..?....#"
             "##########",
 
@@ -48,7 +48,7 @@ public:
 
     std::pair<int,int> translateMove(int step) const;
     bool turn();
-    void move(std::pair <int,int> xypair);
+    void move();
 
 };
 

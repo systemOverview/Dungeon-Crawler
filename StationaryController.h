@@ -5,10 +5,8 @@
 class Character;
 class StationaryController : public AbstractController
 {
-    Character* m_character;
 public:
     StationaryController();
-    void attachCharacter(Character* character);
 
     int move(Level* currentLevel) override;
 

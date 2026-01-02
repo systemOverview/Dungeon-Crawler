@@ -107,6 +107,7 @@ qt_add_executable(prak WIN32 MACOSX_BUNDLE
         list.cpp
         list.h
         StationaryController.h StationaryController.cpp
+        GuardController.h GuardController.cpp
 
     )
 

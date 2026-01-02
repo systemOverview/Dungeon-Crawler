@@ -65,7 +65,7 @@ bool DungeonCrawler::turn() {
     return true;
 }
 
-void DungeonCrawler::move(std::pair <int,int> xymove) {
+void DungeonCrawler::move() {
     currentLevel->getPlayableCharacter()->move(currentLevel, GUI->getLastMove());
     // Character* character = currentLevel->getPlayableCharacter();
 
@@ -81,15 +81,16 @@ void DungeonCrawler::move(std::pair <int,int> xymove) {
     // Tile* wantedTile = currentLevel->getTile(newRow, newColumn);
     // bool isMoveAllowed = currentTile->moveTo(wantedTile,character);
 
-    // std::vector<Character*> NPCs = currentLevel->getNonPlayableCharacters();
-    // for (auto & NPC : NPCs) {
-    //     int move = NPC->getController()->move(currentLevel);
-    // }
+    std::vector<Character*> NPCs = currentLevel->getNonPlayableCharacters();
+    for (auto & NPC : NPCs) {
+        int move = NPC->getController()->move(currentLevel);
+    }
 
 
 
-    GUI->draw(currentLevel);
+    // GUI->draw(currentLevel);
 
+    turn();
 
 
 }

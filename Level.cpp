@@ -4,6 +4,7 @@
 
 #include "Level.h"
 #include "StationaryController.h"
+#include "GuardController.h"
 
 Level::Level(int height, int width, std::string gameString) {
     gameHeight = height;
@@ -68,6 +69,14 @@ Level::Level(int height, int width, std::string gameString) {
                 placeCharacter(crc,row,column,false);
 
             }
+
+            else if (gameString[i]=='G'){
+                GuardController* guardController = new GuardController;
+                Character* crc = new Zombie("G","/pics/textures/zombie/assasin.png",guardController);
+                placeCharacter(crc,row,column,false);
+
+            }
+
 
         }
 

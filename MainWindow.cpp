@@ -88,25 +88,25 @@ void MainWindow::generateArrowButtons(QGridLayout* arrowsField)
 }
 void MainWindow::move(std::pair<int, int> move){
     int i=0;
-    for(int j=0; j<10; j++)
-    {
-        for(int k=0; k<10 ; k++)
-        {
-            i++;
+    // for(int j=0; j<10; j++)
+    // {
+    //     for(int k=0; k<10 ; k++)
+    //     {
+    //         i++;
 
-            qDebug() << "Removing item at: " << j << "," << k;
-            QLayoutItem* item = gameBoard->itemAtPosition(j, k);
+    //         qDebug() << "Removing item at: " << j << "," << k;
+    //         QLayoutItem* item = gameBoard->itemAtPosition(j, k);
 
-            if (!item) continue;
+    //         if (!item) continue;
 
-            if (item->widget()) {
-                delete item->widget();
-            } else {
-                gameBoard->removeItem(item);
-            }
-            qDebug() << "Removed!";
-        }
-    }
+    //         if (item->widget()) {
+    //             delete item->widget();
+    //         } else {
+    //             gameBoard->removeItem(item);
+    //         }
+    //         qDebug() << "Removed!";
+    //     }
+    // }
     qDebug()<<move;
     GUI->move(move);
 }

@@ -10,15 +10,19 @@ class Character;
 class AbstractUI {
 public:
     virtual void draw(Level*) = 0;
-    virtual std::pair<int,int> translateMove(int step) = 0;
+    virtual std::pair<int,int> translateMove(int step);
 
 };
 
 class AbstractController {
+protected :
+    Character* m_character;
 public:
     // TODO : fix the move function across subclasses
     virtual int move(Level*) = 0 ;
-    virtual void attachCharacter(Character* character){};
+    virtual void attachCharacter(Character* character);
+    virtual std::pair<int,int> translateMove(int step);
+
 };
 
 

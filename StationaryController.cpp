@@ -6,10 +6,7 @@ StationaryController::StationaryController()
 
 }
 
-void StationaryController::attachCharacter(Character* character)
-{
-    m_character = character;
-}
+
 
 int StationaryController::move(Level* currentLevel)
 {

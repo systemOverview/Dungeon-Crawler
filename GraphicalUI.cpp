@@ -45,6 +45,17 @@ void GraphicalUI::draw(Level *level)
     std::vector <std::vector<Tile*>>* tiles = level->getTiles();
     for (int i=0;i<level->getHeight();i++) {
         for (int j=0; j<level->getWidth();j++) {
+            QLayoutItem* item = gameBoard->itemAtPosition(i, j);
+
+            if (!item) {}
+
+            else if (item->widget()) {
+                delete item->widget();
+            } else {
+                gameBoard->removeItem(item);
+            }
+
+
             Tile* currentTile = (*tiles)[i][j];
             QWidget* tileWidget = new QWidget();
             tileWidget->setMinimumSize(50,50);
@@ -54,15 +65,11 @@ void GraphicalUI::draw(Level *level)
             }
 
             else {
+
                 // cast into its type
                 if (currentTile->hasCharacter()) {
-                    // #centralwidget{
-                    //                     border-image : url(:/pics/bloody_frame.png) 0 0 0 0 stretch stretch;
-                    //                 }
                     std::ostringstream style ;
-                    qDebug()<<currentTile->getCharacter()->getTexturePath();
                     style << "border-image : url(:" << currentTile->getCharacter()->getTexturePath() << ") 0 0 0 0 stretch stretch;";
-
                     QString bgStyleFull = QString::fromStdString(style.str());
                     tileWidget->setStyleSheet(bgStyleFull);
 
@@ -77,8 +84,21 @@ void GraphicalUI::draw(Level *level)
 
                 }
             }
+            // QLayoutItem* item = gameBoard->itemAtPosition(i,j);
+            // if (gameBoard->itemAtPosition(i,j)){
+            //     gameBoard->removeWidget(gameBoard->itemAtPosition(i, j)->widget()); delete gameBoard->itemAtPosition(i,j);}
 
+
+
+                    // if (item->widget()) {
+                    // } else {
+                    //     gameBoard->removeItem(item);
+                    // }
+
+            // gameBoard->removeItem(item);
             gameBoard->addWidget(tileWidget, i,j);
+
+
         }
     }
 }
@@ -93,7 +113,7 @@ int GraphicalUI::move(Level*)
 
 int GraphicalUI::move(std::pair<int,int> xymove) {
     lastMove = xymove;
-    dc->move(xymove);
+    dc->move();
 }
 
 std::pair<int, int> GraphicalUI::translateMove(int step) {
