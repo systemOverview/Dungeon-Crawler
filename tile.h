@@ -66,10 +66,6 @@ public:
 };
 
 class Wall : public Tile { // Non-Accessible tile, characters can't enter them
-    /*void doNothing() {
-        int a = 16;
-    }*/
-
 
 public:
     Wall(int row, int column) :Tile("#", row, column, ":/pics/textures/wall/wall1.png") {
@@ -77,7 +73,6 @@ public:
     };
 
     bool isEntrable() {
-        std::cout << "wall";
         return false;
     }
 
@@ -86,9 +81,7 @@ public:
 
 
 class Portal : public Tile {
-    /*void doNothing() {
-        int a = 36;
-    }*/
+
     bool shouldMove{true};
     Portal* portalToAccess;
     int portalType;
@@ -119,7 +112,7 @@ public:
 
 class Switch : public Tile, public Active {
 public:
-    Switch(int row, int column) :Tile("?", row, column ,":/pics/switch.png") {
+    Switch(int row, int column) :Tile("?", row, column ,":/pics/textures/other tiles/switch.png") {
 
     };
 
@@ -151,7 +144,7 @@ public:
 class Pit : public Tile {
 
 public:
-    Pit(int row, int column) :Tile("_", row, column, ":/pics/textures/pit.png") {
+    Pit(int row, int column) :Tile("_", row, column, ":/pics/textures/other tiles/pit.png") {
 
     };
 
@@ -167,7 +160,7 @@ public:
 class Ramp : public Tile {
 
 public:
-    Ramp(int row, int column) :Tile("<", row, column, ":/pics/textures/ramp.png") {
+    Ramp(int row, int column) :Tile("<", row, column, ":/pics/textures/other tiles/ramp.png") {
 
     };
 
@@ -178,7 +171,7 @@ public:
 
 class LevelChanger : public Tile{
 public:
-    LevelChanger(int row, int column) :Tile("$", row, column, ":/pics/textures/levelchanger.png") {
+    LevelChanger(int row, int column) :Tile("$", row, column, ":/pics/textures/extra/levelchanger.png") {
 
     };
 

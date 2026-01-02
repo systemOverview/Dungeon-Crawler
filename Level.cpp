@@ -58,7 +58,7 @@ Level::Level(int height, int width, std::string gameString) {
             (tiles)[row][column] = floor;
 
             if (gameString[i]=='P'){
-                Character* crc = new Character("P","/pics/ textures/char/front/char_front_1.png");
+                Character* crc = new Character("P","/pics/textures/char/front/char_front_1.png");
                 placeCharacter(crc,row,column,true);
 
             }
@@ -72,7 +72,7 @@ Level::Level(int height, int width, std::string gameString) {
 
             else if (gameString[i]=='G'){
                 GuardController* guardController = new GuardController;
-                Character* crc = new Zombie("G","/pics/textures/zombie/assasin.png",guardController);
+                Character* crc = new Zombie("G","/pics/textures/zombie/assassin.png",guardController);
                 placeCharacter(crc,row,column,false);
 
             }
@@ -82,8 +82,6 @@ Level::Level(int height, int width, std::string gameString) {
 
     }
     setPortals();
-    // Character* crc = new Character("P","/pics/ textures/char/front/char_front_1.png");
-    // placeCharacter(crc,9,2,true);
 
 
     for (auto door : doors) {

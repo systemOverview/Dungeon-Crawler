@@ -1,12 +1,19 @@
 <RCC>
     <qresource prefix="/pics">
-        <file>startscreen_dark.png</file>
-        <file>bloody_frame.png</file>
-        <file>chest.png</file>
-        <file>new_game_button.png</file>
-        <file>startscreen.png</file>
-        <file>startscreen.ui</file>
-        <file>switch.png</file>
+        <file>textures/start screen/startscreen_dark.png</file>
+        <file>textures/start screen/new_game_button.png</file>
+        <file>textures/doors/door1.png</file>
+        <file>textures/doors/door2.png</file>
+        <file>textures/floor/floor1.png</file>
+        <file>textures/wall/wall1.png</file>
+        <file>textures/portal/portal1.png</file>
+        <file>textures/other tiles/pit.png</file>
+        <file>textures/other tiles/ramp.png</file>
+        <file>textures/other tiles/switch.png</file>
+        <file>textures/extra/levelchanger.png</file>
+        <file>textures/char/front/char_front_1.png</file>
+        <file>textures/zombie/zombie_right.png</file>
+        <file>textures/zombie/assassin.png</file>
         <file>textures/arrows/arrow_down_left.png</file>
         <file>textures/arrows/arrow_down_right.png</file>
         <file>textures/arrows/arrow_down.png</file>
@@ -16,27 +23,5 @@
         <file>textures/arrows/arrow_up_left.png</file>
         <file>textures/arrows/arrow_up_right.png</file>
         <file>textures/arrows/arrow_up.png</file>
-        <file>textures/floor/floor1.png</file>
-        <file>textures/floor/floor2.png</file>
-        <file>textures/floor/floor3.png</file>
-        <file>textures/floor/floor4.png</file>
-        <file>textures/floor/floor5.png</file>
-        <file>textures/portal/portal1.png</file>
-        <file>textures/portal/portal2.png</file>
-        <file>textures/portal/portal3.png</file>
-        <file>textures/doors/door1.png</file>
-        <file>textures/doors/door2.png</file>
-        <file>textures/wall/wall1.png</file>
-        <file>textures/pit.png</file>
-        <file>textures/ramp.png</file>
-        <file>textures/switch.png</file>
-        <file> textures/char/front/char_front_1.png</file>
-        <file> textures/char/back/char_back_1.png</file>
-        <file>textures/char/left/char_left_1.png</file>
-        <file>textures/char/right/char_right_2.png</file>
-        <file>textures/levelchanger.png</file>
-        <file>textures/zombie/zombie_left.png</file>
-        <file>textures/zombie/zombie_right.png</file>
-        <file>textures/zombie/assasin.png</file>
     </qresource>
 </RCC>
