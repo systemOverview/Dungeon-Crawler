@@ -58,21 +58,21 @@ Level::Level(int height, int width, std::string gameString) {
             (tiles)[row][column] = floor;
 
             if (gameString[i]=='P'){
-                Character* crc = new Character("P","/pics/textures/char/front/char_front_1.png");
+                Character* crc = new Character("P","/pics/textures/char/front/char_front_1.png", 20, 20);
                 placeCharacter(crc,row,column,true);
 
             }
 
             else if (gameString[i]=='S'){
                 StationaryController* stationaryController = new StationaryController;
-                Character* crc = new Zombie("S","/pics/textures/zombie/zombie_right.png",stationaryController);
+                Character* crc = new Zombie("S","/pics/textures/zombie/zombie_right.png",10, 5, stationaryController);
                 placeCharacter(crc,row,column,false);
 
             }
 
             else if (gameString[i]=='G'){
                 GuardController* guardController = new GuardController;
-                Character* crc = new Zombie("G","/pics/textures/zombie/assassin.png",guardController);
+                Character* crc = new Zombie("G","/pics/textures/zombie/assassin.png", 10, 5, guardController);
                 placeCharacter(crc,row,column,false);
 
             }

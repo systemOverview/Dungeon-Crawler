@@ -31,7 +31,7 @@
    </property>
    <property name="styleSheet">
     <string notr="true">#centralwidget{
-border-image : url(:/pics/bloody_frame.png) 0 0 0 0 stretch stretch;
+border-image : url(:/pics/textures/start screen/bloody_frame.png) 0 0 0 0 stretch stretch;
 }</string>
    </property>
    <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -76,7 +76,7 @@ border-image : url(:/pics/bloody_frame.png) 0 0 0 0 stretch stretch;
      <x>0</x>
      <y>0</y>
      <width>1081</width>
-     <height>33</height>
+     <height>30</height>
     </rect>
    </property>
   </widget>

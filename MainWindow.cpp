@@ -4,6 +4,9 @@
 #include <sstream>
 #include <QPushButton>
 #include "GraphicalUI.h"
+#include <QLineEdit>
+#include <Qlabel>
+#include "MainWindow.moc"
 #include "DungeonCrawler.h"
 
 MainWindow::MainWindow(Level* lvl,GraphicalUI* g,QWidget *parent)
@@ -15,18 +18,18 @@ MainWindow::MainWindow(Level* lvl,GraphicalUI* g,QWidget *parent)
     QWidget* arrowField = ui->arrowField;
 
     QGridLayout* gameLayout = new QGridLayout(gameField);
-    QGridLayout* arrowLayout = new QGridLayout(arrowField);
+    QGridLayout* arrowsLayout = new QGridLayout(arrowField);
     gameBoard = gameLayout;
     // fill(gameLayout);
     arrowField->setMaximumHeight(300);
-    generateArrowButtons(arrowLayout);
-
+    generateArrowButtons(arrowsLayout);
 
 
 
 }
 
-void MainWindow::fill(QGridLayout* gameField)
+
+void MainWindow::fill(QGridLayout* arrowsLayout)
 {
     std::vector <std::vector<Tile*>>* tiles = level->getTiles();
     for (int i=0;i<level->getHeight();i++) {
@@ -55,13 +58,13 @@ void MainWindow::fill(QGridLayout* gameField)
                     style << "border-image : url(" << currentTile->getTexturePath() << ") 0 0 0 0 stretch stretch;";
 
                     QString bgStyleFull = QString::fromStdString(style.str());
-                    qDebug() << bgStyleFull;
                     tileWidget->setStyleSheet(bgStyleFull);
 
                 }
             }
 
-            gameField->addWidget(tileWidget, i,j);
+            arrowsLayout->addWidget(tileWidget, i,j);
+
         }
     }
 }
@@ -87,27 +90,6 @@ void MainWindow::generateArrowButtons(QGridLayout* arrowsField)
     }
 }
 void MainWindow::move(std::pair<int, int> move){
-    int i=0;
-    // for(int j=0; j<10; j++)
-    // {
-    //     for(int k=0; k<10 ; k++)
-    //     {
-    //         i++;
-
-    //         qDebug() << "Removing item at: " << j << "," << k;
-    //         QLayoutItem* item = gameBoard->itemAtPosition(j, k);
-
-    //         if (!item) continue;
-
-    //         if (item->widget()) {
-    //             delete item->widget();
-    //         } else {
-    //             gameBoard->removeItem(item);
-    //         }
-    //         qDebug() << "Removed!";
-    //     }
-    // }
-    qDebug()<<move;
     GUI->move(move);
 }
 

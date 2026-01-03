@@ -126,6 +126,7 @@ int main(int argc, char *argv[])
     // }
 
     QApplication a(argc, argv);
+
     DungeonCrawler dc;
     // GraphicalUI graphicalUI;
     // QMainWindow w;

@@ -33,10 +33,6 @@ int Tile::getColumn() {
 }
 
 bool Tile::moveTo(Tile *desTile, Character *who) {
-
-    /*
-    std::cout << typeid(this).name() << "\n";
-    */
     if (onLeave(desTile,who) ) {
 
         std::pair <bool, Tile*> onEnterResult = desTile->onEnter(who);
@@ -44,16 +40,37 @@ bool Tile::moveTo(Tile *desTile, Character *who) {
             return false;
         }
 
+        Tile* tileToMoveTo;
 
         if (onEnterResult.second!=nullptr) {
-            character->setTile(onEnterResult.second);
-            onEnterResult.second->setCharacter(who);
+            tileToMoveTo = onEnterResult.second;// if onEnter returns a non-nullptr as it's second argument, then it is the portal that the player will access
         }
         else {
-            character->setTile(desTile);
-            desTile->setCharacter(who);
+            // if (who->getTexture()=="P") {
+            //     std::cout << desTile->getRow() << " " << desTile->getColumn() << "\n";
+            // }
+            tileToMoveTo = desTile;// if onEnter returns a nullptr as it's second argument, then the desTile is a normal tile to be accessed
         }
-        setCharacter(nullptr);
+        if (tileToMoveTo->hasCharacter()){
+            Character* characterAtWantedTile = tileToMoveTo->getCharacter();
+            if (characterAtWantedTile->isHuman()!=who->isHuman()){ // then it means they are a human and a zombie, which means that they can fight
+                who->attackPlayer(characterAtWantedTile);
+                if (characterAtWantedTile->isAlive()){
+                    characterAtWantedTile->attackPlayer(who);
+                }
+                else{
+                    delete characterAtWantedTile;
+                    who->setTile(tileToMoveTo);
+                    tileToMoveTo->setCharacter(who);
+                    setCharacter(nullptr);
+                }
+            }
+        }
+        else{
+            who->setTile(tileToMoveTo);
+            tileToMoveTo->setCharacter(who);
+            setCharacter(nullptr);
+        }
         return true;
     }
     return false;

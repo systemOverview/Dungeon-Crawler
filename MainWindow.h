@@ -4,6 +4,10 @@
 #include <QMainWindow>
 #include <QGridLayout>
 #include "Level.h"
+#include <QEvent>
+
+
+
 class GraphicalUI;
 class DungeonCrawler;
 class Arrow{
