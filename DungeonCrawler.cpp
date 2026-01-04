@@ -5,7 +5,7 @@
 #include "DungeonCrawler.h"
 #include "list.cpp"
 #include <QApplication>
-
+#include <QWindow>
 
 
 DungeonCrawler::DungeonCrawler() {
@@ -60,6 +60,7 @@ bool DungeonCrawler::turn() {
 
 
     GUI->getMainWindow()->show();
+    GUI->getMainWindow()->windowHandle()->setPosition(100,100);
     GUI->draw(currentLevel);
     return true;
 }
