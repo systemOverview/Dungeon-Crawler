@@ -60,7 +60,7 @@ bool DungeonCrawler::turn() {
 
 
     GUI->getMainWindow()->show();
-    GUI->getMainWindow()->windowHandle()->setPosition(100,100);
+    // GUI->getMainWindow()->windowHandle()->setPosition(100,100);
     GUI->draw(currentLevel);
     return true;
 }
