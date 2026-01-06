@@ -9,7 +9,7 @@ class Level;
 class TerminalUI: public AbstractUI, public AbstractController{
 public:
     void draw (Level*) override;
-    int move(Level*) override;
+    std::pair<int,int> move() override;
     std::pair<int,int> translateMove(int step) override;
 };
 #endif //PRAK_TERMINALUI_H

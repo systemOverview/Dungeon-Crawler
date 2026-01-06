@@ -3,8 +3,6 @@
 #include "AbstractUI.h"
 #include <QDialog>
 #include <QMainWindow>
-// #include "startscreen.h"
-// #include "DungeonCrawler.h"
 #include "MainWindow.h"
 #include "Level.h"
 #include <QPainter>
@@ -27,7 +25,7 @@ public:
     QMainWindow* getMainWindow();
     void draw (Level*) override;
     QWidget* generateHealthBar(int percentage, QWidget* parent);
-    int move(Level*) override;
+    std::pair<int,int> move() override;
     int move(std::pair<int,int> xymove);
     std::pair<int,int> translateMove(int step) override;
     void start();
@@ -35,9 +33,8 @@ public:
     void addHealthBar(QWidget* healthBar);
     void removeHealthBars();
     ~GraphicalUI();
-public slots:
+    void playSound(QString soundLink, float volume);
     void switchWindow();
-
 };
 
 #endif // GRAPHICALUI_H

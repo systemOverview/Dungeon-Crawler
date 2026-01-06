@@ -73,6 +73,7 @@ cmake_minimum_required(VERSION 3.19)
 project(prak LANGUAGES CXX)
 
 find_package(Qt6 6.5 REQUIRED COMPONENTS Core Widgets)
+find_package(Qt6 REQUIRED COMPONENTS Multimedia)
 
 qt_standard_project_setup()
 
@@ -116,6 +117,7 @@ target_link_libraries(prak
     PRIVATE
         Qt::Core
         Qt::Widgets
+        Qt6::Multimedia
 )
 
 include(GNUInstallDirs)
@@ -132,3 +134,4 @@ qt_generate_deploy_app_script(
     NO_UNSUPPORTED_PLATFORM_ERROR
 )
 install(SCRIPT ${deploy_script})
+

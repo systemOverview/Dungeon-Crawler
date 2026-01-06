@@ -4,6 +4,8 @@
 #include "DungeonCrawler.h"
 #include <sstream>
 #include <QPainter>
+#include <QMediaPlayer>
+#include <QAudioOutput>
 GraphicalUI::GraphicalUI(Level *lvl, DungeonCrawler *d) {
     level = lvl;
     dc = d;
@@ -29,38 +31,19 @@ void GraphicalUI::switchWindow() {
     }
 }
 
-// bStyle << "background-image:url(" << currentTile->getTexturePath() << "); background-repeat: no-repeat; background-position:center;";
-// bStyle << "background-image:url(:" << currentTile->getCharacter()->getTexturePath() << "); background-repeat: no-repeat; background-position:center;";
-// for (int i = 0; i < level->getHeight(); i++) {
-//     for (int j = 0; j < level->getWidth(); j++) {
-//         Tile *currentTile = (*tiles)[i][j];
-//         QWidget *tileWidget = new QWidget();
-//         tileWidget->setMinimumSize(50, 50);
-//         if (currentTile == nullptr) {
-//         } else {
-//             // cast into its type
-//             if (currentTile->hasCharacter()) {
-//                 std::ostringstream style;
-//                 style << "border-image : url(:" << currentTile->getCharacter()->getTexturePath() <<
-//                         ") 20 0 0 0 stretch stretch;";
-//                 QString bgStyleFull = QString::fromStdString(style.str());
-//                 tileWidget->setStyleSheet(bgStyleFull);
-//             } else {
+void GraphicalUI::playSound(QString soundLink, float volume)
+{
+    QMediaPlayer* player = new QMediaPlayer;
+    QAudioOutput* audioOutput = new QAudioOutput;
+    player->setAudioOutput(audioOutput);
+    player->setSource(QUrl(soundLink));
+    audioOutput->setVolume(volume);
+    player->play();
 
-//                 std::ostringstream style;
-//                 style << "border-image : url(" << currentTile->getTexturePath() << ") 0 0 0 0 stretch stretch;";
-
-//                 QString bgStyleFull = QString::fromStdString(style.str());
-//                 tileWidget->setStyleSheet(bgStyleFull);
-//             }
-//         }
-
-
-//         gameBoard->addWidget(tileWidget, i, j);
-//     }
-// }
+}
 
 void GraphicalUI::draw(Level *level) {
+
     removeHealthBars();
     QGridLayout *gameBoard = mainWindow->getGameBoard();
     std::vector<std::vector<Tile *> > *tiles = level->getTiles();
@@ -94,14 +77,13 @@ void GraphicalUI::draw(Level *level) {
                 Character* characterAtTile = currentTile->getCharacter();
                 QWidget* characterWidget = new QWidget(parentWidget);
                 characterWidget->setFixedSize(50,40);
-                characterWidget->move(0,10); //50: 100 50/100*100
+                characterWidget->move(0,10);
                 std::ostringstream style;
                 std::ostringstream bStyle;
                 style << "border-image : url(:" << characterAtTile->getTexturePath() <<
                     ") 20 0 0 0 stretch stretch;";
 
                 float healthPercentage = (static_cast<float>(currentTile->getCharacter()->getCurrentHP())/static_cast<float>(currentTile->getCharacter()->getMaxHP()))*100;
-                qDebug() << healthPercentage;
                 QWidget* healthBar = generateHealthBar(healthPercentage, nullptr);
                 healthBar->setFixedSize(50,10);
                 characterWidget->show();
@@ -109,7 +91,6 @@ void GraphicalUI::draw(Level *level) {
                 QString bgStyleFull = QString::fromStdString(style.str());
                 characterWidget->setStyleSheet(bgStyleFull);
                 addHealthBar(healthBar);
-                qDebug() << "aadded";
                 gameBoard->addWidget(healthBar, rowIterator, colIterator, Qt::AlignTop);
 
             }
@@ -138,19 +119,17 @@ QWidget* GraphicalUI::generateHealthBar(int percentage, QWidget* parent)
           << "stop:0 red, stop:" << stopRedAt << " red, "
           << "stop:" << startWhiteFrom << " white, stop:1 white);"
           << "border:1px solid black;";
-    // style << "background: qlineargradient(x1:0, y1:0, x2:1, y2:0, "
-    //       << "stop:0 red, stop:" << "0.5" << " red, "
-    //       << "stop:" << "0.51" << " white, stop:1 white);"
-    //       << "border:1px solid black;";
 
     healthBar->setStyleSheet(QString::fromStdString(style.str()));
 
     return healthBar;
 }
 
-int GraphicalUI::move(Level *) {
-    return 0;
+std::pair<int, int> GraphicalUI::move()
+{
+    return lastMove;
 }
+
 
 
 int GraphicalUI::move(std::pair<int, int> xymove) {
@@ -211,7 +190,6 @@ void GraphicalUI::removeHealthBars()
     {
         delete *it;
         it = m_healthBars.erase(it); // erase returns the next valid iterator
-        qDebug() << "removed";
     }
 }
 

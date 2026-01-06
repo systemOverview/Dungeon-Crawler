@@ -19,7 +19,7 @@ protected:
     int m_hitPoints{};
     bool m_isHuman {true};
     Tile* currentTile; // The tile the player is at
-    AbstractController* m_controller = new TerminalUI;
+    AbstractController* m_controller ;
 
 
 public:
@@ -42,7 +42,7 @@ public:
     virtual AbstractController* getController();
     Tile* getTile() const;
     void setTile(Tile* newTile);
-    int move(Level *currentLevel, std::pair <int, int> xymove);
+    std::pair<int,int> move();
     int getMaxHP();
     int getCurrentHP();
     bool isAlive();

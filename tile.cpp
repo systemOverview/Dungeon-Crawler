@@ -46,9 +46,7 @@ bool Tile::moveTo(Tile *desTile, Character *who) {
             tileToMoveTo = onEnterResult.second;// if onEnter returns a non-nullptr as it's second argument, then it is the portal that the player will access
         }
         else {
-            // if (who->getTexture()=="P") {
-            //     std::cout << desTile->getRow() << " " << desTile->getColumn() << "\n";
-            // }
+
             tileToMoveTo = desTile;// if onEnter returns a nullptr as it's second argument, then the desTile is a normal tile to be accessed
         }
         if (tileToMoveTo->hasCharacter()){

@@ -15,6 +15,7 @@ DungeonCrawler::DungeonCrawler() {
     GUI = new GraphicalUI(currentLevel, this);
     Character* s = lvl->getPlayableCharacter();
     s->setController(GUI);
+    // GUI->getStartScreen()->show();
     turn();
 
 }
@@ -57,8 +58,6 @@ std::pair<int,int> DungeonCrawler::translateMove(int step) const {
 }
 
 bool DungeonCrawler::turn() {
-
-
     GUI->getMainWindow()->show();
     // GUI->getMainWindow()->windowHandle()->setPosition(100,100);
     GUI->draw(currentLevel);
@@ -66,11 +65,26 @@ bool DungeonCrawler::turn() {
 }
 
 void DungeonCrawler::move() {
-    currentLevel->getPlayableCharacter()->move(currentLevel, GUI->getLastMove());
+    std::pair<int,int> moveToPerform = GUI->getLastMove();
+    Character* humanCharacter = currentLevel->getPlayableCharacter();
+    Tile* currentTile = humanCharacter->getTile();
+    int newRow = currentTile->getRow()+moveToPerform.first;
+    int newColumn = currentTile->getColumn()+moveToPerform.second;
+    Tile* wantedTile = currentLevel->getTile(newRow, newColumn);
+    bool isMoveAllowed = currentTile->moveTo(wantedTile,humanCharacter);
+
+    // currentLevel->getPlayableCharacter()->move(currentLevel, GUI->getLastMove());
     std::vector<Character*> NPCs = currentLevel->getNonPlayableCharacters();
     for (auto & NPC : NPCs) {
         if (NPC->isAlive()){
-            int move = NPC->getController()->move(currentLevel);
+            // int move = NPC->getController()->move(currentLevel);
+            std::pair<int,int> moveToPerform = NPC->move();
+            Tile* currentTile = NPC->getTile();
+            int newRow = currentTile->getRow()+moveToPerform.first;
+            int newColumn = currentTile->getColumn()+moveToPerform.second;
+            Tile* wantedTile = currentLevel->getTile(newRow, newColumn);
+            bool isMoveAllowed = currentTile->moveTo(wantedTile,NPC);
+
         }
     }
 

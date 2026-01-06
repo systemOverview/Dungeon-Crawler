@@ -28,12 +28,12 @@ void TerminalUI::draw(Level *level) {
     }
 }
 
-int TerminalUI::move(Level* level) {
+std::pair<int,int> TerminalUI::move() {
     int movement{};
     std::cout << "Please enter your move (1-9)";
     std::cin >> movement;
     std::cout << '\n';
-    return movement;
+    return translateMove(movement);
 }
 
 std::pair<int, int> TerminalUI::translateMove(int step) {

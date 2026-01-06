@@ -8,7 +8,7 @@ class StationaryController : public AbstractController
 public:
     StationaryController();
 
-    int move(Level* currentLevel) override;
+    std::pair<int,int> move() override;
 
 
 };

@@ -8,18 +8,15 @@ StationaryController::StationaryController()
 
 
 
-int StationaryController::move(Level* currentLevel)
+std::pair<int,int> StationaryController::move()
 {
 
-    Tile* currentTile = m_character->getTile();
-    // int move = character->move(currentLevel);
-    // std::pair <int,int> xymove = translateMove(move);
+    // Tile* currentTile = m_character->getTile();
+    // int newRow = currentTile->getRow()+1;
+    // int newColumn = currentTile->getColumn()+0;
+    // Tile* wantedTile = currentLevel->getTile(newRow, newColumn);
+    // bool isMoveAllowed = currentTile->moveTo(wantedTile,m_character);
 
-
-    int newRow = currentTile->getRow()+1;
-    int newColumn = currentTile->getColumn()+0;
-    Tile* wantedTile = currentLevel->getTile(newRow, newColumn);
-    bool isMoveAllowed = currentTile->moveTo(wantedTile,m_character);
-
-    return 5;
+    // return 5;
+    return {0,0};
 }

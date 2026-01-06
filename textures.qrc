@@ -25,5 +25,7 @@
         <file>textures/arrows/arrow_up.png</file>
         <file>textures/start screen/bloody_frame.png</file>
         <file>textures/extra/white-bg.png</file>
+        <file>textures/sounds/grunt.wav</file>
     </qresource>
+    <qresource prefix="/"/>
 </RCC>

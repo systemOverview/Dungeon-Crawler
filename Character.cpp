@@ -41,24 +41,9 @@ void Character::setTile(Tile* newTile) {
     currentTile= newTile;
 }
 
-int Character::move(Level *currentLevel, std::pair <int, int> xymove) {
-    // TODO change member/local variable names
+std::pair<int,int> Character::move() {
+    return m_controller->move();
 
-    // int move = character->move(currentLevel);
-    // std::pair <int,int> xymove = translateMove(move);
-
-    if (xymove.first ==0 && xymove.second == 0) {
-        return 0; /*move number 5 does nothing*/
-    }
-    int newRow = currentTile->getRow()+xymove.first;
-    int newColumn = currentTile->getColumn()+xymove.second;
-    Tile* wantedTile = currentLevel->getTile(newRow, newColumn);
-    bool isMoveAllowed = currentTile->moveTo(wantedTile,this);
-
-
-
-    // int step = m_controller->move(currentLevel);
-    // return step;
 
 }
 

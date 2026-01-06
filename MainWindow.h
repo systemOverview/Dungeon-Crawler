@@ -40,9 +40,6 @@ public:
     void generateArrowButtons(QGridLayout* arrowsField);
 
     ~MainWindow();
-
-
-
     void move(std::pair <int, int> move);
 
     QGridLayout* getGameBoard();

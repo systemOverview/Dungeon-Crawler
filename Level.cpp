@@ -120,6 +120,10 @@ void Level::placeCharacter(Character* c, int row, int col, bool isPlayable) {
     }
 }
 
+Character *Level::getPlayableCharacter() {
+    return playableCharacter;
+}
+
 std::vector<Character *> Level::getNonPlayableCharacters()
 {
     return nonPlayableCharacters;
@@ -136,4 +140,14 @@ void Level::setPortals()
     firstPortal->setPortal(secondPortal);
     secondPortal->setPortal(firstPortal);
 
+}
+
+void Level::setDefaultTiles() {
+    for (int i=0; i<gameHeight; i++) {
+        std::vector<Tile*> row;
+        tiles.push_back(row);
+        for (int j=0; j<gameWidth;j++) {
+            tiles[i].push_back(nullptr);
+        }
+    }
 }

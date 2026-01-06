@@ -11,7 +11,7 @@ private:
     std::vector<int>::iterator m_movementPathIterator;
 public:
     GuardController();
-    int move(Level* currentLevel) override;
+    std::pair<int,int> move() override;
 
 };
 

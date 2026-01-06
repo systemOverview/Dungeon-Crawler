@@ -23,22 +23,11 @@ public:
     int getHeight() const;
     int getWidth() const;
     void placeCharacter (Character* c, int row, int col, bool isPlayable);
-    Character* getPlayableCharacter() {
-        return playableCharacter;
-    }
-
+    Character* getPlayableCharacter();
     std::vector <Character*> getNonPlayableCharacters();
 
     void setPortals();
-    void setDefaultTiles() {
-        for (int i=0; i<gameHeight; i++) {
-            std::vector<Tile*> row;
-            tiles.push_back(row);
-            for (int j=0; j<gameWidth;j++) {
-                tiles[i].push_back(nullptr);
-            }
-        }
-    }
+    void setDefaultTiles();
 
 
 
