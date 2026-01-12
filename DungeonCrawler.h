@@ -4,52 +4,48 @@
 
 #ifndef PRAK_DUNGEONCRAWLER_H
 #define PRAK_DUNGEONCRAWLER_H
-#include "TerminalUI.h"
-#include "Level.h"
 #include "GraphicalUI.h"
+#include "Level.h"
+#include "TerminalUI.h"
 #include "list.h"
-class DungeonCrawler {
-
+class DungeonCrawler
+{
 public:
-    Level* currentLevel;
-    List<Level*> levels;
-    std::array <std::string, 2> gameStrings = {
+    List<Level*>::Iterator currentLevel;
+    List<Level *> levels;
+    std::array<std::string, 2> gameStrings = {
 
-            "##########"
-            "#....$...#"
-            "#...<..S.#"
-            "#..___...#"
-            "#..___...#"
-            "#G.......#"
-            "#######X##"
-            "#...G....#"
-            "#P..?....#"
-            "##########",
+        "##########"
+        "#....$...#"
+        "#...<..S.#"
+        "#..___...#"
+        "#..___...#"
+        "#G.......#"
+        "#######X##"
+        "#...G....#"
+        "#P..?....#"
+        "##########",
 
-                "##########"
-                "#....$...#"
-                "#...<....#"
-                "#..___...#"
-                "#..___...#"
-                "#........#"
-                "#######X##"
-                "#........#"
-                "#...?....#"
-                "##########"
-
+        "##########"
+        "#.S..$...#"
+        "#...<....#"
+        "#..___...#"
+        "#..___...#"
+        "#........#"
+        "#######X##"
+        "#........#"
+        "#P.?....#"
+        "##########"
 
     };
-    GraphicalUI* GUI;
+    GraphicalUI *GUI;
 
 public:
     DungeonCrawler();
 
-
-
-    std::pair<int,int> translateMove(int step) const;
+    std::pair<int, int> translateMove(int step) const;
     bool turn();
     void move();
-
 };
 
 #endif //PRAK_DUNGEONCRAWLER_H
