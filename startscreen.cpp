@@ -1,13 +1,11 @@
 #include "startscreen.h"
-#include "ui_startscreen.h"
-#include <iostream>
+#include <QDialog>
 #include <QPixmap>
 #include <QtWidgets>
-#include <QDialog>
+#include "ui_startscreen.h"
+#include <iostream>
 
-
-
-StartScreen::StartScreen(GraphicalUI* GUI, QWidget *parent)
+StartScreen::StartScreen(GraphicalUI *GUI, QWidget *parent)
     : QDialog(parent)
     , ui(new Ui::StartScreen)
 {
@@ -20,10 +18,8 @@ StartScreen::StartScreen(GraphicalUI* GUI, QWidget *parent)
     // QPalette palette;
     // palette.setBrush(QPalette::Window, bkgnd);
     // this->setPalette(palette);
-    connect(ui->newGameButton, &QPushButton::clicked, this , &StartScreen::switchWindow);
+    connect(ui->newGameButton, &QPushButton::clicked, this, &StartScreen::switchWindow);
     //     connect(ui->actionSearch, &QAction::triggered, this, &MainWindow::search);
-
-
 }
 // QWidget::setStyleSheet("background-image: :/textures/switch.png;");
 //    redPixmap = new QPixmap(":/images/red.png");

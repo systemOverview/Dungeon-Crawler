@@ -1,9 +1,9 @@
-#include <iostream>
-#include "header.h"
+#include <QApplication>
 #include "DungeonCrawler.h"
 #include "GraphicalUI.h"
-#include <QApplication>
+#include "header.h"
 #include "list.cpp"
+#include <iostream>
 
 int main(int argc, char *argv[])
 {

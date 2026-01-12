@@ -8,9 +8,7 @@ class StationaryController : public AbstractController
 public:
     StationaryController();
 
-    std::pair<int,int> move() override;
-
-
+    std::pair<int, int> move() override;
 };
 
 #endif // STATIONARYCONTROLLER_H

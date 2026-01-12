@@ -76,7 +76,7 @@ border-image : url(:/pics/textures/start screen/bloody_frame.png) 0 0 0 0 stretc
      <x>0</x>
      <y>0</y>
      <width>1081</width>
-     <height>30</height>
+     <height>22</height>
     </rect>
    </property>
   </widget>

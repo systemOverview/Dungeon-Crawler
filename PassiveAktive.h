@@ -4,23 +4,23 @@
 
 #ifndef PRAK_PASSIVEAKTIVE_H
 #define PRAK_PASSIVEAKTIVE_H
-
 #include <iostream>
-class Passive {
+#include <vector>
+class Passive
+{
 public:
     virtual void notify() = 0;
 };
 
-class Active {
+class Active
+{
 protected:
-    std::vector <Passive*> passiveObjects {};
+    std::vector<Passive *> passiveObjects{};
+
 public:
-    virtual void attach (Passive*);
-    virtual void detach (Passive*);
-    virtual void activate ();
-
-
-
+    virtual void attach(Passive *);
+    virtual void detach(Passive *);
+    virtual void activate();
 };
 
 #endif //PRAK_PASSIVEAKTIVE_H

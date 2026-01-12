@@ -4,34 +4,32 @@
 
 #ifndef PRAK_LEVEL_H
 #define PRAK_LEVEL_H
-#include <iostream>
 #include "Tile.h"
+#include <iostream>
 class Character;
 class Tile;
-class Level {
-    std::vector <std::vector<Tile*>> tiles;
-    std::vector <Character*> characters;
-    std::vector <Character*> nonPlayableCharacters;
-    Character* playableCharacter;
+class Level
+{
+    std::vector<std::vector<Tile *>> tiles;
+    std::vector<Character *> characters;
+    std::vector<Character *> nonPlayableCharacters;
+    Character *playableCharacter;
     int gameHeight{};
     int gameWidth{};
+
 public:
     Level(int height, int width, std::string gameBoard);
 
-    Tile* getTile(int row, int col);
-    std::vector <std::vector<Tile*>>* getTiles();
+    Tile *getTile(int row, int col);
+    std::vector<std::vector<Tile *>> *getTiles();
     int getHeight() const;
     int getWidth() const;
-    void placeCharacter (Character* c, int row, int col, bool isPlayable);
-    Character* getPlayableCharacter();
-    std::vector <Character*> getNonPlayableCharacters();
+    void placeCharacter(Character *c, int row, int col, bool isPlayable);
+    Character *getPlayableCharacter();
+    std::vector<Character *> getNonPlayableCharacters();
 
     void setPortals();
     void setDefaultTiles();
-
-
-
 };
-
 
 #endif //PRAK_LEVEL_H

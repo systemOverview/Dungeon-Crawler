@@ -3,124 +3,131 @@
 //
 
 #include "Level.h"
-#include "StationaryController.h"
 #include "GuardController.h"
+#include "StationaryController.h"
 
-Level::Level(int height, int width, std::string gameString) {
+Level::Level(int height, int width, std::string gameString)
+{
     gameHeight = height;
     gameWidth = width;
     setDefaultTiles();
 
-    std::vector <Door*> doors;
-    Switch* theSwitch = nullptr;
+    std::vector<Door *> doors;
+    Switch *theSwitch = nullptr;
 
-
-
-
-    for (int i=0; i<gameString.length();i++) {
-        int row = i/10;
-        int column = i%10;
-        if (gameString[i]=='#') {
-            Wall* wall = new Wall(row, column);
+    for (int i = 0; i < gameString.length(); i++) {
+        int row = i / 10;
+        int column = i % 10;
+        if (gameString[i] == '#') {
+            Wall *wall = new Wall(row, column);
             (tiles)[row][column] = wall;
         }
 
-        else if (gameString[i]=='X') {
-            Door* door = new Door(row, column);
+        else if (gameString[i] == 'X') {
+            Door *door = new Door(row, column);
             doors.push_back(door);
             (tiles)[row][column] = door;
         }
 
-        else if (gameString[i]=='?') {
-            Switch* switcher = new Switch(row, column);
+        else if (gameString[i] == '?') {
+            Switch *switcher = new Switch(row, column);
             (tiles)[row][column] = switcher;
             theSwitch = switcher;
         }
 
-        else if (gameString[i]=='_') {
-            Pit* pit = new Pit(row, column);
+        else if (gameString[i] == '_') {
+            Pit *pit = new Pit(row, column);
             (tiles)[row][column] = pit;
         }
 
-
-        else if (gameString[i]=='<') {
-            Ramp* ramp = new Ramp(row, column);
+        else if (gameString[i] == '<') {
+            Ramp *ramp = new Ramp(row, column);
             (tiles)[row][column] = ramp;
         }
 
-        else if (gameString[i]=='$') {
-            LevelChanger* levelChanger = new LevelChanger(row, column);
+        else if (gameString[i] == '$') {
+            LevelChanger *levelChanger = new LevelChanger(row, column);
             (tiles)[row][column] = levelChanger;
         }
 
         else {
-            Floor* floor = new Floor(row, column);
+            Floor *floor = new Floor(row, column);
             (tiles)[row][column] = floor;
 
-            if (gameString[i]=='P'){
-                Character* crc = new Character("P","/pics/textures/char/front/char_front_1.png", 20, 20);
-                placeCharacter(crc,row,column,true);
+            if (gameString[i] == 'P') {
+                Character *crc = new Character("P",
+                                               "/pics/textures/char/front/char_front_1.png",
+                                               20,
+                                               20);
+                placeCharacter(crc, row, column, true);
 
             }
 
-            else if (gameString[i]=='S'){
-                StationaryController* stationaryController = new StationaryController;
-                Character* crc = new Zombie("S","/pics/textures/zombie/zombie_right.png",10, 5, stationaryController);
-                placeCharacter(crc,row,column,false);
+            else if (gameString[i] == 'S') {
+                StationaryController *stationaryController = new StationaryController;
+                Character *crc = new Zombie("S",
+                                            "/pics/textures/zombie/zombie_right.png",
+                                            10,
+                                            5,
+                                            stationaryController);
+                placeCharacter(crc, row, column, false);
 
             }
 
-            else if (gameString[i]=='G'){
-                GuardController* guardController = new GuardController;
-                Character* crc = new Zombie("G","/pics/textures/zombie/assassin.png", 10, 5, guardController);
-                placeCharacter(crc,row,column,false);
-
+            else if (gameString[i] == 'G') {
+                GuardController *guardController = new GuardController;
+                Character *crc = new Zombie("G",
+                                            "/pics/textures/zombie/assassin.png",
+                                            10,
+                                            5,
+                                            guardController);
+                placeCharacter(crc, row, column, false);
             }
-
-
         }
-
     }
     setPortals();
-
 
     for (auto door : doors) {
         theSwitch->attach(door);
     }
-
 }
 
-Tile* Level::getTile(int row, int col) {
-    Tile* tileToReturn = tiles[row][col];
+Tile *Level::getTile(int row, int col)
+{
+    Tile *tileToReturn = tiles[row][col];
     return tileToReturn;
 }
 
-std::vector<std::vector<Tile *>>* Level::getTiles() {
+std::vector<std::vector<Tile *>> *Level::getTiles()
+{
     return &tiles;
 }
 
-int Level::getHeight() const {
+int Level::getHeight() const
+{
     return gameHeight;
 }
 
-int Level::getWidth() const {
+int Level::getWidth() const
+{
     return gameWidth;
 }
 
-void Level::placeCharacter(Character* c, int row, int col, bool isPlayable) {
-    Tile* tileToPlaceAt = tiles[row][col];
+void Level::placeCharacter(Character *c, int row, int col, bool isPlayable)
+{
+    Tile *tileToPlaceAt = tiles[row][col];
     tileToPlaceAt->setCharacter(c);
     c->setTile(tileToPlaceAt);
     characters.push_back(c);
     if (isPlayable) {
         playableCharacter = c;
-    }
-    else{
+    } else {
         nonPlayableCharacters.push_back(c);
     }
 }
 
-Character *Level::getPlayableCharacter() {
+Character *Level::getPlayableCharacter()
+{
     return playableCharacter;
 }
 
@@ -133,20 +140,20 @@ void Level::setPortals()
 {
     delete (tiles)[3][2];
     delete (tiles)[5][7];
-    Portal* firstPortal = new Portal(3,2);
-    Portal* secondPortal = new Portal(5,7);
+    Portal *firstPortal = new Portal(3, 2);
+    Portal *secondPortal = new Portal(5, 7);
     (tiles)[3][2] = firstPortal;
     (tiles)[5][7] = secondPortal;
     firstPortal->setPortal(secondPortal);
     secondPortal->setPortal(firstPortal);
-
 }
 
-void Level::setDefaultTiles() {
-    for (int i=0; i<gameHeight; i++) {
-        std::vector<Tile*> row;
+void Level::setDefaultTiles()
+{
+    for (int i = 0; i < gameHeight; i++) {
+        std::vector<Tile *> row;
         tiles.push_back(row);
-        for (int j=0; j<gameWidth;j++) {
+        for (int j = 0; j < gameWidth; j++) {
             tiles[i].push_back(nullptr);
         }
     }

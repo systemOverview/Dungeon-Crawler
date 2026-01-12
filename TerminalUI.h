@@ -6,10 +6,11 @@
 #define PRAK_TERMINALUI_H
 #include "AbstractUI.h"
 class Level;
-class TerminalUI: public AbstractUI, public AbstractController{
+class TerminalUI : public AbstractUI, public AbstractController
+{
 public:
-    void draw (Level*) override;
-    std::pair<int,int> move() override;
-    std::pair<int,int> translateMove(int step) override;
+    void draw(Level *) override;
+    std::pair<int, int> move() override;
+    std::pair<int, int> translateMove(int step) override;
 };
 #endif //PRAK_TERMINALUI_H
