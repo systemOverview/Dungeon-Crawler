@@ -5,180 +5,158 @@
 #ifndef PRAK_TILE_H
 #define PRAK_TILE_H
 
-#include <iostream>
 #include "Character.h"
 #include "PassiveAktive.h"
-class Tile {
+#include <iostream>
+class Tile
+{
 protected:
-
     std::string texture;
-    Character* character {nullptr}; // Character on top of the tile, or nullptr if none.
+    Character *character{nullptr}; // Character on top of the tile, or nullptr if none.
     int row{};
     int column{};
     bool shouldMove{false}; // Should the player be moved to another tile (true if tile is portal)
     std::string texturePath;
 
-
-
-    Tile(std::string Texture, int rw, int cln, std::string textureP) {
+    Tile(std::string Texture, int rw, int cln, std::string textureP)
+    {
         texture = Texture;
         row = rw;
         column = cln;
         texturePath = textureP;
-
     }
 
-
 public:
-
-    /*
-    virtual void doNothing() = 0;
-    */
     virtual ~Tile() = default;
     virtual std::string_view getTexture() const;
-    Character* getCharacter() const;
+    Character *getCharacter() const;
     bool hasCharacter() const;
-    void setCharacter(Character* characterToPlace);
+    void setCharacter(Character *characterToPlace);
     int getRow();
     int getColumn();
 
-    virtual bool moveTo (Tile* desTile, Character* who);
-    virtual bool onLeave(Tile* desTile, Character* who);
-    virtual std::pair<bool, Tile*> onEnter(Character* who);
+    virtual bool moveTo(Tile *desTile, Character *who);
+    virtual bool onLeave(Tile *desTile, Character *who);
+    virtual std::pair<bool, Tile *> onEnter(Character *who);
     virtual std::string getTexturePath();
-    virtual bool isEntrable()  = 0;
+    virtual bool isEntrable() = 0;
 };
 
-class Floor : public Tile { // Accessible tile, characters can enter/leave them
-    /*void doNothing() {
-        int a = 6;
-    }*/
-    std::string texture {"."};
+class Floor : public Tile
+{ // Accessible tile, characters can enter/leave them
+
+    std::string texture{"."};
 
 public:
-    Floor(int row, int column) :Tile(".", row, column, ":/pics/textures/floor/floor1.png") {
-    };
+    Floor(int row, int column)
+        : Tile(".", row, column, ":/pics/textures/floor/floor1.png") {};
 
-
-    bool isEntrable() {
-        return true;
-    }
+    bool isEntrable() { return true; }
 };
 
-class Wall : public Tile { // Non-Accessible tile, characters can't enter them
+class Wall : public Tile
+{ // Non-Accessible tile, characters can't enter them
 
 public:
-    Wall(int row, int column) :Tile("#", row, column, ":/pics/textures/wall/wall1.png") {
+    Wall(int row, int column)
+        : Tile("#", row, column, ":/pics/textures/wall/wall1.png") {
 
-    };
+        };
 
-    bool isEntrable() {
-        return false;
-    }
+    bool isEntrable() { return false; }
 
     virtual std::string getTexturePath();
 };
 
-
-class Portal : public Tile {
-
+class Portal : public Tile
+{
     bool shouldMove{true};
-    Portal* portalToAccess;
+    Portal *portalToAccess;
     int portalType;
+
 public:
-    Portal(int row, int column) :Tile("O", row, column, ":/pics/textures/portal/portal1.png") {
+    Portal(int row, int column)
+        : Tile("O", row, column, ":/pics/textures/portal/portal1.png") {
 
-    };
+        };
 
-    bool isEntrable() {
-        return true;
-    }
+    bool isEntrable() override { return true; }
 
-    void setPortal(Portal* portal) {
-        portalToAccess = portal;
-    }
+    void setPortal(Portal *portal) { portalToAccess = portal; }
 
-    std::pair<bool,Tile*> onEnter(Character *who) override;
-
-
-
+    std::pair<bool, Tile *> onEnter(Character *who) override;
 };
 
-class basePlate : public Tile{
-    bool isOpen {false};
+class basePlate : public Tile
+{
+    bool isOpen{false};
+
 public:
-    void switchStatus (bool status);
+    void switchStatus(bool status);
 };
 
-class Switch : public Tile, public Active {
+class Switch : public Tile, public Active
+{
 public:
-    Switch(int row, int column) :Tile("?", row, column ,":/pics/textures/other tiles/switch.png") {
+    Switch(int row, int column)
+        : Tile("?", row, column, ":/pics/textures/other tiles/switch.png") {
 
-    };
+        };
 
-    bool isEntrable() {
-        return true;
-    }
+    bool isEntrable() override { return true; }
 
-    std::pair<bool,Tile*> onEnter(Character *who) override;
-
+    std::pair<bool, Tile *> onEnter(Character *who) override;
 };
 
-class Door : public Tile, public Passive {
-    bool isOpen {false};
-    bool state {0};
+class Door : public Tile, public Passive
+{
+    bool isOpen{false};
+    bool state{0};
 
-     /* state 0 means wall, state 1 means floor*/
+    /* state 0 means wall, state 1 means floor*/
 public:
-    Door(int row, int column) :Tile("X", row, column, ":/pics/textures/doors/door1.png") {
+    Door(int row, int column)
+        : Tile("X", row, column, ":/pics/textures/doors/door1.png") {
 
-    };
+        };
     void notify();
-    bool isEntrable() {
-        return state;
-    }
-
+    bool isEntrable() { return state; }
 };
 
-
-class Pit : public Tile {
-
+class Pit : public Tile
+{
+    // TODO : bug, cant attack while on pit
 public:
-    Pit(int row, int column) :Tile("_", row, column, ":/pics/textures/other tiles/pit.png") {
+    Pit(int row, int column)
+        : Tile("_", row, column, ":/pics/textures/other tiles/pit.png") {
 
-    };
+        };
 
-    bool isEntrable() {
-        return true;
-    }
-
-
+    bool isEntrable() override { return true; }
 
     bool onLeave(Tile *desTile, Character *who) override;
 };
 
-class Ramp : public Tile {
-
+class Ramp : public Tile
+{
 public:
-    Ramp(int row, int column) :Tile("<", row, column, ":/pics/textures/other tiles/ramp.png") {
+    Ramp(int row, int column)
+        : Tile("<", row, column, ":/pics/textures/other tiles/ramp.png") {
 
-    };
+        };
 
-    bool isEntrable() {
-        return true;
-    }
+    bool isEntrable() { return true; }
 };
 
-class LevelChanger : public Tile{
+class LevelChanger : public Tile
+{
 public:
-    LevelChanger(int row, int column) :Tile("$", row, column, ":/pics/textures/extra/levelchanger.png") {
+    LevelChanger(int row, int column)
+        : Tile("$", row, column, ":/pics/textures/extra/levelchanger.png") {
 
-    };
+        };
 
-    bool isEntrable() {
-        return true;
-    }
-
+    bool isEntrable() { return true; }
 };
 
 #endif //PRAK_TILE_H
