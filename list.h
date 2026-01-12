@@ -1,57 +1,55 @@
 #ifndef LIST_H
 #define LIST_H
 #include <iostream>
-template <typename T>
-class Node {
+template<typename T>
+class Node
+{
     T m_value{};
-    Node* m_nextNode {nullptr};
-    Node* m_prevNode {nullptr};
-
-
+    Node *m_nextNode{nullptr};
+    Node *m_prevNode{nullptr};
 
 public:
     Node(T value);
     T getValue();
-    void setNextNode(Node* nextNode);
+    void setNextNode(Node *nextNode);
 
-    void setPrevNode(Node* prevNode);
+    void setPrevNode(Node *prevNode);
 
-    Node* getNextNode();
+    Node *getNextNode();
 
-    Node* getPrevNode();
-
-
+    Node *getPrevNode();
 };
 
-template <typename T>
-class List {
-    Node<T>* m_lead = nullptr;
-    Node<T>* m_tail = nullptr;
-    std::size_t m_size {0};
+template<typename T>
+class List
+{
+    Node<T> *m_lead = nullptr;
+    Node<T> *m_tail = nullptr;
+    std::size_t m_size{0};
 
-public :
-
-    struct Iterator{
-        using pointer = Node<T>*;
-        using reference = Node<T>&;
+public:
+    struct Iterator
+    {
     private:
-        pointer m_ptr;
+         Node<T>* m_ptr;
+
     public:
-        Iterator(pointer ptr) : m_ptr(ptr) {};
-        Iterator& operator++() {
+        Iterator( Node<T>* ptr=nullptr)
+            : m_ptr(ptr) {};
+
+        Iterator &operator++()
+        {
             m_ptr = m_ptr->getNextNode();
-            return *this; }
-        reference operator*() const { return *m_ptr; }
-        pointer operator->() { return m_ptr; }
-        friend bool operator== (const Iterator& a, const Iterator& b) { return a.m_ptr == b.m_ptr; };
-        friend bool operator!= (const Iterator& a, const Iterator& b) { return a.m_ptr != b.m_ptr; };
-
+            return *this;
+        }
+        T operator*() const { return (m_ptr->getValue()); }
+        Node<T>* operator->() { return (m_ptr->getValue()); }
+        friend bool operator==(const Iterator &a, const Iterator &b) { return a.m_ptr == b.m_ptr; };
+        friend bool operator!=(const Iterator &a, const Iterator &b) { return a.m_ptr != b.m_ptr; };
     };
-
 
     Iterator begin() { return Iterator(m_lead); }
     Iterator end() { return Iterator(m_tail->getNextNode()); }
-
 
     void push_back(T elementToAdd);
 
@@ -67,6 +65,5 @@ public :
 
     std::size_t size();
 };
-
 
 #endif // LIST_H
