@@ -4,67 +4,69 @@
 
 #include "Tile.h"
 
-std::string_view Tile::getTexture() const {
-    if (character) {
-        return character->getTexture();
-    }
+std::string_view Tile::getTexture() const
+{
     return texture;
 }
 
-bool Tile::hasCharacter() const {
-    return (character!=nullptr);
+bool Tile::hasCharacter() const
+{
+    return (character != nullptr);
 }
 
-Character *Tile::getCharacter() const {
+Character *Tile::getCharacter() const
+{
     return character;
 }
 
-
-void Tile::setCharacter(Character *characterToPlace)  {
+void Tile::setCharacter(Character *characterToPlace)
+{
     character = characterToPlace;
 }
 
-int Tile::getRow() {
+int Tile::getRow()
+{
     return row;
 }
 
-int Tile::getColumn() {
+int Tile::getColumn()
+{
     return column;
 }
 
-bool Tile::moveTo(Tile *desTile, Character *who) {
-    if (onLeave(desTile,who) ) {
-
-        std::pair <bool, Tile*> onEnterResult = desTile->onEnter(who);
-        if (onEnterResult.first==false) {
+bool Tile::moveTo(Tile *desTile, Character *who)
+{
+    if (onLeave(desTile, who)) {
+        std::pair<bool, Tile *> onEnterResult = desTile->onEnter(who);
+        if (onEnterResult.first == false) {
             return false;
         }
 
-        Tile* tileToMoveTo;
+        Tile *tileToMoveTo;
 
-        if (onEnterResult.second!=nullptr) {
-            tileToMoveTo = onEnterResult.second;// if onEnter returns a non-nullptr as it's second argument, then it is the portal that the player will access
+        if (onEnterResult.second != nullptr) {
+            tileToMoveTo
+                = onEnterResult
+                      .second; // if onEnter returns a non-nullptr as it's second argument, then it is the portal that the player will access
+        } else {
+            tileToMoveTo
+                = desTile; // if onEnter returns a nullptr as it's second argument, then the desTile is a normal tile to be accessed
         }
-        else {
-
-            tileToMoveTo = desTile;// if onEnter returns a nullptr as it's second argument, then the desTile is a normal tile to be accessed
-        }
-        if (tileToMoveTo->hasCharacter()){
-            Character* characterAtWantedTile = tileToMoveTo->getCharacter();
-            if (characterAtWantedTile->isHuman()!=who->isHuman()){ // then it means they are a human and a zombie, which means that they can fight
+        if (tileToMoveTo->hasCharacter()) {
+            Character *characterAtWantedTile = tileToMoveTo->getCharacter();
+            if (characterAtWantedTile->isHuman()
+                != who->isHuman()) { // then it means they are a human and a zombie, which means that they can fight
                 who->attackPlayer(characterAtWantedTile);
-                if (characterAtWantedTile->isAlive()){
+                if (characterAtWantedTile->isAlive()) {
                     characterAtWantedTile->attackPlayer(who);
-                }
-                else{
+                } else {
                     delete characterAtWantedTile;
                     who->setTile(tileToMoveTo);
                     tileToMoveTo->setCharacter(who);
                     setCharacter(nullptr);
                 }
             }
-        }
-        else{
+        } else {
             who->setTile(tileToMoveTo);
             tileToMoveTo->setCharacter(who);
             setCharacter(nullptr);
@@ -74,14 +76,15 @@ bool Tile::moveTo(Tile *desTile, Character *who) {
     return false;
 }
 
-bool Tile::onLeave(Tile *desTile, Character *who) {
+bool Tile::onLeave(Tile *desTile, Character *who)
+{
     return true;
 }
 
-std::pair<bool, Tile*> Tile::onEnter(Character *who) {
-    std::pair<bool, Tile*> result (isEntrable(), nullptr);
+std::pair<bool, Tile *> Tile::onEnter(Character *who)
+{
+    std::pair<bool, Tile *> result(isEntrable(), nullptr);
     return result;
-
 }
 
 std::string Tile::getTexturePath()
@@ -89,36 +92,37 @@ std::string Tile::getTexturePath()
     return texturePath;
 }
 
-
-std::pair<bool, Tile*> Portal::onEnter(Character *who) {
-    std::pair<bool, Tile*> result (isEntrable(), portalToAccess);
+std::pair<bool, Tile *> Portal::onEnter(Character *who)
+{
+    std::pair<bool, Tile *> result(isEntrable(), portalToAccess);
     return result;
 }
 
-std::pair<bool, Tile *> Switch::onEnter(Character *who) {
+std::pair<bool, Tile *> Switch::onEnter(Character *who)
+{
     activate();
-    std::pair<bool, Tile*> result (isEntrable(), nullptr);
+    std::pair<bool, Tile *> result(isEntrable(), nullptr);
     return result;
-
 }
 
 /*door*/
-void Door::notify() {
+void Door::notify()
+{
     state = !state;
     if (state) {
         texture = "/";
         texturePath = ":/pics/textures/doors/door2.png";
 
-    }
-    else {
-        texture ="X";
+    } else {
+        texture = "X";
         texturePath = ":/pics/textures/doors/door1.png";
     }
 }
 
 /*pit*/
 
-bool Pit::onLeave(Tile *desTile, Character *who) {
+bool Pit::onLeave(Tile *desTile, Character *who)
+{
     if (desTile->getTexture() != "<" && desTile->getTexture() != "_") {
         return false;
     }
