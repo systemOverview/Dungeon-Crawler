@@ -152,7 +152,7 @@ std::pair<int, int> GraphicalUI::translateMove(int step)
         xymove = {1, 0};
         return xymove;
     case 3:
-        xymove = {1, 1}; /*1-3, 2,2*/
+        xymove = {1, 1};
         return xymove;
     case 4:
         xymove = {0, -1};
