@@ -10,7 +10,7 @@
 DungeonCrawler::DungeonCrawler()
 {
     for (auto& gameString : gameStrings){
-        Level *lvl = new Level(10, 10, gameStrings[0]);
+        Level *lvl = new Level(10, 10, gameString);
         levels.push_back(lvl);
     }
     currentLevel = levels.begin();
@@ -69,32 +69,31 @@ void DungeonCrawler::move()
     std::pair<int, int> moveToPerform = GUI->getLastMove();
     Character *humanCharacter = (*currentLevel)->getPlayableCharacter();
     Tile *currentTile = humanCharacter->getTile();
-    if (currentTile->getTexture()=="$"){
-        currentLevel = ++currentLevel;
-        Character *s = (*currentLevel)->getPlayableCharacter();
-        s->setController(GUI);
-        qDebug() << "test";
-
-        return;
-    }
-
     int newRow = currentTile->getRow() + moveToPerform.first;
     int newColumn = currentTile->getColumn() + moveToPerform.second;
     Tile *wantedTile = (*currentLevel)->getTile(newRow, newColumn);
     bool isMoveAllowed = currentTile->moveTo(wantedTile, humanCharacter);
-
-    std::vector<Character *> NPCs = (*currentLevel)->getNonPlayableCharacters();
-    for (auto &NPC : NPCs) {
-        if (NPC->isAlive()) {
-            // int move = NPC->getController()->move(currentLevel);
-            std::pair<int, int> moveToPerform = NPC->move();
-            Tile *currentTile = NPC->getTile();
-            int newRow = currentTile->getRow() + moveToPerform.first;
-            int newColumn = currentTile->getColumn() + moveToPerform.second;
-            Tile *wantedTile = (*currentLevel)->getTile(newRow, newColumn);
-            bool isMoveAllowed = currentTile->moveTo(wantedTile, NPC);
-        }
+    if (isMoveAllowed && wantedTile->getTexture()=="$"){
+        currentLevel = ++currentLevel;
+        qDebug() << (*currentLevel)->getTile(7,1)->getTexture();
+        Character *s = (*currentLevel)->getPlayableCharacter();
+        s->setController(GUI);
+        qDebug() << "test";
     }
+    else{
+        std::vector<Character *> NPCs = (*currentLevel)->getNonPlayableCharacters();
+        for (auto &NPC : NPCs) {
+            if (NPC->isAlive()) {
+                // int move = NPC->getController()->move(currentLevel);
+                std::pair<int, int> moveToPerform = NPC->move();
+                Tile *currentTile = NPC->getTile();
+                int newRow = currentTile->getRow() + moveToPerform.first;
+                int newColumn = currentTile->getColumn() + moveToPerform.second;
+                Tile *wantedTile = (*currentLevel)->getTile(newRow, newColumn);
+                bool isMoveAllowed = currentTile->moveTo(wantedTile, NPC);
+            }
+        }
 
+    }
     turn();
 }
