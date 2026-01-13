@@ -37,7 +37,9 @@ Node<T> *Node<T>::getPrevNode()
 
 template<typename T>
 std::size_t List<T>::size()
-{}
+{
+    return m_size;
+}
 
 template<typename T>
 bool List<T>::isEmpty()
@@ -66,11 +68,11 @@ void List<T>::push_back(T elementToAdd)
         newNode->setPrevNode(m_tail);
         m_tail->setNextNode(newNode);
         m_tail = newNode;
-        m_size++;
     } else {
         m_lead = newNode;
         m_tail = newNode;
     }
+    m_size++;
 }
 
 template<typename T>
@@ -81,14 +83,14 @@ void List<T>::push_front(T elementToAdd)
         newNode->setNextNode(m_lead);
         m_lead->setPrevNode(newNode);
         m_lead = newNode;
-        m_size++;
-
     }
 
     else {
         m_lead = newNode;
         m_tail = newNode;
     }
+    m_size++;
+
 }
 
 template<typename T>
