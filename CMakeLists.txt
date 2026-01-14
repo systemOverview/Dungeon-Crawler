@@ -4,12 +4,13 @@ project(prak LANGUAGES CXX)
 
 find_package(Qt6 6.5 REQUIRED COMPONENTS Core Widgets)
 find_package(Qt6 REQUIRED COMPONENTS Multimedia)
+find_package(Qt6 REQUIRED COMPONENTS Widgets)
 
 qt_standard_project_setup()
 
 set(CMAKE_AUTORCC ON)
 
-
+add_subdirectory(custom-widgets)
 qt_add_executable(prak WIN32 MACOSX_BUNDLE
 
         main.cpp
@@ -39,7 +40,8 @@ qt_add_executable(prak WIN32 MACOSX_BUNDLE
         list.h
         StationaryController.h StationaryController.cpp
         GuardController.h GuardController.cpp
-
+        Observer.h Observer.cpp
+        Subject.h Subject.cpp
     )
 
 
@@ -49,6 +51,9 @@ target_link_libraries(prak
         Qt::Widgets
         Qt6::Multimedia
 )
+target_link_libraries(prak PRIVATE Qt6::Widgets)
+target_link_libraries(prak PRIVATE custom-widgets)
+
 
 include(GNUInstallDirs)
 
