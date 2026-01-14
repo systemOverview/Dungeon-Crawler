@@ -5,6 +5,8 @@
 #include "DungeonCrawler.h"
 #include "MainWindow.h"
 #include "startscreen.h"
+#include "QHealthBar.h"
+#include "QCharacter.h"
 #include <sstream>
 GraphicalUI::GraphicalUI(Level *lvl, DungeonCrawler *d)
 {
@@ -44,65 +46,70 @@ void GraphicalUI::playSound(QString soundLink, float volume)
     player->play();
 }
 
-void GraphicalUI::draw(Level *level)
-{
-    removeHealthBars();
+void GraphicalUI::draw(Level *level){
     QGridLayout *gameBoard = mainWindow->getGameBoard();
     std::vector<std::vector<Tile *> > *tiles = level->getTiles();
     for (int rowIterator = 0; rowIterator < level->getHeight(); rowIterator++) {
         for (int colIterator = 0; colIterator < level->getWidth(); colIterator++) {
             Tile *currentTile = (*tiles)[rowIterator][colIterator];
             QLayoutItem *itemAtTilePosition = gameBoard->itemAtPosition(rowIterator, colIterator);
-            if (!itemAtTilePosition) {
-                QWidget *tileWidget = new QWidget(nullptr);
-                tileWidget->setMinimumSize(50, 50);
-                tileWidget->setFixedSize(50, 50);
-                std::ostringstream style;
-                std::ostringstream bStyle;
-                style << "border-image : url(" << currentTile->getTexturePath()
-                      << ") 0 0 0 0 stretch stretch;";
-                bStyle << "background-image:url(" << currentTile->getTexturePath()
-                       << "); background-repeat: no-repeat; background-position:center;";
-
-                QString bgStyleFull = QString::fromStdString(style.str());
-                tileWidget->setStyleSheet(bgStyleFull);
-
+            QTile* tileWidget;
+            if (!itemAtTilePosition){
+                tileWidget = new QTile(nullptr, currentTile, gameBoard);
                 gameBoard->addWidget(tileWidget, rowIterator, colIterator);
-            } else {
-                QList<QWidget *> children = itemAtTilePosition->widget()->findChildren<QWidget *>(
-                    QString(), Qt::FindDirectChildrenOnly);
-                for (auto it = children.begin(); it != children.end(); it++) {
-                    delete (*it);
-                }
             }
 
-            if (currentTile->hasCharacter()) {
-                QWidget *parentWidget = gameBoard->itemAtPosition(rowIterator, colIterator)->widget();
-                Character *characterAtTile = currentTile->getCharacter();
-                QWidget *characterWidget = new QWidget(parentWidget);
-                characterWidget->setFixedSize(50, 40);
-                characterWidget->move(0, 10);
-                std::ostringstream style;
-                std::ostringstream bStyle;
-                style << "border-image : url(:" << characterAtTile->getTexturePath()
-                      << ") 20 0 0 0 stretch stretch;";
 
-                float healthPercentage
-                    = (static_cast<float>(currentTile->getCharacter()->getCurrentHP())
-                       / static_cast<float>(currentTile->getCharacter()->getMaxHP()))
-                      * 100;
-                QWidget *healthBar = generateHealthBar(healthPercentage, nullptr);
-                healthBar->setFixedSize(50, 10);
-                characterWidget->show();
-                // healthBar->show();
-                QString bgStyleFull = QString::fromStdString(style.str());
-                characterWidget->setStyleSheet(bgStyleFull);
-                addHealthBar(healthBar);
-                gameBoard->addWidget(healthBar, rowIterator, colIterator, Qt::AlignTop);
-            }
+            // if (tileWidget->getCharacter()){
+            //     QHealthBar* healthBar = tileWidget->getCharacter()->getHealthBar();
+            //     gameBoard->addWidget(healthBar, rowIterator, colIterator, Qt::AlignTop);
+            // }
+
         }
     }
+
 }
+
+// void GraphicalUI::draw(Level *level)
+// {
+//     removeHealthBars();
+//     QGridLayout *gameBoard = mainWindow->getGameBoard();
+//     std::vector<std::vector<Tile *> > *tiles = level->getTiles();
+//     for (int rowIterator = 0; rowIterator < level->getHeight(); rowIterator++) {
+//         for (int colIterator = 0; colIterator < level->getWidth(); colIterator++) {
+//             Tile *currentTile = (*tiles)[rowIterator][colIterator];
+//             QLayoutItem *itemAtTilePosition = gameBoard->itemAtPosition(rowIterator, colIterator);
+//             if (!itemAtTilePosition) {
+//                 QTile *tileWidget = new QTile(nullptr, currentTile);
+//                 gameBoard->addWidget(tileWidget, rowIterator, colIterator);
+//             } else {
+//                 QList<QWidget *> children = itemAtTilePosition->widget()->findChildren<QWidget *>(
+//                     QString(), Qt::FindDirectChildrenOnly);
+//                 for (auto it = children.begin(); it != children.end(); it++) {
+//                     delete (*it);
+//                 }
+//             }
+
+
+//             if (currentTile->hasCharacter()) {
+//                 QWidget *parentWidget = gameBoard->itemAtPosition(rowIterator, colIterator)->widget();
+//                 Character *characterAtTile = currentTile->getCharacter();
+//                 QCharacter *characterWidget = new QCharacter(parentWidget, characterAtTile);
+
+//                 float healthPercentage
+//                     = (static_cast<float>(currentTile->getCharacter()->getCurrentHP())
+//                        / static_cast<float>(currentTile->getCharacter()->getMaxHP()))
+//                       * 100;
+//                 QHealthBar* healthBar = characterWidget->getHealthBar();
+//                 healthBar->updateHealthBarPercentage(healthPercentage);
+//                 characterWidget->show();
+//                 // healthBar->show();
+//                 addHealthBar(healthBar);
+//                 gameBoard->addWidget(healthBar, rowIterator, colIterator, Qt::AlignTop);
+//             }
+//         }
+//     }
+// }
 
 QWidget *GraphicalUI::generateHealthBar(int percentage, QWidget *parent)
 {
@@ -193,9 +200,9 @@ void GraphicalUI::addHealthBar(QWidget *healthBar)
 void GraphicalUI::removeHealthBars()
 {
     for (auto it = m_healthBars.begin(); it != m_healthBars.end();) {
-        delete *it;
-        it = m_healthBars.erase(it); // erase returns the next valid iterator
-    }
+        (*it)->setParent(nullptr);
+        it = m_healthBars.erase(it);
+    };
 }
 
 QDialog *GraphicalUI::getStartScreen()

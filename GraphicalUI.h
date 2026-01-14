@@ -6,6 +6,7 @@
 #include "AbstractUI.h"
 #include "Level.h"
 #include "MainWindow.h"
+#include "QTile.h"
 
 class DungeonCrawler;
 class GraphicalUI : public AbstractUI, public AbstractController
