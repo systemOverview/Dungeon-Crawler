@@ -4,11 +4,10 @@
 
 #ifndef PRAK_TILE_H
 #define PRAK_TILE_H
-
 #include "Character.h"
 #include "PassiveAktive.h"
-#include <iostream>
-class Tile
+#include "Subject.h"
+class Tile : public Subject
 {
 protected:
     std::string texture;

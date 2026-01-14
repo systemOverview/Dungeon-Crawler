@@ -22,6 +22,8 @@ Character *Tile::getCharacter() const
 void Tile::setCharacter(Character *characterToPlace)
 {
     character = characterToPlace;
+    notifyObservers("character");
+
 }
 
 int Tile::getRow()
@@ -117,6 +119,8 @@ void Door::notify()
         texture = "X";
         texturePath = ":/pics/textures/doors/door1.png";
     }
+    notifyObservers("texture");
+
 }
 
 /*pit*/

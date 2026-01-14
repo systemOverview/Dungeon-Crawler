@@ -5,12 +5,12 @@
 #ifndef PRAK_CHARACTER_H
 #define PRAK_CHARACTER_H
 #include "AbstractUI.h"
-#include "TerminalUI.h"
-#include <iostream>
+#include "Subject.h"
+class QCharacter;
 class StationaryController;
 class Tile;
 class TerminalUI;
-class Character
+class Character : public Subject
 {
 protected:
     std::string m_texture;
@@ -21,6 +21,8 @@ protected:
     bool m_isHuman{true};
     Tile *currentTile; // The tile the player is at
     AbstractController *m_controller;
+    QCharacter* m_QCharacter; // it's QT widget.
+
 
 public:
     Character(std::string_view txt,
@@ -53,6 +55,9 @@ public:
     bool isAlive();
     void decrementFromHP(int amount);
     void attackPlayer(Character *characterToAttack);
+    void setQCharacter(QCharacter* QCharacter);
+    QCharacter* getQChatacter();
+
 };
 
 class Zombie : public Character

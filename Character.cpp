@@ -65,6 +65,10 @@ bool Character::isAlive()
 void Character::decrementFromHP(int amountToDecrement)
 {
     m_hitPoints -= amountToDecrement;
+    notifyObservers("hitPoints");
+    if (!isAlive()){
+        notifyObservers("isAlive");
+    }
 }
 
 void Character::attackPlayer(Character *characterToAttack)
@@ -73,3 +77,13 @@ void Character::attackPlayer(Character *characterToAttack)
     qDebug() << characterToAttack->getTexture() << " was hit and his new HP is "
              << characterToAttack->getCurrentHP();
 }
+
+void Character::setQCharacter(QCharacter* QCharacter){
+    m_QCharacter = QCharacter;
+}
+
+QCharacter *Character::getQChatacter()
+{
+    return m_QCharacter;
+}
+
