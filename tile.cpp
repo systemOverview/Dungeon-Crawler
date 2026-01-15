@@ -3,6 +3,7 @@
 //
 
 #include "Tile.h"
+#include <QtCore/qdebug.h>
 
 std::string_view Tile::getTexture() const
 {
@@ -47,20 +48,17 @@ bool Tile::moveTo(Tile *desTile, Character *who)
         Tile *tileToMoveTo;
 
         if (onEnterResult.second != nullptr) {
-            tileToMoveTo
-                = onEnterResult
-                      .second; // if onEnter returns a non-nullptr as it's second argument, then it is the portal that the player will access
+            tileToMoveTo= onEnterResult.second; // if onEnter returns a non-nullptr as it's second argument, then it is the portal that the player will access
         } else {
-            tileToMoveTo
-                = desTile; // if onEnter returns a nullptr as it's second argument, then the desTile is a normal tile to be accessed
+            tileToMoveTo= desTile; // if onEnter returns a nullptr as it's second argument, then the desTile is a normal tile to be accessed
         }
         if (tileToMoveTo->hasCharacter()) {
             Character *characterAtWantedTile = tileToMoveTo->getCharacter();
-            if (characterAtWantedTile->isHuman()
-                != who->isHuman()) { // then it means they are a human and a zombie, which means that they can fight
+            if (characterAtWantedTile->isHuman()!= who->isHuman()) { // then it means they are a human and a zombie, which means that they can fight
                 who->attackPlayer(characterAtWantedTile);
                 if (characterAtWantedTile->isAlive()) {
                     characterAtWantedTile->attackPlayer(who);
+
                 } else {
                     who->setTile(tileToMoveTo);
                     tileToMoveTo->setCharacter(who);

@@ -78,31 +78,6 @@ void GraphicalUI::draw(Level *level){
 
 }
 
-QWidget *GraphicalUI::generateHealthBar(int percentage, QWidget *parent)
-{
-    QWidget *healthBar = new QWidget(parent);
-    float stopRedAt = std::clamp(percentage / 100.0f, 0.0f, 1.0f);
-    if (stopRedAt < 0) {
-        stopRedAt = 0;
-        percentage = 0;
-    }
-    float startWhiteFrom = stopRedAt + 0.01;
-    if (stopRedAt >= 1) {
-        stopRedAt = 0.99;
-        startWhiteFrom = 1;
-    }
-    std::ostringstream style;
-    std::ostringstream bStyle;
-    style << "background: qlineargradient(x1:0, y1:0, x2:1, y2:0, "
-          << "stop:0 red, stop:" << stopRedAt << " red, "
-          << "stop:" << startWhiteFrom << " white, stop:1 white);"
-          << "border:1px solid black;";
-
-    healthBar->setStyleSheet(QString::fromStdString(style.str()));
-
-    return healthBar;
-}
-
 std::pair<int, int> GraphicalUI::move()
 {
     return lastMove;

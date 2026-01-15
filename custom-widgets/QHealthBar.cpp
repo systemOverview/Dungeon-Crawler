@@ -3,8 +3,8 @@
 #include <QtGui/qpainter.h>
 #include <sstream>
 
-QHealthBar::QHealthBar(QWidget *parent)
-    : QWidget{parent}, m_healthPercentage(100)
+QHealthBar::QHealthBar(QWidget *parent, float healthPercentage)
+    : QWidget{parent}, m_healthPercentage(healthPercentage)
 {
     updateStyleSheet();
     setFixedSize(50, 10);

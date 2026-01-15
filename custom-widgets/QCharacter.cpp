@@ -13,7 +13,10 @@ QCharacter::QCharacter(QWidget *parent, Character* character)
     setStyleSheet(bgStyleFull);
     setFixedSize(50, 40);
     move(0, 10);
-    m_healthBar = new QHealthBar(nullptr);
+    float healthPercentage= (static_cast<float>(m_character->getCurrentHP())
+                              / static_cast<float>(m_character->getMaxHP()))
+                             * 100;
+    m_healthBar = new QHealthBar(nullptr, healthPercentage);
     character->registerObserver(this);
     character->setQCharacter(this);
 
@@ -43,6 +46,7 @@ void QCharacter::update(std::string changedMemberName)
 QCharacter::~QCharacter()
 {
     delete m_healthBar;
+    // m_character->removeObserver(this);
 }
 
 void QCharacter::paintEvent(QPaintEvent* event)

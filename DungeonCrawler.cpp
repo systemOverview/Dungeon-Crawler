@@ -9,17 +9,18 @@
 
 DungeonCrawler::DungeonCrawler()
 {
-    Character* humanCharacter = new Character("P",
+    m_humanCharacter = new Character("P",
                                               "/pics/textures/char/front/char_front_1.png",
                                               20,
                                               20);
     for (auto& gameString : gameStrings){
-        Level *lvl = new Level(10, 10, gameString, humanCharacter);
+        Level *lvl = new Level(10, 10, gameString);
         levels.push_back(lvl);
     }
     currentLevel = levels.begin();
+    (*currentLevel)->placePlayingCharacter(m_humanCharacter);
     GUI = new GraphicalUI(*(currentLevel), this);
-    humanCharacter->setController(GUI);
+    m_humanCharacter->setController(GUI);
     // GUI->getStartScreen()->show();
     GUI->getMainWindow()->show();
     GUI->draw(*currentLevel);
@@ -103,8 +104,10 @@ void DungeonCrawler::levelUp()
     qDebug() << "test";
     GUI->deleteAllTiles();
     currentLevel = ++currentLevel;
-    Character *c = (*currentLevel)->getPlayableCharacter();
-    c->setController(GUI);
+    // TODO refacor this
+    m_humanCharacter->removeObserver(m_humanCharacter->getQChatacter());
+    (*currentLevel)->placePlayingCharacter(m_humanCharacter);
+    m_humanCharacter->setController(GUI);
     GUI->draw(*currentLevel);
 
 }

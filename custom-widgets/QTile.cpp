@@ -14,6 +14,12 @@ QTile::QTile(QWidget* parent, Tile* tile, QGridLayout* gameBoard) : QWidget(pare
     updateStyleSheetTexture();
     if (tile->hasCharacter()) {
         qDebug () << tile->getCharacter()->getTexture();
+        // if (tile->getCharacter()->getQChatacter()){
+        //     m_character = tile->getCharacter()->getQChatacter();
+        // }
+        // else{
+        //     m_character = new QCharacter(this, tile->getCharacter());
+        // }
         m_character = new QCharacter(this, tile->getCharacter());
         m_character->show();
         gameBoard->addWidget(this, m_tile->getRow(), m_tile->getColumn());

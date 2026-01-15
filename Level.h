@@ -14,11 +14,12 @@ class Level
     std::vector<Character *> characters;
     std::vector<Character *> nonPlayableCharacters;
     Character *playableCharacter;
+    std::pair <int,int> m_playingCharacterPosition;
     int gameHeight{};
     int gameWidth{};
 
 public:
-    Level(int height, int width, std::string gameBoard, Character* humanCharacter);
+    Level(int height, int width, std::string gameBoard);
 
     Tile *getTile(int row, int col);
     std::vector<std::vector<Tile *>> *getTiles();
@@ -26,9 +27,9 @@ public:
     int getWidth() const;
 
     void placeCharacter(Character *c, int row, int col, bool isPlayable);
+    void placePlayingCharacter(Character*c);
     Character *getPlayableCharacter();
     std::vector<Character *> getNonPlayableCharacters();
-
     void setPortals();
     void setDefaultTiles();
 };

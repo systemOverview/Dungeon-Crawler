@@ -5,8 +5,9 @@
 #include "Level.h"
 #include "GuardController.h"
 #include "StationaryController.h"
+#include <qDebug>
 
-Level::Level(int height, int width, std::string gameString, Character* humanCharacter)
+Level::Level(int height, int width, std::string gameString)
 {
     gameHeight = height;
     gameWidth = width;
@@ -55,7 +56,7 @@ Level::Level(int height, int width, std::string gameString, Character* humanChar
             (tiles)[row][column] = floor;
 
             if (gameString[i] == 'P') {
-                placeCharacter(humanCharacter, row, column, true);
+                m_playingCharacterPosition = {row, column};
             }
 
             else if (gameString[i] == 'S') {
@@ -119,6 +120,15 @@ void Level::placeCharacter(Character *c, int row, int col, bool isPlayable)
     } else {
         nonPlayableCharacters.push_back(c);
     }
+}
+
+void Level::placePlayingCharacter(Character *c)
+{
+    // this function is called by the dungeon controller, since the playing character is the same across all levels
+    // everytime a player levels up, the controller calls this to place the character. The other characters (NPCs)
+    // don't move across levels.
+
+    placeCharacter(c, m_playingCharacterPosition.first, m_playingCharacterPosition.second, true);
 }
 
 Character *Level::getPlayableCharacter()

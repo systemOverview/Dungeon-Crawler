@@ -10,7 +10,7 @@ class QHealthBar : public QWidget, public Subject
 private:
     float m_healthPercentage;
 public:
-    QHealthBar(QWidget* parent);
+    QHealthBar(QWidget* parent, float healthPercentage=100);
     void paintEvent(QPaintEvent* event); // QWidget subclasses must have this function explicity included to use stylesheets.
     void updateParent(QWidget* parent);
     void updateStyleSheet();
