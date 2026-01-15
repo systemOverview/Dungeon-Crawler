@@ -18,12 +18,13 @@ class Level
     int gameWidth{};
 
 public:
-    Level(int height, int width, std::string gameBoard);
+    Level(int height, int width, std::string gameBoard, Character* humanCharacter);
 
     Tile *getTile(int row, int col);
     std::vector<std::vector<Tile *>> *getTiles();
     int getHeight() const;
     int getWidth() const;
+
     void placeCharacter(Character *c, int row, int col, bool isPlayable);
     Character *getPlayableCharacter();
     std::vector<Character *> getNonPlayableCharacters();

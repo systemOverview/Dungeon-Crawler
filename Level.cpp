@@ -6,7 +6,7 @@
 #include "GuardController.h"
 #include "StationaryController.h"
 
-Level::Level(int height, int width, std::string gameString)
+Level::Level(int height, int width, std::string gameString, Character* humanCharacter)
 {
     gameHeight = height;
     gameWidth = width;
@@ -55,12 +55,7 @@ Level::Level(int height, int width, std::string gameString)
             (tiles)[row][column] = floor;
 
             if (gameString[i] == 'P') {
-                Character *crc = new Character("P",
-                                               "/pics/textures/char/front/char_front_1.png",
-                                               20,
-                                               20);
-                placeCharacter(crc, row, column, true);
-
+                placeCharacter(humanCharacter, row, column, true);
             }
 
             else if (gameString[i] == 'S') {

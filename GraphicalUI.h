@@ -36,6 +36,7 @@ public:
     ~GraphicalUI();
     void playSound(QString soundLink, float volume);
     void switchWindow();
+    void deleteAllTiles();
 };
 
 #endif // GRAPHICALUI_H

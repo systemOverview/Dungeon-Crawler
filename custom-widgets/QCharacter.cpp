@@ -33,12 +33,16 @@ void QCharacter::update(std::string changedMemberName)
                / static_cast<float>(m_character->getMaxHP()))
               * 100;
         m_healthBar->updateHealthBarPercentage(healthPercentage);
-        m_healthBar->setParent(nullptr);
     }
 
     else if (changedMemberName=="isAlive"){
-        return;
+        delete this;
     }
+}
+
+QCharacter::~QCharacter()
+{
+    delete m_healthBar;
 }
 
 void QCharacter::paintEvent(QPaintEvent* event)

@@ -13,12 +13,10 @@ QTile::QTile(QWidget* parent, Tile* tile, QGridLayout* gameBoard) : QWidget(pare
     setFixedSize(50, 50);
     updateStyleSheetTexture();
     if (tile->hasCharacter()) {
+        qDebug () << tile->getCharacter()->getTexture();
         m_character = new QCharacter(this, tile->getCharacter());
         m_character->show();
         gameBoard->addWidget(this, m_tile->getRow(), m_tile->getColumn());
-        // m_gameBoard->addWidget(m_character->getHealthBar(), m_tile->getRow(), m_tile->getColumn(),Qt::AlignTop );
-
-
     }
 
 
@@ -39,21 +37,18 @@ void QTile::updateStyleSheetTexture()
 
 };
 
-
 void QTile::update(std::string changedMemberName)
 {
-    qDebug () << changedMemberName;
     if (changedMemberName=="texture"){
         updateStyleSheetTexture();
     }
     else if (changedMemberName == "character"){
         if (m_tile->hasCharacter()){
-            qDebug()<<"change";
             m_character = m_tile->getCharacter()->getQChatacter();
             m_character->setParent(this);
             m_character->show();
+            m_character->getHealthBar()->setParent(nullptr);
             m_gameBoard->addWidget(m_character->getHealthBar(), m_tile->getRow(), m_tile->getColumn(),Qt::AlignTop );
-
         }
         else{
             m_character=nullptr;

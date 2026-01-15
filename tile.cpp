@@ -62,7 +62,6 @@ bool Tile::moveTo(Tile *desTile, Character *who)
                 if (characterAtWantedTile->isAlive()) {
                     characterAtWantedTile->attackPlayer(who);
                 } else {
-                    delete characterAtWantedTile;
                     who->setTile(tileToMoveTo);
                     tileToMoveTo->setCharacter(who);
                     setCharacter(nullptr);

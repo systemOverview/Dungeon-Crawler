@@ -67,7 +67,7 @@ void Character::decrementFromHP(int amountToDecrement)
     m_hitPoints -= amountToDecrement;
     notifyObservers("hitPoints");
     if (!isAlive()){
-        notifyObservers("isAlive");
+        delete this;
     }
 }
 
@@ -85,5 +85,10 @@ void Character::setQCharacter(QCharacter* QCharacter){
 QCharacter *Character::getQChatacter()
 {
     return m_QCharacter;
+}
+
+Character::~Character()
+{
+    notifyObservers("isAlive");
 }
 

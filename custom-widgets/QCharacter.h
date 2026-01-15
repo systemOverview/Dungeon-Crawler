@@ -17,6 +17,7 @@ public:
     QCharacter(QWidget *parent, Character* character);
     QHealthBar* getHealthBar();
     void update(std::string changedMemberName="") override;
+    ~QCharacter();
 };
 
 #endif // QCHARACTER_H

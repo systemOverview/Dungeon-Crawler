@@ -57,6 +57,7 @@ public:
     void attackPlayer(Character *characterToAttack);
     void setQCharacter(QCharacter* QCharacter);
     QCharacter* getQChatacter();
+    ~Character();
 
 };
 

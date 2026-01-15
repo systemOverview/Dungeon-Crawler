@@ -46,6 +46,7 @@ public:
     std::pair<int, int> translateMove(int step) const;
     bool turn();
     void move();
+    void levelUp();
 };
 
 #endif //PRAK_DUNGEONCRAWLER_H

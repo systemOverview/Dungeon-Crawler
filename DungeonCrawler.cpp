@@ -9,16 +9,20 @@
 
 DungeonCrawler::DungeonCrawler()
 {
+    Character* humanCharacter = new Character("P",
+                                              "/pics/textures/char/front/char_front_1.png",
+                                              20,
+                                              20);
     for (auto& gameString : gameStrings){
-        Level *lvl = new Level(10, 10, gameString);
+        Level *lvl = new Level(10, 10, gameString, humanCharacter);
         levels.push_back(lvl);
     }
     currentLevel = levels.begin();
     GUI = new GraphicalUI(*(currentLevel), this);
-    Character *s = (*currentLevel)->getPlayableCharacter();
-    s->setController(GUI);
+    humanCharacter->setController(GUI);
     // GUI->getStartScreen()->show();
-    turn();
+    GUI->getMainWindow()->show();
+    GUI->draw(*currentLevel);
 }
 
 std::pair<int, int> DungeonCrawler::translateMove(int step) const
@@ -74,11 +78,7 @@ void DungeonCrawler::move()
     Tile *wantedTile = (*currentLevel)->getTile(newRow, newColumn);
     bool isMoveAllowed = currentTile->moveTo(wantedTile, humanCharacter);
     if (isMoveAllowed && wantedTile->getTexture()=="$"){
-        currentLevel = ++currentLevel;
-        qDebug() << (*currentLevel)->getTile(7,1)->getTexture();
-        Character *s = (*currentLevel)->getPlayableCharacter();
-        s->setController(GUI);
-        qDebug() << "test";
+        levelUp();
     }
     else{
         std::vector<Character *> NPCs = (*currentLevel)->getNonPlayableCharacters();
@@ -95,5 +95,16 @@ void DungeonCrawler::move()
         }
 
     }
-    turn();
+    // turn();
+}
+
+void DungeonCrawler::levelUp()
+{
+    qDebug() << "test";
+    GUI->deleteAllTiles();
+    currentLevel = ++currentLevel;
+    Character *c = (*currentLevel)->getPlayableCharacter();
+    c->setController(GUI);
+    GUI->draw(*currentLevel);
+
 }
