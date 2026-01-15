@@ -31,7 +31,7 @@ std::pair<int, int> DungeonCrawler::translateMove(int step) const
     std::pair<int, int> xymove;
 
     switch (step) {
-    /* to go down, you add +1 to the row, to go up -1 the row, right +1 the column, left -1 the column*/
+    /* to go down, you add +1 to the column, to go up -1 the column, right +1 the row, left -1 the row*/
     case 1:
         xymove = {1, -1};
         return xymove;
