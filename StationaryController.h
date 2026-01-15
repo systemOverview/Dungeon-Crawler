@@ -1,7 +1,6 @@
 #ifndef STATIONARYCONTROLLER_H
 #define STATIONARYCONTROLLER_H
 #include "AbstractUI.h"
-#include "Level.h"
 class Character;
 class StationaryController : public AbstractController
 {
