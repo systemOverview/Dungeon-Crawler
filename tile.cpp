@@ -39,7 +39,7 @@ int Tile::getColumn()
 
 std::pair<int, int> Tile::getCordsAsPair()
 {
-    return {column, row};
+    return {row, column};
 }
 
 bool Tile::moveTo(Tile *desTile, Character *who)
