@@ -26,6 +26,7 @@
         <file>textures/start screen/bloody_frame.png</file>
         <file>textures/extra/white-bg.png</file>
         <file>textures/sounds/grunt.wav</file>
+        <file>textures/zombie/attacker.png</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>
