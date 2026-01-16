@@ -87,7 +87,7 @@ Level::Level(int height, int width, std::string gameString)
             }
 
             else if (gameString[i] == 'A') {
-                AttackController* attackController = new AttackController;
+                AttackController* attackController = new AttackController(this, m_graph);
                 Character *crc = new Attacker("A",
                                             "/pics/textures/zombie/attacker.png",
                                             10,
@@ -97,7 +97,6 @@ Level::Level(int height, int width, std::string gameString)
             }
         }
     }
-    setPortals();
     m_graph->setupAlldges();
     for (auto door : doors) {
         theSwitch->attach(door);
@@ -180,4 +179,9 @@ void Level::setDefaultTiles()
             tiles[i].push_back(nullptr);
         }
     }
+}
+
+LevelGraph *Level::getGraph()
+{
+    return m_graph;
 }

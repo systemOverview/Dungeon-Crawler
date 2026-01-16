@@ -36,6 +36,7 @@ public:
     std::vector<Character *> getNonPlayableCharacters();
     void setPortals();
     void setDefaultTiles();
+    LevelGraph* getGraph();
 };
 
 #endif //PRAK_LEVEL_H

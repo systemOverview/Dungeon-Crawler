@@ -8,17 +8,18 @@ class Vertex{
 private:
     Tile* m_tile;
     float m_weight;
-    std::vector<Vertex*> m_neighbours;
+    std::vector<std::pair<Vertex*, float>> m_neighbours; // vertex/weight
 public:
     Vertex(Tile* tile, float weight=1);
-    void addNeighbour(Vertex* neighbourToAdd);
+    void addNeighbour(Vertex* neighbourToAdd, float weights);
     Tile* getTile();
     void setTile(Tile* newTile);
     float getWeight();
-    std::vector<Vertex*> getNeighbours();
+    std::vector<std::pair<Vertex*, float>>  getNeighbours();
+
 };
 
-class LevelGraph
+class LevelGraph : public Subject
 {
 private:
     // std::vector<Vertex*> m_vertexes;
@@ -31,6 +32,9 @@ public:
     void setupEdgesForVertex(Vertex* vertex);
     bool isEdgeBetweenTilesPossible(std::string_view firstTileTexture, std::string_view SecondTileTexture);
     Vertex* getVertex(std::pair<int,int> cords);
+    std::vector<std::pair<int,int>> getShortestsPathBetweenTwoTiles(Vertex* startingVertex, Vertex* targetVertex, std::string_view algorithmToUse="");
+    std::vector<std::pair<int,int>> getShortestsPathBetweenTwoTilesDjikstra(Vertex* startingVertex, Vertex* targetVertex);
+    bool doesVectorHasElement(std::vector<Vertex*> vector, Vertex* element);
 };
 
 #endif // LEVELGRAPH_H
