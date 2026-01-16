@@ -9,7 +9,7 @@
 #include "QTile.h"
 
 class DungeonCrawler;
-class GraphicalUI : public AbstractUI, public AbstractController
+class GraphicalUI : public AbstractUI, public AbstractController, public Observer
 {
 private:
     QDialog *startScreen;
@@ -19,6 +19,8 @@ private:
     DungeonCrawler *dc;
     std::pair<int, int> lastMove;
     std::vector<QWidget *> m_healthBars;
+    std::map<std::pair<int,int>, QTile*> m_Qtiles;
+    std::vector<QTile*> m_temporarelyAlteredTiles;
 
 public:
     GraphicalUI(Level *lvl, DungeonCrawler *d);
@@ -37,6 +39,7 @@ public:
     void playSound(QString soundLink, float volume);
     void switchWindow();
     void deleteAllTiles();
+    void update(std::string memberToChange) override;
 };
 
 #endif // GRAPHICALUI_H

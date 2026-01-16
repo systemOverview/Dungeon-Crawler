@@ -8,6 +8,8 @@
 #include "QHealthBar.h"
 #include "QCharacter.h"
 #include <sstream>
+#include <QTimer>
+#include <QGraphicsColorizeEffect>
 GraphicalUI::GraphicalUI(Level *lvl, DungeonCrawler *d)
 {
     level = lvl;
@@ -52,6 +54,8 @@ void GraphicalUI::deleteAllTiles()
 
 }
 
+
+
 void GraphicalUI::playSound(QString soundLink, float volume)
 {
     QMediaPlayer *player = new QMediaPlayer;
@@ -63,18 +67,50 @@ void GraphicalUI::playSound(QString soundLink, float volume)
 }
 
 void GraphicalUI::draw(Level *level){
+    if (level!=this->level){
+        this->level = level;
+    }
     QGridLayout *gameBoard = mainWindow->getGameBoard();
     std::vector<std::vector<Tile *> > *tiles = level->getTiles();
     for (int rowIterator = 0; rowIterator < level->getHeight(); rowIterator++) {
         for (int colIterator = 0; colIterator < level->getWidth(); colIterator++) {
             Tile *currentTile = (*tiles)[rowIterator][colIterator];
             QTile* tileWidget = new QTile(nullptr, currentTile, gameBoard);
+
+            m_Qtiles[{rowIterator, colIterator}] = tileWidget;
             gameBoard->addWidget(tileWidget, rowIterator, colIterator);
             if (tileWidget->getCharacter()){
                 gameBoard->addWidget(tileWidget->getCharacter()->getHealthBar(), rowIterator, colIterator, Qt::AlignTop);
             }
         }
     }
+
+
+}
+
+void GraphicalUI::update(std::string memberToChange)
+{
+
+    if (memberToChange=="finishedPathFinding"){
+        for (auto it = m_temporarelyAlteredTiles.begin(); it!=m_temporarelyAlteredTiles.end();){
+            (*it)->graphicsEffect()->setEnabled(false);
+            it = m_temporarelyAlteredTiles.erase(it);
+        }
+        return;
+    }
+    QGridLayout *gameBoard = mainWindow->getGameBoard();
+    qDebug() << memberToChange;
+    int row = std::stoi(memberToChange.substr(0,1));
+    int col = std::stoi(memberToChange.substr(1,1));
+    QTile* t = m_Qtiles[{row,col}];
+    QGraphicsColorizeEffect* effect = new QGraphicsColorizeEffect;
+    effect->setColor(QColor(0, 0, 255));
+    effect->setStrength(0.6);
+    t->setGraphicsEffect(effect);
+    m_temporarelyAlteredTiles.push_back(t);
+    QEventLoop loop;
+    QTimer::singleShot(100, &loop, &QEventLoop::quit);
+    loop.exec();
 
 }
 
