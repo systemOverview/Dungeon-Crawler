@@ -5,6 +5,7 @@
 #include "Level.h"
 #include "GuardController.h"
 #include "StationaryController.h"
+#include "AttackController.h"
 #include <qDebug>
 
 Level::Level(int height, int width, std::string gameString)
@@ -28,22 +29,26 @@ Level::Level(int height, int width, std::string gameString)
             Door *door = new Door(row, column);
             doors.push_back(door);
             (tiles)[row][column] = door;
+            m_graph->addVertex(door, 1);
         }
 
         else if (gameString[i] == '?') {
             Switch *switcher = new Switch(row, column);
             (tiles)[row][column] = switcher;
             theSwitch = switcher;
+            m_graph->addVertex(switcher, 1);
         }
 
         else if (gameString[i] == '_') {
             Pit *pit = new Pit(row, column);
             (tiles)[row][column] = pit;
+            m_graph->addVertex(pit, 1);
         }
 
         else if (gameString[i] == '<') {
             Ramp *ramp = new Ramp(row, column);
             (tiles)[row][column] = ramp;
+            m_graph->addVertex(ramp, 1);
         }
 
         else if (gameString[i] == '$') {
@@ -54,6 +59,7 @@ Level::Level(int height, int width, std::string gameString)
         else {
             Floor *floor = new Floor(row, column);
             (tiles)[row][column] = floor;
+            m_graph->addVertex(floor, 1);
 
             if (gameString[i] == 'P') {
                 m_playingCharacterPosition = {row, column};
@@ -79,10 +85,20 @@ Level::Level(int height, int width, std::string gameString)
                                             guardController);
                 placeCharacter(crc, row, column, false);
             }
+
+            else if (gameString[i] == 'A') {
+                AttackController* attackController = new AttackController;
+                Character *crc = new Attacker("A",
+                                            "/pics/textures/zombie/attacker.png",
+                                            10,
+                                            5,
+                                            attackController);
+                placeCharacter(crc, row, column, false);
+            }
         }
     }
     setPortals();
-
+    m_graph->setupAlldges();
     for (auto door : doors) {
         theSwitch->attach(door);
     }
@@ -151,6 +167,8 @@ void Level::setPortals()
     (tiles)[5][7] = secondPortal;
     firstPortal->setPortal(secondPortal);
     secondPortal->setPortal(firstPortal);
+    m_graph->getVertex({3,2})->setTile(firstPortal);
+    m_graph->getVertex({5,7})->setTile(secondPortal);
 }
 
 void Level::setDefaultTiles()

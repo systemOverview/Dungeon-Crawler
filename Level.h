@@ -6,6 +6,8 @@
 #define PRAK_LEVEL_H
 #include "Tile.h"
 #include <iostream>
+#include "LevelGraph.h"
+
 class Character;
 class Tile;
 class Level
@@ -17,6 +19,8 @@ class Level
     std::pair <int,int> m_playingCharacterPosition;
     int gameHeight{};
     int gameWidth{};
+    LevelGraph* m_graph = new LevelGraph();
+
 
 public:
     Level(int height, int width, std::string gameBoard);
