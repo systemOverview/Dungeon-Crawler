@@ -42,6 +42,8 @@ qt_add_executable(prak WIN32 MACOSX_BUNDLE
         GuardController.h GuardController.cpp
         Observer.h Observer.cpp
         Subject.h Subject.cpp
+        LevelGraph.h LevelGraph.cpp
+        AttackController.h AttackController.cpp
     )
 
 
