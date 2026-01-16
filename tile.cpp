@@ -37,6 +37,11 @@ int Tile::getColumn()
     return column;
 }
 
+std::pair<int, int> Tile::getCordsAsPair()
+{
+    return {column, row};
+}
+
 bool Tile::moveTo(Tile *desTile, Character *who)
 {
     if (onLeave(desTile, who)) {

@@ -33,6 +33,7 @@ public:
     void setCharacter(Character *characterToPlace);
     int getRow();
     int getColumn();
+    std::pair<int,int> getCordsAsPair();
 
     virtual bool moveTo(Tile *desTile, Character *who);
     virtual bool onLeave(Tile *desTile, Character *who);
