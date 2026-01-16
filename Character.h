@@ -77,4 +77,21 @@ public:
     };
 };
 
+class Attacker : public Character
+{
+public:
+    Attacker(std::string_view txt,
+           std::string_view texturePath,
+           int strength,
+           int stamina,
+           AbstractController *controller,
+           Tile *tile = nullptr)
+        : Character(txt, texturePath, strength, stamina, tile, false)
+    {
+        m_controller = controller;
+        m_controller->attachCharacter(this);
+    };
+};
+
+
 #endif //PRAK_CHARACTER_H
