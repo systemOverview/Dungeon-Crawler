@@ -1,60 +1,53 @@
 #include "QCharacter.h"
 #include <QStyleOption>
 #include <QtGui/qpainter.h>
-#include <sstream>
 
-QCharacter::QCharacter(QWidget *parent, Character* character)
-    : QWidget{parent}, m_character(character)
+QCharacter::QCharacter(Character* character)
+    : m_character(character)
 {
-    std::ostringstream style;
-    style << "border-image : url(:" << character->getTexturePath()
-          << ") 20 0 0 0 stretch stretch;";
-    QString bgStyleFull = QString::fromStdString(style.str());
-    setStyleSheet(bgStyleFull);
-    setFixedSize(50, 40);
-    move(0, 10);
-    float healthPercentage= (static_cast<float>(m_character->getCurrentHP())
-                              / static_cast<float>(m_character->getMaxHP()))
-                             * 100;
-    m_healthBar = new QHealthBar(nullptr, healthPercentage);
+    m_texturePath = QString::fromStdString(character->getTexturePath());
+    m_healthPercentage= (static_cast<float>(m_character->getCurrentHP())
+                              / static_cast<float>(m_character->getMaxHP()));
     character->registerObserver(this);
     character->setQCharacter(this);
 
 }
 
-
-
-QHealthBar *QCharacter::getHealthBar()
+QString QCharacter::getTexturePath()
 {
-    return m_healthBar;
+    return m_texturePath;
 }
 
-void QCharacter::update(std::string changedMemberName)
+
+QLinearGradient QCharacter::getHealthBarGradient(int width){
+
+    float whereWhiteStarts = m_healthPercentage+0.01; // white should start strictly after red for both of them not to intermix, so i add a small amount.
+    QLinearGradient linearGrad(QPointF(0, 0), QPointF(width, 0));
+    linearGrad.setColorAt(0, Qt::red);
+    linearGrad.setColorAt(m_healthPercentage, Qt::red);
+
+    if (whereWhiteStarts<1){
+        linearGrad.setColorAt(whereWhiteStarts, Qt::white);
+        linearGrad.setColorAt(1, Qt::white);
+    }
+    return linearGrad;
+}
+
+void QCharacter::reactToChange(std::string changedMemberName)
 {
     if (changedMemberName=="hitPoints"){
-        float healthPercentage= (static_cast<float>(m_character->getCurrentHP())
-               / static_cast<float>(m_character->getMaxHP()))
-              * 100;
-        m_healthBar->updateHealthBarPercentage(healthPercentage);
+        m_healthPercentage= (static_cast<float>(m_character->getCurrentHP())
+                              / static_cast<float>(m_character->getMaxHP()));
+        notifyObservers("hitPoints");
     }
 
     else if (changedMemberName=="isAlive"){
+        notifyObservers("dead character");
         delete this;
     }
 }
 
 QCharacter::~QCharacter()
 {
-    delete m_healthBar;
-    // m_character->removeObserver(this);
-}
-
-void QCharacter::paintEvent(QPaintEvent* event)
-{
-    QStyleOption opt;
-    opt.initFrom(this);
-    QPainter p(this);
-    style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
-    QWidget::paintEvent(event);
 }
 

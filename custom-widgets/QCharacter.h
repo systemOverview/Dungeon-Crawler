@@ -2,21 +2,21 @@
 #define QCHARACTER_H
 #include <QWidget>
 #include "Character.h"
-#include "QHealthBar.h"
 #include "Observer.h"
-class QCharacter : public QWidget, public Observer
+class QCharacter : public Subject, public Observer
 {
-    Q_OBJECT
 private:
     Character* m_character; // The character it represents.
-    QHealthBar* m_healthBar;
-    void paintEvent(QPaintEvent* event); // QWidget subclasses must have this function explicity included to use stylesheets.
+    QString m_texturePath;
+    float m_healthPercentage;
+    void paintEvent(QPaintEvent* event);
 
 
 public:
-    QCharacter(QWidget *parent, Character* character);
-    QHealthBar* getHealthBar();
-    void update(std::string changedMemberName="") override;
+    QCharacter(Character* character);
+    QString getTexturePath();
+    QLinearGradient getHealthBarGradient(int width); // the tile width, the health bar must have full width of the tile
+    void reactToChange(std::string changedMemberName="") override;
     ~QCharacter();
 };
 
