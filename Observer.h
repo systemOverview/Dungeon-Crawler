@@ -4,7 +4,7 @@
 class Observer
 {
 public:
-    virtual void update(std::string changedMemberName="") = 0;
+    virtual void reactToChange(std::string changedMemberName="") = 0;
 };
 
 
