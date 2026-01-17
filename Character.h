@@ -43,13 +43,13 @@ public:
     AbstractUI *getTerminal();
     void setController(AbstractController *controller);
 
-    std::string_view getTexture() const;
-    std::string_view getTexturePath() const;
+    std::string getTexture() const;
+    std::string getTexturePath() const;
     bool isHuman();
     virtual AbstractController *getController();
     Tile *getTile() const;
     void setTile(Tile *newTile);
-    std::pair<int, int> move();
+    virtual std::pair<int, int> move();
     int getMaxHP();
     int getCurrentHP();
     bool isAlive();
@@ -84,7 +84,7 @@ public:
            std::string_view texturePath,
            int strength,
            int stamina,
-           AbstractController *controller,
+           AbstractController* controller,
            Tile *tile = nullptr)
         : Character(txt, texturePath, strength, stamina, tile, false)
     {

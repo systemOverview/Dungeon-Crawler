@@ -12,12 +12,12 @@ void Character::setController(AbstractController *controller)
     m_controller = controller;
 }
 
-std::string_view Character::getTexture() const
+std::string Character::getTexture() const
 {
     return m_texture;
 }
 
-std::string_view Character::getTexturePath() const
+std::string Character::getTexturePath() const
 {
     return m_texturePath;
 }
