@@ -3,7 +3,7 @@ find_package(Qt6 REQUIRED COMPONENTS Widgets)
 add_library(custom-widgets STATIC
         QCharacter.h QCharacter.cpp
         QTile.h QTile.cpp
-        QHealthBar.h QHealthBar.cpp
+
 )
 
 target_link_libraries(custom-widgets
