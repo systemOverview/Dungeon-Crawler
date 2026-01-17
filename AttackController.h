@@ -18,7 +18,7 @@ public:
     std::pair<int, int> DjikstraMove();
     std::pair<int, int> move() override;
     std::pair<int,int> move(std::pair<int,int> startingTileCords);
-    void update(std::string changedMemberName="") override;
+    void reactToChange(std::string changedMemberName="") override;
 
 };
 

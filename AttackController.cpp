@@ -42,7 +42,7 @@ std::pair<int, int> AttackController::move()
     return DjikstraMove();
 }
 
-void AttackController::update(std::string changedMemberName)
+void AttackController::reactToChange(std::string changedMemberName)
 {
     return;
 }
