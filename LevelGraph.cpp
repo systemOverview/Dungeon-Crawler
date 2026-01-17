@@ -128,7 +128,7 @@ std::vector<std::pair<int, int> > LevelGraph::getShortestsPathBetweenTwoTilesDji
         leadingVertexPath.push_back({newDirectionRow, newDirectionColumn});
         pathTowardsVertex[shortestPath.first] = leadingVertexPath;
         qDebug() << "The shortest move is from " << leadingVertex->getTile()->getCordsAsPair() << " to " << shortestPath.first->getTile()->getCordsAsPair();
-        std::string message = std::to_string(shortestPath.first->getTile()->getRow()) + std::to_string(shortestPath.first->getTile()->getColumn());
+        std::string message = "v"+std::to_string(shortestPath.first->getTile()->getRow()) + std::to_string(shortestPath.first->getTile()->getColumn());
         notifyObservers(message);
         if (shortestPath.first == targetVertex){
             notifyObservers("finishedPathFinding");

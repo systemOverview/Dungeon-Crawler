@@ -8,7 +8,6 @@
 #include "QCharacter.h"
 #include <sstream>
 #include <QTimer>
-#include <QGraphicsColorizeEffect>
 GraphicalUI::GraphicalUI(Level *lvl, DungeonCrawler *d)
 {
     level = lvl;
@@ -87,28 +86,30 @@ void GraphicalUI::draw(Level *level){
 void GraphicalUI::reactToChange(std::string memberToChange)
 {
 
-    // if (memberToChange=="finishedPathFinding"){
-    //     for (auto it = m_temporarelyAlteredTiles.begin(); it!=m_temporarelyAlteredTiles.end();){
-    //         (*it)->graphicsEffect()->setEnabled(false);
-    //         it = m_temporarelyAlteredTiles.erase(it);
-    //     }
-    //     return;
-    // }
-    // QGridLayout *gameBoard = mainWindow->getGameBoard();
-    // qDebug() << memberToChange;
-    // int row = std::stoi(memberToChange.substr(0,1));
-    // int col = std::stoi(memberToChange.substr(1,1));
-    // QTile* t = m_Qtiles[{row,col}];
-    // QGraphicsColorizeEffect* effect = new QGraphicsColorizeEffect;
-    // effect->setColor(QColor(0, 0, 255));
-    // effect->setStrength(0.6);
-    // t->setGraphicsEffect(effect);
-    // m_temporarelyAlteredTiles.push_back(t);
-    // QEventLoop loop;
-    // QTimer::singleShot(100, &loop, &QEventLoop::quit);
-    // loop.exec();
+    if (memberToChange=="finishedPathFinding"){
+        QTile::removeEffectFromTemporarelyAlteredTiles();
+        return;
+    }
+    else if (memberToChange.substr(0,1)=="v"){ // visualization
+        visualizeTile(memberToChange);
+    }
 
 }
+
+void GraphicalUI::visualizeTile(std::string message)
+{
+    QGridLayout *gameBoard = mainWindow->getGameBoard();
+    int row = std::stoi(message.substr(1,1));
+    int col = std::stoi(message.substr(2,1));
+    QTile* tileToVisualize = m_Qtiles[{row,col}];
+
+    tileToVisualize->colorize();
+    QEventLoop loop;
+    QTimer::singleShot(10, &loop, &QEventLoop::quit);
+    loop.exec();
+
+}
+
 
 std::pair<int, int> GraphicalUI::move()
 {

@@ -60,6 +60,32 @@ void QTile::reactToChange(std::string changedMemberName)
     update();
 }
 
+void QTile::colorize()
+{
+    QGraphicsColorizeEffect* effect = new QGraphicsColorizeEffect;
+    effect->setColor(QColor(0, 0, 255));
+    effect->setStrength(0.6);
+    setGraphicsEffect(effect);
+    QTile::addTemporarelyAlteredTiles(this);
+
+
+}
+
+void QTile::addTemporarelyAlteredTiles(QTile *Qtile)
+{
+    TemporarelyAlteredTiles.push_back(Qtile);
+}
+
+void QTile::removeEffectFromTemporarelyAlteredTiles()
+{
+    for (auto it = TemporarelyAlteredTiles.begin(); it!=TemporarelyAlteredTiles.end();){
+        if ((*it)->graphicsEffect()){
+        (*it)->graphicsEffect()->setEnabled(false);
+        }
+        it = TemporarelyAlteredTiles.erase(it);
+    }
+}
+
 void QTile::paintEvent(QPaintEvent* event)
 {
     QPainter painter(this);

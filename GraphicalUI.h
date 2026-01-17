@@ -40,6 +40,7 @@ public:
     void switchWindow();
     void deleteAllTiles();
     void reactToChange(std::string memberToChange) override;
+    void visualizeTile(std::string message);
 };
 
 #endif // GRAPHICALUI_H

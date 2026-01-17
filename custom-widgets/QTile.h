@@ -5,6 +5,7 @@
 #include "tile.h"
 #include "QCharacter.h"
 #include "Observer.h"
+#include <QGraphicsColorizeEffect>
 class QTile : public QWidget, public Observer
 {
     Q_OBJECT
@@ -13,8 +14,7 @@ private:
     QString m_texturePath;
     QCharacter* m_QCharacter; // The character on that tile.
     QGridLayout* m_gameBoard;
-
-
+    inline static std::vector<QTile*> TemporarelyAlteredTiles; // stores qtiles whom style changed temporarly for algorithm visualizations
 public:
     QTile(QWidget* parent, Tile* tile, QGridLayout* gameBoard);
     QCharacter* getQCharacter();
@@ -23,6 +23,10 @@ public:
     void paintEvent(QPaintEvent* event); // QWidget subclasses must have this function explicity included to use stylesheets.
     void reactToChange(std::string changedMemberName="") override;
     void changeStyleTemporarly();
+    void colorize();
+    static void addTemporarelyAlteredTiles(QTile* Qtile);
+    static void removeEffectFromTemporarelyAlteredTiles();
+
 
 };
 
