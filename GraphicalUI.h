@@ -39,7 +39,7 @@ public:
     void playSound(QString soundLink, float volume);
     void switchWindow();
     void deleteAllTiles();
-    void update(std::string memberToChange) override;
+    void reactToChange(std::string memberToChange) override;
 };
 
 #endif // GRAPHICALUI_H
