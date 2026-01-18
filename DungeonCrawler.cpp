@@ -24,7 +24,6 @@ DungeonCrawler::DungeonCrawler()
     // GUI->getStartScreen()->show();
     GUI->getMainWindow()->show();
     GUI->draw(*currentLevel);
-    (*currentLevel)->getGraph()->registerObserver(GUI);
 }
 
 std::pair<int, int> DungeonCrawler::translateMove(int step) const
