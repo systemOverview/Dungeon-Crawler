@@ -5,6 +5,7 @@
 
 QTile::QTile(QWidget* parent, Tile* tile, QGridLayout* gameBoard) : QWidget(parent), m_tile{tile}, m_gameBoard(gameBoard){
     tile->registerObserver(this);
+    EventBus::subscribeToEvent<EventBus::TileChange>(this, tile);
     setFixedSize(50, 50);
     m_texturePath = QString::fromStdString(m_tile->getTexturePath());
     if (tile->hasCharacter()) {
@@ -40,10 +41,7 @@ void QTile::setQCharacter(QCharacter *QChar)
 void QTile::reactToChange(std::string changedMemberName)
 {
 
-    if (changedMemberName=="texture"){
-        m_texturePath = QString::fromStdString(m_tile->getTexturePath());
-    }
-    else if (changedMemberName=="hitPoints"){
+    if (changedMemberName=="hitPoints"){
         repaint(); // to update the tile graphics (the healthbar especially)
         return;
     }
@@ -107,6 +105,15 @@ void QTile::removeEffectFromTemporarelyAlteredTiles()
         (*it)->graphicsEffect()->setEnabled(false);
         }
         it = TemporarelyAlteredTiles.erase(it);
+    }
+}
+
+void QTile::onTileChange(TileChangeEvent *event)
+{
+    assert("QTile subscribed to wrong tile"&&event->getChangedTile()->getCordsAsPair()==m_tile->getCordsAsPair());
+    switch (event->getChangeType()){
+    case TileChangeEvent::TextureChange :{m_texturePath = QString::fromStdString(m_tile->getTexturePath());repaint();break;}
+    case TileChangeEvent::DoorStatus : {break;} // QTile doesn't care about the door status, only its texture which is always reset when the door status changes, guaranteeing a TextureChange Event being transmitted.
     }
 }
 

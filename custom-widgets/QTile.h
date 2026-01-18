@@ -6,7 +6,8 @@
 #include "QCharacter.h"
 #include "Observer.h"
 #include <QGraphicsColorizeEffect>
-class QTile : public QWidget, public Observer
+#include "EventBus.h"
+class QTile : public QWidget, public Observer, public EventListener
 {
     Q_OBJECT
 private:
@@ -30,6 +31,7 @@ public:
     void setTextOverlay(std::string text);
     static void addTemporarelyAlteredTiles(QTile* Qtile);
     static void removeEffectFromTemporarelyAlteredTiles();
+    void onTileChange(TileChangeEvent* event) override;
 
 
 };
