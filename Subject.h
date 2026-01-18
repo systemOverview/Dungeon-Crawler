@@ -6,7 +6,7 @@
 class Subject
 {
 private:
-    std::vector<Observer*> m_observersList;
+    std::vector<Observer*> m_observersList = {};
 public:
     Subject();
     void registerObserver(Observer* newObserver);

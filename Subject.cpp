@@ -1,4 +1,5 @@
 #include "Subject.h"
+#include <qDebug>
 Subject::Subject() {
 }
 
@@ -18,7 +19,8 @@ void Subject::removeObserver(Observer *observerToRemove)
 }
 
 void Subject::notifyObservers(std::string changedMemberName){
+    qDebug() << "obs"  << this;
     for (auto it = m_observersList.begin(); it!= m_observersList.end();it++){
-        (*it)->update(changedMemberName);
+        (*it)->reactToChange(changedMemberName);
     }
 }
