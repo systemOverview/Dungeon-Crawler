@@ -20,7 +20,7 @@ public:
 
 };
 
-class LevelGraph : public Subject
+class LevelGraph : public Subject, public EventListener
 {
 private:
     // std::vector<Vertex*> m_vertexes;
@@ -28,7 +28,7 @@ private:
 
 public:
     LevelGraph();
-    void addVertex(Tile* tile, float weight);
+    Vertex* addVertex(Tile* tile, float weight);
     void setupAlldges();
     void setupEdgesForVertex(Vertex* vertex);
     bool isEdgeBetweenTilesPossible(std::string_view firstTileTexture, std::string_view SecondTileTexture);
@@ -36,6 +36,7 @@ public:
     std::vector<std::pair<int,int>> getShortestsPathBetweenTwoTiles(Vertex* startingVertex, Vertex* targetVertex, std::string_view algorithmToUse="");
     std::vector<std::pair<int,int>> getShortestsPathBetweenTwoTilesDjikstra(Vertex* startingVertex, Vertex* targetVertex);
     bool doesVectorHasElement(std::vector<Vertex*> vector, Vertex* element);
+    void onTileChange(TileChangeEvent* event) override;
 };
 
 #endif // LEVELGRAPH_H

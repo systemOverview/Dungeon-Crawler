@@ -31,14 +31,15 @@ std::vector<std::pair<Vertex*, float>> Vertex::getNeighbours(){
 
 LevelGraph::LevelGraph()
 {
-
+    EventBus::subscribeToEvent<EventBus::TileChange>(this);
 }
 
-void LevelGraph::addVertex(Tile *tile, float weight)
+Vertex* LevelGraph::addVertex(Tile *tile, float weight)
 {
     Vertex* newVertex = new Vertex(tile, weight);
     std::pair<int,int> cords = {tile->getRow(), tile->getColumn()};
     m_vertexes[cords] =  newVertex;
+    return newVertex;
 }
 void LevelGraph::setupAlldges()
 {
@@ -56,6 +57,10 @@ void LevelGraph::setupEdgesForVertex(Vertex *vertex)
             if ((i!=tile->getRow() || j!=tile->getColumn()) && m_vertexes.count({i,j})){
                 Vertex* neighbourVertex = m_vertexes[{i,j}];
                 Tile* neighbourTile = neighbourVertex->getTile();
+                std::pair<int,int> a = {6,7};
+                if ((tile->getCordsAsPair())==a){
+                    qDebug() << "a";
+                }
                 if (isEdgeBetweenTilesPossible(tile->getTexture(), neighbourTile->getTexture())){
                     vertex->addNeighbour(neighbourVertex, 1);
                 }
@@ -124,7 +129,9 @@ std::vector<std::pair<int, int> > LevelGraph::getShortestsPathBetweenTwoTilesDji
         }
 
 
-
+        if (shortestPath.first==nullptr){
+            return {};
+        }
         visitedVertexes.push_back(shortestPath.first);
         visited[bitsetIndex(shortestPath.first)]=1;
         djikstraValues[shortestPath.first] = shortestPath.second;
@@ -141,10 +148,6 @@ std::vector<std::pair<int, int> > LevelGraph::getShortestsPathBetweenTwoTilesDji
         if (shortestPath.first == targetVertex){
             return pathTowardsVertex[targetVertex];
         }
-
-        else if (counter<1){
-            return {};
-        }
     }
     return {};
 }
@@ -152,5 +155,20 @@ std::vector<std::pair<int, int> > LevelGraph::getShortestsPathBetweenTwoTilesDji
 bool LevelGraph::doesVectorHasElement(std::vector<Vertex *> vector, Vertex *element)
 {
     return (std::find(vector.begin(), vector.end(), element) != vector.end());
+}
+
+void LevelGraph::onTileChange(TileChangeEvent *event)
+{
+    switch (event->getChangeType()){
+    case (TileChangeEvent::TextureChange): {;break;}
+    case (TileChangeEvent::DoorStatus): {
+        qDebug() << event->getChangedTile()->getCordsAsPair();
+        Vertex* newVertex = addVertex(event->getChangedTile(), 1);
+        setupEdgesForVertex(newVertex);
+        for (auto neighbour : newVertex->getNeighbours()){
+            neighbour.first->addNeighbour(newVertex, 1);
+        }
+    }
+    }
 }
 
