@@ -14,6 +14,7 @@ private:
     QString m_texturePath;
     QCharacter* m_QCharacter; // The character on that tile.
     QGridLayout* m_gameBoard;
+    std::string m_textOverlay; //for algorithms visualization;
     inline static std::vector<QTile*> TemporarelyAlteredTiles; // stores qtiles whom style changed temporarly for algorithm visualizations
 public:
     QTile(QWidget* parent, Tile* tile, QGridLayout* gameBoard);
@@ -24,6 +25,9 @@ public:
     void reactToChange(std::string changedMemberName="") override;
     void changeStyleTemporarly();
     void colorize();
+    void configurePainterForTextOverlay(QPainter* painter);
+    std::string getTextOverlay();
+    void setTextOverlay(std::string text);
     static void addTemporarelyAlteredTiles(QTile* Qtile);
     static void removeEffectFromTemporarelyAlteredTiles();
 

@@ -1,6 +1,7 @@
 #include "QTile.h"
 #include <QStyleOption>
 #include <QtGui/qpainter.h>
+#include <QtWidgets/qlabel.h>
 
 QTile::QTile(QWidget* parent, Tile* tile, QGridLayout* gameBoard) : QWidget(parent), m_tile{tile}, m_gameBoard(gameBoard){
     tile->registerObserver(this);
@@ -71,6 +72,29 @@ void QTile::colorize()
 
 }
 
+void QTile::configurePainterForTextOverlay(QPainter *painter)
+{
+    QPen pen = painter->pen();
+    pen.setColor(Qt::black);
+    painter->setPen(pen);
+
+    QFont font = painter->font();
+    font.setPixelSize(48);
+    painter->setFont(font);
+
+}
+
+std::string QTile::getTextOverlay()
+{
+    return m_textOverlay;
+}
+
+void QTile::setTextOverlay(std::string text)
+{
+    m_textOverlay = text;
+    repaint();
+}
+
 void QTile::addTemporarelyAlteredTiles(QTile *Qtile)
 {
     TemporarelyAlteredTiles.push_back(Qtile);
@@ -92,8 +116,16 @@ void QTile::paintEvent(QPaintEvent* event)
     QImage textureImage (m_texturePath);
 
     QRect rect = this->rect();
+    painter.setPen(QPen(Qt::red));
+    painter.setFont(QFont("Times", 12, QFont::Bold));
+    painter.drawText(textureImage.rect(), Qt::AlignCenter, "Text");
 
     painter.drawImage(rect, textureImage);
+    if (m_textOverlay!=""){
+        configurePainterForTextOverlay(&painter);
+        painter.drawText(rect, QString::fromStdString(m_textOverlay));
+    }
+
     if (m_tile->hasCharacter()){
         QPixmap characterPixMap (":"+m_QCharacter->getTexturePath());
 
@@ -106,8 +138,11 @@ void QTile::paintEvent(QPaintEvent* event)
         QBrush brush (linearGrad);
 
         painter.drawPixmap(charRect, characterPixMap);
+
+
         painter.fillRect(healthRect, brush);
     }
+
 }
 
 std::pair<QRect, QRect> QTile::getRects(){
