@@ -57,7 +57,7 @@ public:
     AnimateTileEvent(Tile* tile,std::vector<Visualization> visualizations, std::string textToOverlay="");
     Tile* getAffectedTile() const;
     std::string_view getOverlayText() const;
-
+    std::vector<Visualization> getVisualizations();
 };
 
 //Start of CharacterDeathEvent declaration.

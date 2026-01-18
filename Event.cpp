@@ -14,3 +14,4 @@ AnimateTileEvent::AnimateTileEvent(Tile* tile,std::vector<Visualization> visuali
 
 Tile* AnimateTileEvent::getAffectedTile() const {return m_affectedTile;}
 std::string_view AnimateTileEvent::getOverlayText() const {return m_textToOverlay;}
+std::vector<AnimateTileEvent::Visualization> AnimateTileEvent::getVisualizations(){return m_visualizations;}
