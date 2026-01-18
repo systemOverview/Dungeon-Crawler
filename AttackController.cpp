@@ -13,23 +13,22 @@ std::pair<int, int> AttackController::DjikstraMove()
         std::pair<int,int> humanCords = m_level->getPlayableCharacter()->getTile()->getCordsAsPair();
         Vertex* attackerVertex = m_graph->getVertex(attackerCords);
         Vertex* humanVertex = m_graph->getVertex(humanCords);
-        qDebug() << "textures " << attackerVertex->getTile()->getCharacter()->getTexture() << humanVertex->getTile()->getCharacter()->getTexture();
-        qDebug() << "cords " << attackerCords << humanCords;
         m_path= m_graph->getShortestsPathBetweenTwoTiles(attackerVertex, humanVertex);
-
-        qDebug() << m_path;
+        if (m_path.empty()){
+            return {0,0};
+        }
         it = m_path.begin();
         isPath = true;
         move = *it;
         it++;
     }
     else{
+        if (m_path.empty()){
+            return {0,0};
+        }
         if (it!=m_path.end()){
             move=*it;
             it++;
-        }
-        else{
-            qDebug() << "endpath";
         }
     }
     qDebug() << move;
