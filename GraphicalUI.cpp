@@ -5,11 +5,10 @@
 #include "DungeonCrawler.h"
 #include "MainWindow.h"
 #include "startscreen.h"
-#include "QCharacter.h"
-#include <sstream>
 #include <QTimer>
 GraphicalUI::GraphicalUI(Level *lvl, DungeonCrawler *d)
 {
+    EventBus::subscribeToEvent(EventBus::AnimateTile, this);
     level = lvl;
     dc = d;
     startScreen = new StartScreen(this);
@@ -83,33 +82,33 @@ void GraphicalUI::draw(Level *level){
 
 }
 
-void GraphicalUI::reactToChange(std::string memberToChange)
-{
 
-    if (memberToChange=="finishedPathFinding"){
-        QTile::removeEffectFromTemporarelyAlteredTiles();
-        return;
-    }
-    else if (memberToChange.substr(0,1)=="v"){ // visualization
-        visualizeTile(memberToChange);
-    }
-
-}
-
-void GraphicalUI::visualizeTile(std::string message)
-{
+void GraphicalUI::onAnimateTile(AnimateTileEvent* event) {
     QGridLayout *gameBoard = mainWindow->getGameBoard();
-    int row = std::stoi(message.substr(1,1));
-    int col = std::stoi(message.substr(2,1));
-    QTile* tileToVisualize = m_Qtiles[{row,col}];
+    std::string overlayText (event->getOverlayText());
+    Tile* tile = event->getAffectedTile();
+    QTile* tileToVisualize = m_Qtiles[{tile->getRow(),tile->getColumn()}];
+    auto v = event->getVisualizations();
+    for (auto it = v.begin(); it!=v.end(); it++){
+        switch (*it){
+        case AnimateTileEvent::colorizeTile :{tileToVisualize->colorize();break;
+        }
 
-    tileToVisualize->colorize();
+        case AnimateTileEvent::overlayText :{
+            if (overlayText==tileToVisualize->getTextOverlay()){
+                return; // no need to visualize this change and set delay before next visualization.
+            }
+            tileToVisualize->setTextOverlay(overlayText);
+            break;
+        }
+
+        }
+    }
+
     QEventLoop loop;
-    QTimer::singleShot(10, &loop, &QEventLoop::quit);
+    QTimer::singleShot(100, &loop, &QEventLoop::quit);
     loop.exec();
-
 }
-
 
 std::pair<int, int> GraphicalUI::move()
 {

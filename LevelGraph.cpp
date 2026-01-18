@@ -90,14 +90,18 @@ std::vector<std::pair<int, int> > LevelGraph::getShortestsPathBetweenTwoTiles(Ve
 {
     return getShortestsPathBetweenTwoTilesDjikstra(startingVertex, targetVertex);
 }
-
 std::vector<std::pair<int, int> > LevelGraph::getShortestsPathBetweenTwoTilesDjikstra(Vertex *startingVertex, Vertex *targetVertex)
 {
+    std::bitset<200> visited;
+    auto bitsetIndex = [](Vertex* vertex) -> int {
+        return (vertex->getTile()->getRow()*10+vertex->getTile()->getColumn());
+    };
     std::vector<Vertex*> visitedVertexes;
     std::map<Vertex*, std::vector<std::pair<int,int>>> pathTowardsVertex;
     std::map<Vertex*, float> djikstraValues;
     visitedVertexes.push_back(startingVertex);
     djikstraValues[startingVertex] = 0;
+    visited[bitsetIndex(startingVertex)]=1;
     pathTowardsVertex[startingVertex] = {};
     while (true){
         std::pair<Vertex*, float> shortestPath = {nullptr, 10000};
@@ -106,9 +110,11 @@ std::vector<std::pair<int, int> > LevelGraph::getShortestsPathBetweenTwoTilesDji
         for (auto it = visitedVertexes.begin(); it!=visitedVertexes.end();it++){
             std::vector<std::pair<Vertex*, float>> neighbours = (*it)->getNeighbours();
             for (auto nit = neighbours.begin(); nit!=neighbours.end(); nit++){
-                if (!doesVectorHasElement(visitedVertexes, (*nit).first) ){
+                if (!visited[bitsetIndex((*nit).first)]){
                     counter++;
                     float value = (*nit).second+djikstraValues[*it];
+                    int intValue = value;
+                    EventBus::transmitEvent<EventBus::AnimateTile>((*nit).first->getTile(), {AnimateTileEvent::overlayText}, std::to_string(intValue));
                     if (value<shortestPath.second){
                         shortestPath = {nit->first, value};
                         leadingVertex = (*it);
@@ -116,28 +122,30 @@ std::vector<std::pair<int, int> > LevelGraph::getShortestsPathBetweenTwoTilesDji
                 }
             }
         }
-        if (counter<1){
-            notifyObservers("finishedPathFinding");
-            return pathTowardsVertex[targetVertex];
-        }
+
+
+
         visitedVertexes.push_back(shortestPath.first);
+        visited[bitsetIndex(shortestPath.first)]=1;
         djikstraValues[shortestPath.first] = shortestPath.second;
         std::vector<std::pair<int,int>> leadingVertexPath = pathTowardsVertex[leadingVertex];
         int newDirectionRow  = (shortestPath.first->getTile()->getRow())-leadingVertex->getTile()->getRow();
         int newDirectionColumn  = (shortestPath.first->getTile()->getColumn()-leadingVertex->getTile()->getColumn());
         leadingVertexPath.push_back({newDirectionRow, newDirectionColumn});
         pathTowardsVertex[shortestPath.first] = leadingVertexPath;
-        qDebug() << "The shortest move is from " << leadingVertex->getTile()->getCordsAsPair() << " to " << shortestPath.first->getTile()->getCordsAsPair();
-        std::string message = "v"+std::to_string(shortestPath.first->getTile()->getRow()) + std::to_string(shortestPath.first->getTile()->getColumn());
-        notifyObservers(message);
+        int v = shortestPath.second;
+        std::string vv = std::to_string(v);
+        EventBus::transmitEvent<EventBus::AnimateTile>((shortestPath).first->getTile(), {AnimateTileEvent::colorizeTile, AnimateTileEvent::overlayText}, vv);
+
+
         if (shortestPath.first == targetVertex){
-            notifyObservers("finishedPathFinding");
             return pathTowardsVertex[targetVertex];
         }
 
-
+        else if (counter<1){
+            return {};
+        }
     }
-    notifyObservers("finishedPathFinding");
     return {};
 }
 
@@ -145,5 +153,4 @@ bool LevelGraph::doesVectorHasElement(std::vector<Vertex *> vector, Vertex *elem
 {
     return (std::find(vector.begin(), vector.end(), element) != vector.end());
 }
-
 

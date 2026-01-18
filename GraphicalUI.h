@@ -7,9 +7,10 @@
 #include "Level.h"
 #include "MainWindow.h"
 #include "QTile.h"
+#include "EventBus.h"
 
 class DungeonCrawler;
-class GraphicalUI : public AbstractUI, public AbstractController, public Observer
+class GraphicalUI : public AbstractUI, public AbstractController, public EventListener
 {
 private:
     QDialog *startScreen;
@@ -39,8 +40,7 @@ public:
     void playSound(QString soundLink, float volume);
     void switchWindow();
     void deleteAllTiles();
-    void reactToChange(std::string memberToChange) override;
-    void visualizeTile(std::string message);
+    void onAnimateTile(AnimateTileEvent* event) override;
 };
 
 #endif // GRAPHICALUI_H

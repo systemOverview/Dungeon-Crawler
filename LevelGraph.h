@@ -3,6 +3,7 @@
 #include <map>
 #include <vector>
 #include "tile.h"
+#include "EventBus.h"
 
 class Vertex{
 private:
