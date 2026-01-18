@@ -24,7 +24,6 @@ void Tile::setCharacter(Character *characterToPlace)
 {
     character = characterToPlace;
     notifyObservers("character");
-
 }
 
 int Tile::getRow()
@@ -93,7 +92,7 @@ std::pair<bool, Tile *> Tile::onEnter(Character *who)
 
 std::string Tile::getTexturePath()
 {
-    return texturePath;
+    return m_texturePath;
 }
 
 std::pair<bool, Tile *> Portal::onEnter(Character *who)
@@ -115,13 +114,13 @@ void Door::notify()
     state = !state;
     if (state) {
         texture = "/";
-        texturePath = ":/pics/textures/doors/door2.png";
+        setTexturePath(":/pics/textures/doors/door2.png");
 
     } else {
         texture = "X";
-        texturePath = ":/pics/textures/doors/door1.png";
+        setTexturePath(":/pics/textures/doors/door1.png");
     }
-    notifyObservers("texture");
+    EventBus::transmitEvent<EventBus::TileChange>(this, TileChangeEvent::DoorStatus);
 
 }
 
@@ -137,5 +136,5 @@ bool Pit::onLeave(Tile *desTile, Character *who)
 
 std::string Wall::getTexturePath()
 {
-    return texturePath;
+    return m_texturePath;
 }

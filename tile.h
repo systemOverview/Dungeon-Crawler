@@ -7,6 +7,8 @@
 #include "Character.h"
 #include "PassiveAktive.h"
 #include "Subject.h"
+#include "EventBus.h"
+#include <QtCore/qdebug.h>
 class Tile : public Subject
 {
 protected:
@@ -15,14 +17,14 @@ protected:
     int row{};
     int column{};
     bool shouldMove{false}; // Should the player be moved to another tile (true if tile is portal)
-    std::string texturePath;
+    std::string m_texturePath;
 
     Tile(std::string Texture, int rw, int cln, std::string textureP)
     {
         texture = Texture;
         row = rw;
         column = cln;
-        texturePath = textureP;
+        m_texturePath = textureP;
     }
 
 public:
@@ -39,6 +41,10 @@ public:
     virtual bool onLeave(Tile *desTile, Character *who);
     virtual std::pair<bool, Tile *> onEnter(Character *who);
     virtual std::string getTexturePath();
+    void setTexturePath(std::string texturePath){
+        m_texturePath = texturePath;
+        EventBus::transmitEvent<EventBus::TileChange>(this, TileChangeEvent::TextureChange);
+    }
     virtual bool isEntrable() = 0;
 };
 
