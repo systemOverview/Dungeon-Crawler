@@ -1,7 +1,6 @@
 
 cmake_minimum_required(VERSION 3.19)
 project(prak LANGUAGES CXX)
-
 find_package(Qt6 6.5 REQUIRED COMPONENTS Core Widgets)
 find_package(Qt6 REQUIRED COMPONENTS Multimedia)
 find_package(Qt6 REQUIRED COMPONENTS Widgets)
@@ -44,7 +43,12 @@ qt_add_executable(prak WIN32 MACOSX_BUNDLE
         Subject.h Subject.cpp
         LevelGraph.h LevelGraph.cpp
         AttackController.h AttackController.cpp
+        Event.h Event.cpp
+        EventBus.h EventBus.cpp
     )
+find_package(Boost REQUIRED)
+
+target_include_directories(prak PRIVATE ${Boost_INCLUDE_DIRS})
 
 
 target_link_libraries(prak
