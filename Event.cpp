@@ -16,10 +16,31 @@ Tile* AnimateTileEvent::getAffectedTile() const {return m_affectedTile;}
 std::string_view AnimateTileEvent::getOverlayText() const {return m_textToOverlay;}
 std::vector<AnimateTileEvent::Visualization> AnimateTileEvent::getVisualizations(){return m_visualizations;}
 
+//Start of CharacterHealthChangeEventEvent definitions.
+CharacterHealthChangeEvent::CharacterHealthChangeEvent(Character *character): m_character{character}{};
+Character* CharacterHealthChangeEvent::getCharacter(){return m_character;}
+
+void CharacterHealthChangeEvent::registerListener(EventListener *eventListener, Character *characterToListenTo)
+{
+    characterPreferenceRegister[eventListener].push_back(characterToListenTo);
+    registerListener(eventListener);
+}
+
 //Start of TileChangeEvent definitions.
 TileChangeEvent::TileChangeEvent(Tile *changedTile, ChangeType changeType) : m_changedTile{changedTile}, m_changeType{changeType}{};
 
 Tile* TileChangeEvent::getChangedTile() const {return m_changedTile;}
+
+bool TileChangeEvent::isListenerSubscribedToThisEvent(EventListener* eventListener, TileChangeEvent* event){
+    assert(TilePreferenceRegister.count(eventListener)>0 && "isListenerSubscribedToThisEvent was supplied with an eventListener with no preferences");
+    for (auto subscribedTilesIterator = TilePreferenceRegister[eventListener].begin(); subscribedTilesIterator!=TilePreferenceRegister[eventListener].end(); subscribedTilesIterator++){
+        if ((*subscribedTilesIterator)==event->getChangedTile()){
+            (eventListener)->onTileChange(event);
+            return true;
+        }
+    }
+    return false;
+}
 
 TileChangeEvent::ChangeType TileChangeEvent::getChangeType() const{return m_changeType;}
 
@@ -39,19 +60,6 @@ void TileChangeEvent::registerListener(EventListener* eventListener, std::vector
     registerListener(eventListener);
 }
 
-void TileChangeEvent::notifyListeners(TileChangeEvent* event)
-{
-    for (auto eventListener = EventListeners.begin(); eventListener!=EventListeners.end(); eventListener++){
-        if (TilePreferenceRegister.count(*eventListener)){
-            for (auto subscribedTilesIterator = TilePreferenceRegister[*eventListener].begin(); subscribedTilesIterator!=TilePreferenceRegister[*eventListener].end(); subscribedTilesIterator++){
-                if ((*subscribedTilesIterator)==event->getChangedTile()){
-                    (*eventListener)->onTileChange(event);
-                    return;
-                }
-            }
-        }
-        else{
-            (*eventListener)->onTileChange(event);
-        }
-    }
-}
+void TileChangeEvent::notifyListeners(TileChangeEvent* event){notifyListenersAccordingToRegister(event, &TilePreferenceRegister);}
+void TileChangeEvent::notifySpecificListener(EventListener* eventListener, TileChangeEvent *event){eventListener->onTileChange(event);}
+

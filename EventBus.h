@@ -7,7 +7,6 @@ class EventBus
 
 public:
     enum Type {
-        CharacterDeath,
         CharacterHealthChange,
         AnimateTile,
         TileChange
@@ -19,13 +18,10 @@ public:
 
     // Start of transmitEvent templates.
     // They follow this syntax : EventBus::transmitEvent<EventBus::Type>(parameters).
+
     template <Type eventType>
-    static typename std::enable_if<eventType==Type::CharacterDeath, void>::type transmitEvent() {
-        CharacterDeathEvent::notifyListeners(new CharacterDeathEvent());
-    }
-    template <Type eventType>
-    static typename std::enable_if<eventType==Type::CharacterHealthChange, void>::type transmitEvent() {
-        CharacterHealthChangeEvent::notifyListeners(new CharacterHealthChangeEvent());
+    static typename std::enable_if<eventType==Type::CharacterHealthChange, void>::type transmitEvent(Character* character) {
+        CharacterHealthChangeEvent::notifyListeners(new CharacterHealthChangeEvent(character));
     }
     template <Type eventType>
     static typename std::enable_if<eventType==Type::AnimateTile, void>::type transmitEvent(Tile* affectedTile, std::vector<AnimateTileEvent::Visualization> visualizations, std::string textToOverlay="") {
@@ -38,16 +34,17 @@ public:
     // Start of subscribeToEvent templates.
     // SubscribeToEvent allows objects to subscribe to certain events, and possibly set filters depending on the event type.
     template <Type eventType>
-    inline static void subscribeToEvent(EventListener* listener)
+    inline static void subscribeToEvent(EventListener* listener) // General template
     {
 
         switch (eventType){
-        case CharacterDeath : {CharacterDeathEvent::registerListener(listener);break;}
         case CharacterHealthChange: {CharacterHealthChangeEvent::registerListener(listener);break;}
         case AnimateTile: {AnimateTileEvent::registerListener(listener);break;}
         case TileChange : {TileChangeEvent::registerListener(listener);break;}
         }
     }
+
+    //TileChangeEvent templates.
 
     template <Type eventType>
     static typename std::enable_if<eventType==Type::TileChange, void>::type subscribeToEvent(EventListener* eventListener, Tile* TileToListenTo) {
