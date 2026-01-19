@@ -5,12 +5,12 @@
 #ifndef PRAK_CHARACTER_H
 #define PRAK_CHARACTER_H
 #include "AbstractUI.h"
-#include "Subject.h"
+#include "EventBus.h"
 class QCharacter;
 class StationaryController;
 class Tile;
 class TerminalUI;
-class Character : public Subject
+class Character
 {
 protected:
     std::string m_texture;

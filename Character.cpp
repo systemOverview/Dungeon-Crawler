@@ -65,7 +65,7 @@ bool Character::isAlive()
 void Character::decrementFromHP(int amountToDecrement)
 {
     m_hitPoints -= amountToDecrement;
-    notifyObservers("hitPoints");
+    EventBus::transmitEvent<EventBus::CharacterHealthChange>(this);
     if (!isAlive()){
         delete this;
     }
@@ -89,6 +89,6 @@ QCharacter *Character::getQChatacter()
 
 Character::~Character()
 {
-    notifyObservers("isAlive");
+    EventBus::transmitEvent<EventBus::CharacterHealthChange>(this);
 }
 
