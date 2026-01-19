@@ -8,7 +8,7 @@
 #include <QTimer>
 GraphicalUI::GraphicalUI(Level *lvl, DungeonCrawler *d)
 {
-    EventBus::subscribeToEvent(EventBus::AnimateTile, this);
+    // EventBus::subscribeToEvent<EventBus::AnimateTile>(this);
     level = lvl;
     dc = d;
     startScreen = new StartScreen(this);
@@ -106,7 +106,7 @@ void GraphicalUI::onAnimateTile(AnimateTileEvent* event) {
     }
 
     QEventLoop loop;
-    QTimer::singleShot(100, &loop, &QEventLoop::quit);
+    QTimer::singleShot(10, &loop, &QEventLoop::quit);
     loop.exec();
 }
 
