@@ -9,7 +9,8 @@ public:
     enum Type {
         CharacterHealthChange,
         AnimateTile,
-        TileChange
+        TileChange,
+        QCharacterChange
     };
     // Start of notifyListeners templates
     // Used templates for these to be able to overload based on enum, in case in future i had to implement
@@ -31,6 +32,10 @@ public:
     static typename std::enable_if<eventType==Type::TileChange, void>::type transmitEvent(Tile* affectedTile, TileChangeEvent::ChangeType changeType) {
         TileChangeEvent::notifyListeners(new TileChangeEvent(affectedTile, changeType));
     }
+    template <Type eventType>
+    static typename std::enable_if<eventType==Type::QCharacterChange, void>::type transmitEvent(QCharacter* QCharacter, QCharacterChangeEvent::ChangeType changeType) {
+        QCharacterChangeEvent::notifyListeners(new QCharacterChangeEvent(QCharacter, changeType));
+    }
 
 
     // Start of subscribeToEvent templates.
@@ -43,14 +48,20 @@ public:
         case CharacterHealthChange: {CharacterHealthChangeEvent::registerListener(listener);break;}
         case AnimateTile: {AnimateTileEvent::registerListener(listener);break;}
         case TileChange : {TileChangeEvent::registerListener(listener);break;}
+        case QCharacterChange: {QCharacterChangeEvent::registerListener(listener);break;}
         default : {throw std::runtime_error( "Template is of an unexisting enum value." );}
         }
     }
-
+    //Start of unsubscribe templates.
+    template <Type eventType>
+    static typename std::enable_if<eventType==Type::QCharacterChange, void>::type unsubscribeFromEvent(EventListener* eventListener, QCharacter* QCharacterToStopListeningTo) {
+        QCharacterChangeEvent::deregisterListener(eventListener, QCharacterToStopListeningTo);
+    }
     inline static void unsubscribeFromAllEvents(EventListener* eventListener){
         CharacterHealthChangeEvent::deregisterListener(eventListener);
         AnimateTileEvent::deregisterListener(eventListener);
         TileChangeEvent::deregisterListener(eventListener);
+        QCharacterChangeEvent::deregisterListener(eventListener);
 
     };
 
@@ -64,7 +75,7 @@ public:
     static typename std::enable_if<eventType==Type::TileChange, void>::type subscribeToEvent(EventListener* eventListener, std::vector<Tile*> TilesToListenTo) {
         TileChangeEvent::registerListener(eventListener, TilesToListenTo);
     }
-
+    //CharacterHealthChangeEvent templates.
     template <Type eventType>
     static typename std::enable_if<eventType==Type::CharacterHealthChange, void>::type subscribeToEvent(EventListener* eventListener, Character* characterToListenTo) {
         CharacterHealthChangeEvent::registerListener(eventListener, characterToListenTo);
@@ -73,6 +84,16 @@ public:
     template <Type eventType>
     static typename std::enable_if<eventType==Type::CharacterHealthChange, void>::type subscribeToEvent(EventListener* eventListener, std::vector<Character*> CharactersToListenTo) {
         CharacterHealthChangeEvent::registerListener(eventListener, CharactersToListenTo);
+    }
+    //QCharacterChangeEvent templates.
+    template <Type eventType>
+    static typename std::enable_if<eventType==Type::QCharacterChange, void>::type subscribeToEvent(EventListener* eventListener, QCharacter* QcharacterToListenTo) {
+        QCharacterChangeEvent::registerListener(eventListener, QcharacterToListenTo);
+    }
+
+    template <Type eventType>
+    static typename std::enable_if<eventType==Type::QCharacterChange, void>::type subscribeToEvent(EventListener* eventListener, std::vector<QCharacter*> QCharactersToListenTo) {
+        QCharacterChangeEvent::registerListener(eventListener, QCharactersToListenTo);
     }
 
 

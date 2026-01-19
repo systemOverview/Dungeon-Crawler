@@ -5,6 +5,7 @@
 #include <map>
 class Tile;
 class Character;
+class QCharacter;
 class EventListener;
 //Start of Event declaration.
 template<typename eventType>
@@ -36,6 +37,7 @@ protected:
         return false;
     }
 
+
     static bool isListenerSubscribedToThisEvent(EventListener* eventListener, eventType* event);
     // Some event types provide functionality to filter events to certain criteria (specific tiles or characters for example).
     // This is needed for the notifyListenersAccordingToRegister that would otherwise have to get the specific member of the event
@@ -66,11 +68,13 @@ protected:
 class AnimateTileEvent;
 class CharacterHealthChangeEvent;
 class TileChangeEvent;
+class QCharacterChangeEvent;
 class EventListener{
 public:
     virtual void onCharacterHealthChange(CharacterHealthChangeEvent* event){};
     virtual void onAnimateTile(AnimateTileEvent* event){};
     virtual void onTileChange(TileChangeEvent* event){};
+    virtual void onQCharacterChange(QCharacterChangeEvent* event){};
     ~EventListener();
 };
 
@@ -95,7 +99,6 @@ public:
     std::string_view getOverlayText() const;
     std::vector<Visualization> getVisualizations();
 };
-
 
 //Start of CharacterHealthChangeEventEvent declaration.
 class CharacterHealthChangeEvent : private Event<CharacterHealthChangeEvent>{
@@ -123,7 +126,8 @@ class TileChangeEvent : private Event<TileChangeEvent>
 public:
     enum ChangeType{
         TextureChange,
-        DoorStatus
+        DoorStatus,
+        Character
     };
 private:
     // Default behavior is that those who use the normal function listen to all tiles updates
@@ -150,5 +154,37 @@ public:
     static void registerListener(EventListener* eventListener, std::vector<Tile*> ListOfTilesToListenTo);
 
 };
+
+class QCharacterChangeEvent : private Event<QCharacterChangeEvent>
+{
+    friend class EventBus;
+public:
+    enum ChangeType{
+        healthbar,
+        death
+    };
+private:
+
+    QCharacter* m_changedQCharacter;
+    ChangeType m_changeType;
+    inline static std::map<EventListener*, std::vector<QCharacter*>> QCharacterPreferenceRegister = {};
+public:
+    QCharacterChangeEvent(QCharacter* changedCharacter, ChangeType changeType);
+    QCharacter* getChangedQCharacter() const;
+    ChangeType getChangeType() const;
+    static bool isListenerSubscribedToThisEvent(EventListener* eventListener, QCharacterChangeEvent* event);
+    //notifyListeners declarations
+    static void notifyListeners(QCharacterChangeEvent* event);
+    static void deregisterListener(EventListener* eventListener);
+    static void deregisterListener(EventListener* eventListener, QCharacter* QCharacter); //overloaded to deregister just from one QChar.
+    static void notifySpecificListener(EventListener* eventListener, QCharacterChangeEvent* event);
+    // registerListener declarations
+    using Event::registerListener;
+    static void registerListener(EventListener* eventListener, QCharacter* QCharacterToListenTo);
+    static void registerListener(EventListener* eventListener, std::vector<QCharacter*> ListOfQCharactersToListenTo);
+    static void test(EventListener* el, std::pair<int,int> p);
+};
+
+
 
 #endif // EVENT_H
