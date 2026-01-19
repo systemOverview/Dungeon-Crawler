@@ -19,12 +19,12 @@ std::vector<AnimateTileEvent::Visualization> AnimateTileEvent::getVisualizations
 //Start of CharacterHealthChangeEventEvent definitions.
 CharacterHealthChangeEvent::CharacterHealthChangeEvent(Character *character): m_character{character}{};
 Character* CharacterHealthChangeEvent::getCharacter(){return m_character;}
-
 void CharacterHealthChangeEvent::registerListener(EventListener *eventListener, Character *characterToListenTo)
 {
     characterPreferenceRegister[eventListener].push_back(characterToListenTo);
     registerListener(eventListener);
 }
+
 
 //Start of TileChangeEvent definitions.
 TileChangeEvent::TileChangeEvent(Tile *changedTile, ChangeType changeType) : m_changedTile{changedTile}, m_changeType{changeType}{};
@@ -55,7 +55,7 @@ void TileChangeEvent::registerListener(EventListener* eventListener, std::vector
 {
 
     for (auto it = ListOfTilesToListenTo.begin(); it!=ListOfTilesToListenTo.end(); it++){
-        ListOfTilesToListenTo.push_back(*it);
+        TilePreferenceRegister[eventListener].push_back(*it);
     }
     registerListener(eventListener);
 }
