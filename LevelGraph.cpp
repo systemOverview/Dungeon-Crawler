@@ -127,6 +127,7 @@ std::vector<std::pair<int, int> > LevelGraph::getShortestsPathBetweenTwoTilesDji
 
 
         if (shortestPath.first==nullptr){
+            EventBus::transmitEvent<EventBus::VisualizationStatus>(VisualizationStatusEvent::Start);
             return {};
         }
         visitedVertexes.push_back(shortestPath.first);
@@ -143,6 +144,7 @@ std::vector<std::pair<int, int> > LevelGraph::getShortestsPathBetweenTwoTilesDji
 
 
         if (shortestPath.first == targetVertex){
+            EventBus::transmitEvent<EventBus::VisualizationStatus>(VisualizationStatusEvent::Start);
             return pathTowardsVertex[targetVertex];
         }
     }
