@@ -3,6 +3,7 @@
 #include <QtCore/qdebug.h>
 #include <QtCore/qlogging.h>
 #include <map>
+// new type checklist: add onEvent to EventListener, define notifyListener to use notifyListenersAccordingToRegister if you have a pref register
 class Tile;
 class Character;
 class QCharacter;
@@ -43,7 +44,6 @@ protected:
         for (auto eventListenerIterator = EventListeners.begin(); eventListenerIterator!=EventListeners.end(); eventListenerIterator++){
             if (preferenceRegister->count(*eventListenerIterator)){
                 for (auto subscriptionIterator = (*preferenceRegister)[(*eventListenerIterator)].begin(); subscriptionIterator!=(*preferenceRegister)[(*eventListenerIterator)].end(); subscriptionIterator++){
-                    // auto check = [](QCharacter* QChar, QCharacterChangeEvent* event){ return QChar == event->getChangedQCharacter();};
                     if (criteriaFunction((*subscriptionIterator), event)){
                         eventType::notifySpecificListener(*eventListenerIterator, event);
                         return;
@@ -78,12 +78,14 @@ class AnimateTileEvent;
 class CharacterHealthChangeEvent;
 class TileChangeEvent;
 class QCharacterChangeEvent;
+class VisualizationStatusEvent;
 class EventListener{
 public:
     virtual void onCharacterHealthChange(CharacterHealthChangeEvent* event){};
     virtual void onAnimateTile(AnimateTileEvent* event){};
     virtual void onTileChange(TileChangeEvent* event){};
     virtual void onQCharacterChange(QCharacterChangeEvent* event){};
+    virtual void onVisualizationChange(VisualizationStatusEvent* event){};
     ~EventListener();
 };
 
@@ -189,6 +191,24 @@ public:
     static void registerListener(EventListener* eventListener, QCharacter* QCharacterToListenTo);
     static void registerListener(EventListener* eventListener, std::vector<QCharacter*> ListOfQCharactersToListenTo);
 };
+
+class VisualizationStatusEvent : private Event<QCharacterChangeEvent>
+{
+    friend class EventBus;
+public:
+    enum Status{
+        Quit,
+        Start
+    };
+private:
+    Status m_status;
+public:
+    VisualizationStatusEvent(Status status) : m_status(status){};
+    Status getStatus() const;
+    static void notifyListeners(VisualizationStatusEvent* event);
+    using Event::registerListener;
+};
+
 
 
 

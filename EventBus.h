@@ -1,7 +1,8 @@
 #ifndef EVENTBUS_H
 #define EVENTBUS_H
 #include "Event.h"
-
+// new type checklist :add to Type, transmitEvent(notifyListeners),
+// subscribeToEvent(if it has a custom one) , unsubscribeFromAllEvents, registerListener,
 class EventBus
 {
 
@@ -10,7 +11,8 @@ public:
         CharacterHealthChange,
         AnimateTile,
         TileChange,
-        QCharacterChange
+        QCharacterChange,
+        VisualizationStatus,
     };
     // Start of notifyListeners templates
     // Used templates for these to be able to overload based on enum, in case in future i had to implement
@@ -36,7 +38,10 @@ public:
     static typename std::enable_if<eventType==Type::QCharacterChange, void>::type transmitEvent(QCharacter* QCharacter, QCharacterChangeEvent::ChangeType changeType) {
         QCharacterChangeEvent::notifyListeners(new QCharacterChangeEvent(QCharacter, changeType));
     }
-
+    template <Type eventType>
+    static typename std::enable_if<eventType==Type::VisualizationStatus, void>::type transmitEvent(VisualizationStatusEvent::Status status) {
+        VisualizationStatusEvent::notifyListeners(new VisualizationStatusEvent(status));
+    }
 
     // Start of subscribeToEvent templates.
     // SubscribeToEvent allows objects to subscribe to certain events, and possibly set filters depending on the event type.
@@ -49,6 +54,8 @@ public:
         case AnimateTile: {AnimateTileEvent::registerListener(listener);break;}
         case TileChange : {TileChangeEvent::registerListener(listener);break;}
         case QCharacterChange: {QCharacterChangeEvent::registerListener(listener);break;}
+        case VisualizationStatus: {VisualizationStatusEvent::registerListener(listener);break;}
+
         default : {throw std::runtime_error( "Template is of an unexisting enum value." );}
         }
     }
@@ -62,8 +69,10 @@ public:
         AnimateTileEvent::deregisterListener(eventListener);
         TileChangeEvent::deregisterListener(eventListener);
         QCharacterChangeEvent::deregisterListener(eventListener);
+        VisualizationStatusEvent::deregisterListener(eventListener);
 
     };
+
 
     //TileChangeEvent templates.
     template <Type eventType>

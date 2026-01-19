@@ -154,3 +154,15 @@ void QCharacterChangeEvent::registerListener(EventListener *eventListener, std::
     registerListener(eventListener);
 }
 
+//Start of VisualizationStatusEvent definitions.
+
+VisualizationStatusEvent::Status VisualizationStatusEvent::getStatus() const
+{
+    return m_status;
+}
+
+void VisualizationStatusEvent::notifyListeners(VisualizationStatusEvent* event) {
+    for (auto it = EventListeners.begin(); it!=EventListeners.end(); it++){
+        (*it)->onVisualizationChange(event);
+    }
+}
