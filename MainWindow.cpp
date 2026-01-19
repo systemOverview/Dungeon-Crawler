@@ -14,12 +14,30 @@ MainWindow::MainWindow(Level *lvl, GraphicalUI *g, QWidget *parent)
     , level{lvl}
     , GUI{g}
 {
-    ui->setupUi(this);
-    QWidget *gameField = ui->gameField;
-    QWidget *arrowField = ui->arrowField;
+    // ui->setupUi(this);
+    QWidget* central = new QWidget(this);
+    setCentralWidget(central);
+    QWidget* gameField = new QWidget(central);
+    QWidget* arrowField = new QWidget(central);
+    QPushButton* stopVisualizationButton = new QPushButton(central);
+    stopVisualizationButton->setText("Stop visualization");
+    connect(stopVisualizationButton, &QPushButton::clicked, [g, this]() { g->quitVisualizationLoop();});
+    QHBoxLayout* hlayout = new QHBoxLayout(central);
+    QVBoxLayout* vlayout = new QVBoxLayout(central);
 
-    QGridLayout *gameLayout = new QGridLayout(gameField);
-    QGridLayout *arrowsLayout = new QGridLayout(arrowField);
+
+    hlayout->addWidget(gameField,2);
+    vlayout->addWidget(stopVisualizationButton, Qt::AlignTop);
+    vlayout->addWidget(arrowField);
+    vlayout->addStretch();
+    hlayout->addLayout(vlayout);
+
+
+    arrowField->setFixedSize(300,300);
+
+
+    QGridLayout* gameLayout = new QGridLayout(gameField);
+    QGridLayout* arrowsLayout = new QGridLayout(arrowField);
     gameBoard = gameLayout;
     // fill(gameLayout);
     arrowField->setMaximumHeight(300);
