@@ -1,10 +1,12 @@
 #ifndef EVENT_H
 #define EVENT_H
+#include <QtCore/qdebug.h>
+#include <QtCore/qlogging.h>
 #include <map>
 class Tile;
 class Character;
-//Start of Event declaration.
 class EventListener;
+//Start of Event declaration.
 template<typename eventType>
 class Event{
 protected:
@@ -12,15 +14,20 @@ protected:
     // and because of that definitions will have to be here.
     inline static std::vector<EventListener*> EventListeners = {};
     static void registerListener(EventListener* eventListener) {if (!isListenerSubscribedToMe(eventListener)){EventListeners.push_back(eventListener);};}
-    static void removeListener(EventListener* eventListener) {
+    static bool deregisterListener(EventListener* eventListener) {
+        // Base implementation for classes that only have a general EventListeners vector.
+        // Can be overridden by just redeclaring it to cause name hiding.
+        // returns true if it found and deleted it, false otherwise. So functions that have one or more registers don't loop needlessly if the main one doesn't have it.
         for (auto it = EventListeners.begin(); it!=EventListeners.end(); ){
             if ((*it)==eventListener){
                 it = EventListeners.erase(it);
+                return true;
             }
             else{
                 it++;
             }
         }
+        return false;
     }
     static bool isListenerSubscribedToMe(EventListener* eventListener){
         for (auto it = EventListeners.begin(); it!=EventListeners.end(); it++ ){
@@ -41,7 +48,6 @@ protected:
     // Same thing as isListenerSubscribedToThisEvent: eventListener.onWhat? Let the specific event handle it.
     template<typename vectorType>
     static void notifyListenersAccordingToRegister(eventType* event, std::map<EventListener*, std::vector<vectorType*>>* preferenceRegister){
-
         for (auto eventListenerIterator = EventListeners.begin(); eventListenerIterator!=EventListeners.end(); eventListenerIterator++){
             if (preferenceRegister->count(*eventListenerIterator)){
                 if (eventType::isListenerSubscribedToThisEvent(*eventListenerIterator, event)){
@@ -65,6 +71,7 @@ public:
     virtual void onCharacterHealthChange(CharacterHealthChangeEvent* event){};
     virtual void onAnimateTile(AnimateTileEvent* event){};
     virtual void onTileChange(TileChangeEvent* event){};
+    ~EventListener();
 };
 
 
@@ -98,10 +105,15 @@ class CharacterHealthChangeEvent : private Event<CharacterHealthChangeEvent>{
 public:
     CharacterHealthChangeEvent(Character* character);
     Character* getCharacter();
+    static bool isListenerSubscribedToThisEvent(EventListener* eventListener, CharacterHealthChangeEvent* event);
+    static void notifySpecificListener(EventListener* eventListener, CharacterHealthChangeEvent* event);
     static void notifyListeners(CharacterHealthChangeEvent* event);
+    static void deregisterListener(EventListener* eventListener);
     //registerListener declarations
     using Event::registerListener;
     static void registerListener(EventListener* eventListener, Character* characterToListenTo);
+    static void registerListener(EventListener* eventListener, std::vector<Character*> ListOfCharactersToListenTo);
+
 };
 
 //Start of TileTextureChangeEvent declaration.
@@ -121,12 +133,14 @@ private:
     ChangeType m_changeType;
     inline static std::map<EventListener*, std::vector<Tile*>> TilePreferenceRegister = {};
 public:
+
     TileChangeEvent(Tile* changedTile, ChangeType changeType);
     Tile* getChangedTile() const;
     ChangeType getChangeType() const;
     static bool isListenerSubscribedToThisEvent(EventListener* eventListener, TileChangeEvent* event);
     //notifyListeners declarations
     static void notifyListeners(TileChangeEvent* event);
+    static void deregisterListener(EventListener* eventListener);
     static void notifySpecificListener(EventListener* eventListener, TileChangeEvent* event);
     // registerListener declarations
     using Event::registerListener; // Apparently name hiding doesn't care about functions signatures.

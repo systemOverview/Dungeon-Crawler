@@ -35,19 +35,26 @@ public:
 
     // Start of subscribeToEvent templates.
     // SubscribeToEvent allows objects to subscribe to certain events, and possibly set filters depending on the event type.
+    // They follow this syntax :EventBus::subscribeToEvent<EventBus::type>(parameters);
     template <Type eventType>
     inline static void subscribeToEvent(EventListener* listener) // General template
     {
-
         switch (eventType){
         case CharacterHealthChange: {CharacterHealthChangeEvent::registerListener(listener);break;}
         case AnimateTile: {AnimateTileEvent::registerListener(listener);break;}
         case TileChange : {TileChangeEvent::registerListener(listener);break;}
+        default : {throw std::runtime_error( "Template is of an unexisting enum value." );}
         }
     }
 
+    inline static void unsubscribeFromAllEvents(EventListener* eventListener){
+        CharacterHealthChangeEvent::deregisterListener(eventListener);
+        AnimateTileEvent::deregisterListener(eventListener);
+        TileChangeEvent::deregisterListener(eventListener);
+
+    };
+
     //TileChangeEvent templates.
-    // They follow this syntax :EventBus::subscribeToEvent<EventBus::type>(parameters);
     template <Type eventType>
     static typename std::enable_if<eventType==Type::TileChange, void>::type subscribeToEvent(EventListener* eventListener, Tile* TileToListenTo) {
         TileChangeEvent::registerListener(eventListener, TileToListenTo);
@@ -67,6 +74,7 @@ public:
     static typename std::enable_if<eventType==Type::CharacterHealthChange, void>::type subscribeToEvent(EventListener* eventListener, std::vector<Character*> CharactersToListenTo) {
         CharacterHealthChangeEvent::registerListener(eventListener, CharactersToListenTo);
     }
+
 
     EventBus();
 };

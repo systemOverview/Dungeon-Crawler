@@ -1,6 +1,11 @@
 #include "Event.h"
+#include "EventBus.h"
 #include <QtCore/qdebug.h>
 
+EventListener::~EventListener()
+{
+    EventBus::unsubscribeFromAllEvents(this);
+}
 
 //Start of AnimateTileEvent definitions.
 void AnimateTileEvent::notifyListeners(AnimateTileEvent* event) {
@@ -49,6 +54,18 @@ void CharacterHealthChangeEvent::registerListener(EventListener *eventListener, 
 
 }
 void CharacterHealthChangeEvent::notifyListeners(CharacterHealthChangeEvent* event){notifyListenersAccordingToRegister(event, &characterPreferenceRegister);}
+
+void CharacterHealthChangeEvent::deregisterListener(EventListener *eventListener)
+{
+    bool didFindAndDelete = Event::deregisterListener(eventListener); // First remove it from the main EventListeners vector.
+    if (!didFindAndDelete){return;}
+    for (auto listenerCharactersPair = characterPreferenceRegister.begin(); listenerCharactersPair!=characterPreferenceRegister.end(); ){
+        if ((*listenerCharactersPair).first==eventListener){
+            listenerCharactersPair = characterPreferenceRegister.erase(listenerCharactersPair);
+        }
+        else{listenerCharactersPair++;}
+    }
+}
 void CharacterHealthChangeEvent::notifySpecificListener(EventListener* eventListener, CharacterHealthChangeEvent *event){
     qDebug() << eventListener;
     eventListener->onCharacterHealthChange(event);
@@ -56,6 +73,7 @@ void CharacterHealthChangeEvent::notifySpecificListener(EventListener* eventList
 
 
 //Start of TileChangeEvent definitions.
+
 TileChangeEvent::TileChangeEvent(Tile *changedTile, ChangeType changeType) : m_changedTile{changedTile}, m_changeType{changeType}{};
 
 Tile* TileChangeEvent::getChangedTile() const {return m_changedTile;}
@@ -89,5 +107,16 @@ void TileChangeEvent::registerListener(EventListener* eventListener, std::vector
 }
 
 void TileChangeEvent::notifyListeners(TileChangeEvent* event){notifyListenersAccordingToRegister(event, &TilePreferenceRegister);}
+
+void TileChangeEvent::deregisterListener(EventListener *eventListener)
+{
+    bool didFindAndDelete = Event::deregisterListener(eventListener); // First remove it from the main EventListeners vector.
+    if (!didFindAndDelete){return;}
+    for (auto listenerTilesPair = TilePreferenceRegister.begin(); listenerTilesPair!=TilePreferenceRegister.end(); ){
+        if ((*listenerTilesPair).first==eventListener){listenerTilesPair = TilePreferenceRegister.erase(listenerTilesPair);}
+        else{listenerTilesPair++;}
+    }
+}
 void TileChangeEvent::notifySpecificListener(EventListener* eventListener, TileChangeEvent *event){eventListener->onTileChange(event);}
+
 
