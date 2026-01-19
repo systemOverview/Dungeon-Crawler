@@ -31,7 +31,6 @@ std::pair<int, int> AttackController::DjikstraMove()
             it++;
         }
     }
-    qDebug() << move;
     return move;
 }
 
