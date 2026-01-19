@@ -31,6 +31,8 @@ public:
     static typename std::enable_if<eventType==Type::TileChange, void>::type transmitEvent(Tile* affectedTile, TileChangeEvent::ChangeType changeType) {
         TileChangeEvent::notifyListeners(new TileChangeEvent(affectedTile, changeType));
     }
+
+
     // Start of subscribeToEvent templates.
     // SubscribeToEvent allows objects to subscribe to certain events, and possibly set filters depending on the event type.
     template <Type eventType>
@@ -45,15 +47,25 @@ public:
     }
 
     //TileChangeEvent templates.
-
+    // They follow this syntax :EventBus::subscribeToEvent<EventBus::type>(parameters);
     template <Type eventType>
     static typename std::enable_if<eventType==Type::TileChange, void>::type subscribeToEvent(EventListener* eventListener, Tile* TileToListenTo) {
         TileChangeEvent::registerListener(eventListener, TileToListenTo);
     }
 
     template <Type eventType>
-    static typename std::enable_if<eventType==Type::TileChange, void>::type subscribeToEvent(EventListener* eventListener, std::vector<Tile*> TileToListenTo) {
-        TileChangeEvent::registerListener(eventListener, TileToListenTo);
+    static typename std::enable_if<eventType==Type::TileChange, void>::type subscribeToEvent(EventListener* eventListener, std::vector<Tile*> TilesToListenTo) {
+        TileChangeEvent::registerListener(eventListener, TilesToListenTo);
+    }
+
+    template <Type eventType>
+    static typename std::enable_if<eventType==Type::CharacterHealthChange, void>::type subscribeToEvent(EventListener* eventListener, Character* characterToListenTo) {
+        CharacterHealthChangeEvent::registerListener(eventListener, characterToListenTo);
+    }
+
+    template <Type eventType>
+    static typename std::enable_if<eventType==Type::CharacterHealthChange, void>::type subscribeToEvent(EventListener* eventListener, std::vector<Character*> CharactersToListenTo) {
+        CharacterHealthChangeEvent::registerListener(eventListener, CharactersToListenTo);
     }
 
     EventBus();
