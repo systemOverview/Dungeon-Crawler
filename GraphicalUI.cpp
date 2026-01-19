@@ -89,7 +89,7 @@ void GraphicalUI::draw(Level *level){
 
 void GraphicalUI::quitVisualizationLoop()
 {
-    m_loopDuration = 0;
+    m_isVisualizeModeOn = false;
     m_visualizationLoop->quit();
 }
 
@@ -103,7 +103,7 @@ void GraphicalUI::onVisualizationChange(VisualizationStatusEvent* eventt)
     if (eventt->getStatus()==VisualizationStatusEvent::Quit){
         return;
     }
-    while (!m_animationsQueue.empty()){
+    while (m_isVisualizeModeOn && !m_animationsQueue.empty()){
         AnimateTileEvent* event = m_animationsQueue.front();
         QGridLayout *gameBoard = mainWindow->getGameBoard();
         std::string overlayText (event->getOverlayText());

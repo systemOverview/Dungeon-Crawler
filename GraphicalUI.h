@@ -13,7 +13,7 @@ class DungeonCrawler;
 class GraphicalUI : public AbstractUI, public AbstractController, public EventListener
 {
 private:
-    bool b=true;
+    bool m_isVisualizeModeOn=true;
     QDialog* startScreen;
     MainWindow *mainWindow;
     int currentWindow{0};
