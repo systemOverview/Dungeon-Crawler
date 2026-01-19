@@ -57,10 +57,7 @@ void LevelGraph::setupEdgesForVertex(Vertex *vertex)
             if ((i!=tile->getRow() || j!=tile->getColumn()) && m_vertexes.count({i,j})){
                 Vertex* neighbourVertex = m_vertexes[{i,j}];
                 Tile* neighbourTile = neighbourVertex->getTile();
-                std::pair<int,int> a = {6,7};
-                if ((tile->getCordsAsPair())==a){
-                    qDebug() << "a";
-                }
+
                 if (isEdgeBetweenTilesPossible(tile->getTexture(), neighbourTile->getTexture())){
                     vertex->addNeighbour(neighbourVertex, 1);
                 }
@@ -162,7 +159,6 @@ void LevelGraph::onTileChange(TileChangeEvent *event)
     switch (event->getChangeType()){
     case (TileChangeEvent::TextureChange): {;break;}
     case (TileChangeEvent::DoorStatus): {
-        qDebug() << event->getChangedTile()->getCordsAsPair();
         Vertex* newVertex = addVertex(event->getChangedTile(), 1);
         setupEdgesForVertex(newVertex);
         for (auto neighbour : newVertex->getNeighbours()){
