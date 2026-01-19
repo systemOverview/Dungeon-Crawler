@@ -101,11 +101,10 @@ void DungeonCrawler::move()
 
 void DungeonCrawler::levelUp()
 {
-    qDebug() << "test";
     GUI->deleteAllTiles();
     currentLevel = ++currentLevel;
     // TODO refacor this
-    m_humanCharacter->removeObserver(m_humanCharacter->getQChatacter());
+    // m_humanCharacter->removeObserver(m_humanCharacter->getQChatacter());
     (*currentLevel)->placePlayingCharacter(m_humanCharacter);
     m_humanCharacter->setController(GUI);
     GUI->draw(*currentLevel);
