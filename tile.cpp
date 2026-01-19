@@ -23,7 +23,7 @@ Character *Tile::getCharacter() const
 void Tile::setCharacter(Character *characterToPlace)
 {
     character = characterToPlace;
-    notifyObservers("character");
+    EventBus::transmitEvent<EventBus::TileChange>(this, TileChangeEvent::Character);
 }
 
 int Tile::getRow()

@@ -11,6 +11,7 @@ class QTile : public QWidget, public Observer, public EventListener
 {
     Q_OBJECT
 private:
+    inline static int counter = 0;
     Tile* m_tile; // The tile it represents, QTile is a view, and m_tile is the model.
     QString m_texturePath;
     QCharacter* m_QCharacter; // The character on that tile.
@@ -32,7 +33,7 @@ public:
     static void addTemporarelyAlteredTiles(QTile* Qtile);
     static void removeEffectFromTemporarelyAlteredTiles();
     void onTileChange(TileChangeEvent* event) override;
-
+    virtual void onQCharacterChange(QCharacterChangeEvent* event) override;
 
 };
 

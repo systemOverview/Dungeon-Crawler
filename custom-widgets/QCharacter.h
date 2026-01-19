@@ -17,9 +17,11 @@ private:
 public:
     QCharacter(Character* character);
     QString getTexturePath();
+    void recalculateHealthPercentage();
     QLinearGradient getHealthBarGradient(int width); // the tile width, the health bar must have full width of the tile
     void onCharacterHealthChange(CharacterHealthChangeEvent* event) override;
     ~QCharacter();
+    Character *getCharacter() const;
 };
 
 #endif // QCHARACTER_H

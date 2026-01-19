@@ -2,6 +2,11 @@
 #include <QStyleOption>
 #include <QtGui/qpainter.h>
 
+Character *QCharacter::getCharacter() const
+{
+    return m_character;
+}
+
 QCharacter::QCharacter(Character* character)
     : m_character(character)
 {
@@ -38,15 +43,14 @@ void QCharacter::onCharacterHealthChange(CharacterHealthChangeEvent *event)
 {
     assert(m_character!=nullptr && "Character is deleted but still attempted to access.");
     assert(event->getCharacter()==m_character && "QCharacter subscribed to the wrong character." );
-
     m_healthPercentage= (static_cast<float>(m_character->getCurrentHP())
                           / static_cast<float>(m_character->getMaxHP()));
     if (m_healthPercentage<=0){
-        notifyObservers("dead character");
+        EventBus::transmitEvent<EventBus::QCharacterChange>(this, QCharacterChangeEvent::death);
         delete this;
     }
     else{
-        notifyObservers("hitPoints");
+        EventBus::transmitEvent<EventBus::QCharacterChange>(this, QCharacterChangeEvent::healthbar);
     }
 }
 
