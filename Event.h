@@ -36,31 +36,40 @@ protected:
         }
         return false;
     }
-
-
-    static bool isListenerSubscribedToThisEvent(EventListener* eventListener, eventType* event);
-    // Some event types provide functionality to filter events to certain criteria (specific tiles or characters for example).
-    // This is needed for the notifyListenersAccordingToRegister that would otherwise have to get the specific member of the event
-    // and compare that to the eventListener. But since this a template class, it doesn't know what's the actual get function for that specific
-    // event, so this function allows each Event type to just implement a small function instead of re-defining the notifyListenersAccordingToRegister
-    // function and losing on reusability.
-    //notifyListeners functions
     static void notifyListeners(eventType* event);
     static void notifySpecificListener(EventListener* eventListener, eventType* event);
-    // Same thing as isListenerSubscribedToThisEvent: eventListener.onWhat? Let the specific event handle it.
-    template<typename vectorType>
-    static void notifyListenersAccordingToRegister(eventType* event, std::map<EventListener*, std::vector<vectorType*>>* preferenceRegister){
+    template<typename vectorType, typename function>
+    static void notifyListenersAccordingToRegister(eventType* event, std::map<EventListener*,std::vector<vectorType*>>* preferenceRegister, function criteriaFunction){
         for (auto eventListenerIterator = EventListeners.begin(); eventListenerIterator!=EventListeners.end(); eventListenerIterator++){
             if (preferenceRegister->count(*eventListenerIterator)){
-                if (eventType::isListenerSubscribedToThisEvent(*eventListenerIterator, event)){
-                    eventType::notifySpecificListener(*eventListenerIterator, event);
-                    return;
+                for (auto subscriptionIterator = (*preferenceRegister)[(*eventListenerIterator)].begin(); subscriptionIterator!=(*preferenceRegister)[(*eventListenerIterator)].end(); subscriptionIterator++){
+                    // auto check = [](QCharacter* QChar, QCharacterChangeEvent* event){ return QChar == event->getChangedQCharacter();};
+                    if (criteriaFunction((*subscriptionIterator), event)){
+                        eventType::notifySpecificListener(*eventListenerIterator, event);
+                        return;
+                    }
                 }
             }
             else{
                 eventType::notifySpecificListener(*eventListenerIterator, event);
             }
         }
+    }
+    template <typename vectorType> // Character, Tile, etc...
+    static void deregisterListenerAccordingToRegister(EventListener* eventListener, vectorType* elementToRemove, std::map<EventListener*, std::vector<vectorType*>>* preferenceRegister){
+
+    for (auto listenerPair = preferenceRegister->begin(); listenerPair!=preferenceRegister->end(); listenerPair++){
+        if ((*listenerPair).first==eventListener){
+            for (auto it = (*listenerPair).second.begin(); it!=(*listenerPair).second.end();){
+                if ((*it)==elementToRemove){
+                    it = (*listenerPair).second.erase(it);
+                }
+                else{
+                    it++;
+                }
+            }
+        }
+    }
     }
 };
 
@@ -108,7 +117,6 @@ class CharacterHealthChangeEvent : private Event<CharacterHealthChangeEvent>{
 public:
     CharacterHealthChangeEvent(Character* character);
     Character* getCharacter();
-    static bool isListenerSubscribedToThisEvent(EventListener* eventListener, CharacterHealthChangeEvent* event);
     static void notifySpecificListener(EventListener* eventListener, CharacterHealthChangeEvent* event);
     static void notifyListeners(CharacterHealthChangeEvent* event);
     static void deregisterListener(EventListener* eventListener);
@@ -141,7 +149,6 @@ public:
     TileChangeEvent(Tile* changedTile, ChangeType changeType);
     Tile* getChangedTile() const;
     ChangeType getChangeType() const;
-    static bool isListenerSubscribedToThisEvent(EventListener* eventListener, TileChangeEvent* event);
     //notifyListeners declarations
     static void notifyListeners(TileChangeEvent* event);
     static void deregisterListener(EventListener* eventListener);
@@ -172,7 +179,6 @@ public:
     QCharacterChangeEvent(QCharacter* changedCharacter, ChangeType changeType);
     QCharacter* getChangedQCharacter() const;
     ChangeType getChangeType() const;
-    static bool isListenerSubscribedToThisEvent(EventListener* eventListener, QCharacterChangeEvent* event);
     //notifyListeners declarations
     static void notifyListeners(QCharacterChangeEvent* event);
     static void deregisterListener(EventListener* eventListener);
@@ -182,7 +188,6 @@ public:
     using Event::registerListener;
     static void registerListener(EventListener* eventListener, QCharacter* QCharacterToListenTo);
     static void registerListener(EventListener* eventListener, std::vector<QCharacter*> ListOfQCharactersToListenTo);
-    static void test(EventListener* el, std::pair<int,int> p);
 };
 
 

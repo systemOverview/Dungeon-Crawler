@@ -25,17 +25,6 @@ std::vector<AnimateTileEvent::Visualization> AnimateTileEvent::getVisualizations
 CharacterHealthChangeEvent::CharacterHealthChangeEvent(Character *character): m_character{character}{};
 Character* CharacterHealthChangeEvent::getCharacter(){return m_character;}
 
-bool CharacterHealthChangeEvent::isListenerSubscribedToThisEvent(EventListener* eventListener, CharacterHealthChangeEvent* event)
-{
-    assert(characterPreferenceRegister.count(eventListener)>0 && "isListenerSubscribedToThisEvent was supplied with an eventListener with no preferences");
-    for (auto subscribedCharactersiterator = characterPreferenceRegister[eventListener].begin(); subscribedCharactersiterator!=characterPreferenceRegister[eventListener].end(); subscribedCharactersiterator++){
-        if ((*subscribedCharactersiterator)==event->getCharacter()){
-            return true;
-        }
-    }
-    return false;
-}
-
 void CharacterHealthChangeEvent::registerListener(EventListener *eventListener, Character *characterToListenTo)
 {
     assert(characterToListenTo!=nullptr && "Character supplied is nullptr");
@@ -52,7 +41,10 @@ void CharacterHealthChangeEvent::registerListener(EventListener *eventListener, 
     registerListener(eventListener);
 
 }
-void CharacterHealthChangeEvent::notifyListeners(CharacterHealthChangeEvent* event){notifyListenersAccordingToRegister(event, &characterPreferenceRegister);}
+void CharacterHealthChangeEvent::notifyListeners(CharacterHealthChangeEvent* event){        auto check = [](Character* QChar, CharacterHealthChangeEvent* event){ return QChar == event->getCharacter();};
+    auto criteriaFunction = [](Character* QChar, CharacterHealthChangeEvent* event){ return QChar == event->getCharacter();};
+    notifyListenersAccordingToRegister(event, &characterPreferenceRegister, criteriaFunction);
+}
 
 void CharacterHealthChangeEvent::deregisterListener(EventListener *eventListener)
 {
@@ -74,16 +66,6 @@ void CharacterHealthChangeEvent::notifySpecificListener(EventListener* eventList
 TileChangeEvent::TileChangeEvent(Tile *changedTile, ChangeType changeType) : m_changedTile{changedTile}, m_changeType{changeType}{};
 Tile* TileChangeEvent::getChangedTile() const {return m_changedTile;}
 
-bool TileChangeEvent::isListenerSubscribedToThisEvent(EventListener* eventListener, TileChangeEvent* event){
-    assert(TilePreferenceRegister.count(eventListener)>0 && "isListenerSubscribedToThisEvent was supplied with an eventListener with no preferences");
-    for (auto subscribedTilesIterator = TilePreferenceRegister[eventListener].begin(); subscribedTilesIterator!=TilePreferenceRegister[eventListener].end(); subscribedTilesIterator++){
-        if ((*subscribedTilesIterator)==event->getChangedTile()){
-            return true;
-        }
-    }
-    return false;
-}
-
 TileChangeEvent::ChangeType TileChangeEvent::getChangeType() const{return m_changeType;}
 void TileChangeEvent::registerListener(EventListener* eventListener, Tile *TileToListenTo)
 {
@@ -101,7 +83,10 @@ void TileChangeEvent::registerListener(EventListener* eventListener, std::vector
     registerListener(eventListener);
 }
 
-void TileChangeEvent::notifyListeners(TileChangeEvent* event){notifyListenersAccordingToRegister(event, &TilePreferenceRegister);}
+void TileChangeEvent::notifyListeners(TileChangeEvent* event){
+    auto criteriaFunction = [](Tile* tile, TileChangeEvent* event){ return tile == event->getChangedTile();};
+    notifyListenersAccordingToRegister(event, &TilePreferenceRegister, criteriaFunction);
+}
 void TileChangeEvent::deregisterListener(EventListener *eventListener)
 {
     bool didFindAndDelete = Event::deregisterListener(eventListener); // First remove it from the main EventListeners vector.
@@ -119,18 +104,10 @@ QCharacterChangeEvent::QCharacterChangeEvent(QCharacter* changedQCharacter, Chan
 QCharacter *QCharacterChangeEvent::getChangedQCharacter() const {return m_changedQCharacter;}
 QCharacterChangeEvent::ChangeType QCharacterChangeEvent::getChangeType() const {return m_changeType;}
 
-bool QCharacterChangeEvent::isListenerSubscribedToThisEvent(EventListener *eventListener, QCharacterChangeEvent *event)
-{
-    assert(QCharacterPreferenceRegister.count(eventListener)>0 && "isListenerSubscribedToThisEvent was supplied with an eventListener with no preferences");
-    for (auto subscribedCharactersiterator = QCharacterPreferenceRegister[eventListener].begin(); subscribedCharactersiterator!=QCharacterPreferenceRegister[eventListener].end(); subscribedCharactersiterator++){
-        if ((*subscribedCharactersiterator)==event->getChangedQCharacter()){
-            return true;
-        }
-    }
-    return false;
+void QCharacterChangeEvent::notifyListeners(QCharacterChangeEvent *event){
+    auto criteriaFunction = [](QCharacter* QChar, QCharacterChangeEvent* event){ return QChar == event->getChangedQCharacter();};
+    notifyListenersAccordingToRegister(event, &QCharacterPreferenceRegister, criteriaFunction);
 }
-
-void QCharacterChangeEvent::notifyListeners(QCharacterChangeEvent *event){notifyListenersAccordingToRegister(event, &QCharacterPreferenceRegister);}
 void QCharacterChangeEvent::deregisterListener(EventListener *eventListener)
 {
     bool didFindAndDelete = Event::deregisterListener(eventListener); // First remove it from the main EventListeners vector.
@@ -140,21 +117,24 @@ void QCharacterChangeEvent::deregisterListener(EventListener *eventListener)
         else{listenerQCharacterPair++;}
     }
 }
-void QCharacterChangeEvent::deregisterListener(EventListener *eventListener, QCharacter *QCharacter)
+void QCharacterChangeEvent::deregisterListener(EventListener* eventListener, QCharacter* QCharacter)
 {
-    assert(QCharacterPreferenceRegister.count(eventListener)>0 && "Event listener tried to deregister from specific event it is not subscribed to");
-    for (auto listenerQCharacterPair = QCharacterPreferenceRegister.begin(); listenerQCharacterPair!=QCharacterPreferenceRegister.end(); listenerQCharacterPair++){
-        if ((*listenerQCharacterPair).first==eventListener){
-        for (auto it = (*listenerQCharacterPair).second.begin(); it!=(*listenerQCharacterPair).second.end();){
-            if ((*it)==QCharacter){
-                it = (*listenerQCharacterPair).second.erase(it);
-            }
-            else{
-                it++;
-            }
-        }
-        }
-    }
+    // assert(QCharacterPreferenceRegister.count(eventListener)>0 && "Event listener tried to deregister from specific event it is not subscribed to");
+    // for (auto listenerQCharacterPair = QCharacterPreferenceRegister.begin(); listenerQCharacterPair!=QCharacterPreferenceRegister.end(); listenerQCharacterPair++){
+    //     if ((*listenerQCharacterPair).first==eventListener){
+    //     for (auto it = (*listenerQCharacterPair).second.begin(); it!=(*listenerQCharacterPair).second.end();){
+    //         if ((*it)==QCharacter){
+    //             it = (*listenerQCharacterPair).second.erase(it);
+    //         }
+    //         else{
+    //             it++;
+    //         }
+    //     }
+    //     }
+    // }
+    //    inline static std::map<EventListener*, std::vector<QCharacter*>> QCharacterPreferenceRegister = {};
+
+    deregisterListenerAccordingToRegister(eventListener,QCharacter, &QCharacterPreferenceRegister);
 }
 
 void QCharacterChangeEvent::notifySpecificListener(EventListener *eventListener, QCharacterChangeEvent *event){eventListener->onQCharacterChange(event);}
