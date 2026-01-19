@@ -114,6 +114,7 @@ void QTile::onTileChange(TileChangeEvent *event)
     switch (event->getChangeType()){
     case TileChangeEvent::TextureChange :{m_texturePath = QString::fromStdString(m_tile->getTexturePath());repaint();break;}
     case TileChangeEvent::DoorStatus : {break;} // QTile doesn't care about the door status, only its texture which is always reset when the door status changes, guaranteeing a TextureChange Event being transmitted.
+    default : {throw std::runtime_error( "The type of the TileChange is not handled." );}
     }
 }
 
@@ -141,7 +142,6 @@ void QTile::paintEvent(QPaintEvent* event)
         QRect charRect = rects.second;
 
         QLinearGradient linearGrad = m_QCharacter->getHealthBarGradient(width());
-        qDebug() << linearGrad;
         QBrush brush (linearGrad);
 
         painter.drawPixmap(charRect, characterPixMap);

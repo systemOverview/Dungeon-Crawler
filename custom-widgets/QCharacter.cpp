@@ -8,7 +8,7 @@ QCharacter::QCharacter(Character* character)
     m_texturePath = QString::fromStdString(character->getTexturePath());
     m_healthPercentage= (static_cast<float>(m_character->getCurrentHP())
                               / static_cast<float>(m_character->getMaxHP()));
-    character->registerObserver(this);
+    EventBus::subscribeToEvent<EventBus::CharacterHealthChange>(this,character);
     character->setQCharacter(this);
 
 }
@@ -33,17 +33,20 @@ QLinearGradient QCharacter::getHealthBarGradient(int width){
     return linearGrad;
 }
 
-void QCharacter::reactToChange(std::string changedMemberName)
-{
-    if (changedMemberName=="hitPoints"){
-        m_healthPercentage= (static_cast<float>(m_character->getCurrentHP())
-                              / static_cast<float>(m_character->getMaxHP()));
-        notifyObservers("hitPoints");
-    }
 
-    else if (changedMemberName=="isAlive"){
+void QCharacter::onCharacterHealthChange(CharacterHealthChangeEvent *event)
+{
+    assert(m_character!=nullptr && "Character is deleted but still attempted to access.");
+    assert(event->getCharacter()==m_character && "QCharacter subscribed to the wrong character." );
+
+    m_healthPercentage= (static_cast<float>(m_character->getCurrentHP())
+                          / static_cast<float>(m_character->getMaxHP()));
+    if (m_healthPercentage<=0){
         notifyObservers("dead character");
         delete this;
+    }
+    else{
+        notifyObservers("hitPoints");
     }
 }
 

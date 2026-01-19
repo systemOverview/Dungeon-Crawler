@@ -3,7 +3,9 @@
 #include <QWidget>
 #include "Character.h"
 #include "Observer.h"
-class QCharacter : public Subject, public Observer
+#include "EventBus.h"
+#include "Subject.h"
+class QCharacter : public Subject, public EventListener
 {
 private:
     Character* m_character; // The character it represents.
@@ -16,7 +18,7 @@ public:
     QCharacter(Character* character);
     QString getTexturePath();
     QLinearGradient getHealthBarGradient(int width); // the tile width, the health bar must have full width of the tile
-    void reactToChange(std::string changedMemberName="") override;
+    void onCharacterHealthChange(CharacterHealthChangeEvent* event) override;
     ~QCharacter();
 };
 
