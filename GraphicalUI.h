@@ -13,11 +13,15 @@ class DungeonCrawler;
 class GraphicalUI : public AbstractUI, public AbstractController, public EventListener
 {
 private:
-    QDialog *startScreen;
+    bool b=true;
+    QDialog* startScreen;
     MainWindow *mainWindow;
     int currentWindow{0};
-    Level *level;
-    DungeonCrawler *dc;
+    QEventLoop* m_visualizationLoop;
+    int m_loopDuration = 100;
+    std::queue<AnimateTileEvent*> m_animationsQueue;
+    Level* level;
+    DungeonCrawler* dc;
     std::pair<int, int> lastMove;
     std::vector<QWidget *> m_healthBars;
     std::map<std::pair<int,int>, QTile*> m_Qtiles;
@@ -28,7 +32,8 @@ public:
     QDialog *getStartScreen();
     QMainWindow *getMainWindow();
     void draw(Level *) override;
-    QWidget *generateHealthBar(int percentage, QWidget *parent);
+    void quitVisualizationLoop();
+    QWidget* generateHealthBar(int percentage, QWidget *parent);
     std::pair<int, int> move() override;
     void move(std::pair<int, int> xymove);
     std::pair<int, int> translateMove(int step) override;
@@ -41,6 +46,7 @@ public:
     void switchWindow();
     void deleteAllTiles();
     void onAnimateTile(AnimateTileEvent* event) override;
+    void onVisualizationChange(VisualizationStatusEvent* event) override;
 };
 
 #endif // GRAPHICALUI_H

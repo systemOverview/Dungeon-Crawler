@@ -6,13 +6,18 @@
 #include "MainWindow.h"
 #include "startscreen.h"
 #include <QTimer>
+
+
 GraphicalUI::GraphicalUI(Level *lvl, DungeonCrawler *d)
 {
-    // EventBus::subscribeToEvent<EventBus::AnimateTile>(this);
+    EventBus::subscribeToEvent<EventBus::AnimateTile>(this);
+    EventBus::subscribeToEvent<EventBus::VisualizationStatus>(this);
+
     level = lvl;
     dc = d;
     startScreen = new StartScreen(this);
     mainWindow = new MainWindow(lvl, this);
+    m_visualizationLoop = new QEventLoop();
 }
 
 GraphicalUI::~GraphicalUI()
@@ -82,32 +87,48 @@ void GraphicalUI::draw(Level *level){
 
 }
 
+void GraphicalUI::quitVisualizationLoop()
+{
+    m_loopDuration = 0;
+    m_visualizationLoop->quit();
+}
 
 void GraphicalUI::onAnimateTile(AnimateTileEvent* event) {
-    QGridLayout *gameBoard = mainWindow->getGameBoard();
-    std::string overlayText (event->getOverlayText());
-    Tile* tile = event->getAffectedTile();
-    QTile* tileToVisualize = m_Qtiles[{tile->getRow(),tile->getColumn()}];
-    auto v = event->getVisualizations();
-    for (auto it = v.begin(); it!=v.end(); it++){
-        switch (*it){
-        case AnimateTileEvent::colorizeTile :{tileToVisualize->colorize();break;
-        }
+    qDebug() << event;
+    m_animationsQueue.emplace(event);
+}
 
-        case AnimateTileEvent::overlayText :{
-            if (overlayText==tileToVisualize->getTextOverlay()){
-                return; // no need to visualize this change and set delay before next visualization.
-            }
-            tileToVisualize->setTextOverlay(overlayText);
-            break;
-        }
-
-        }
+void GraphicalUI::onVisualizationChange(VisualizationStatusEvent* eventt)
+{
+    if (eventt->getStatus()==VisualizationStatusEvent::Quit){
+        return;
     }
+    while (!m_animationsQueue.empty()){
+        AnimateTileEvent* event = m_animationsQueue.front();
+        QGridLayout *gameBoard = mainWindow->getGameBoard();
+        std::string overlayText (event->getOverlayText());
+        Tile* tile = event->getAffectedTile();
+        QTile* tileToVisualize = m_Qtiles[{tile->getRow(),tile->getColumn()}];
+        auto v = event->getVisualizations();
+        for (auto it = v.begin(); it!=v.end(); it++){
+            switch (*it){
+            case AnimateTileEvent::colorizeTile :{tileToVisualize->colorize();break;
+            }
 
-    QEventLoop loop;
-    QTimer::singleShot(10, &loop, &QEventLoop::quit);
-    loop.exec();
+            case AnimateTileEvent::overlayText :{
+                if (overlayText!=tileToVisualize->getTextOverlay()){
+                    tileToVisualize->setTextOverlay(overlayText);
+                }
+                break;
+            }
+
+            }
+        }
+        QTimer::singleShot(m_loopDuration, m_visualizationLoop, &QEventLoop::quit);
+        m_visualizationLoop->exec();
+        qDebug() << m_loopDuration;
+        m_animationsQueue.pop();
+    }
 }
 
 std::pair<int, int> GraphicalUI::move()
