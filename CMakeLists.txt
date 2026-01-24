@@ -45,6 +45,8 @@ qt_add_executable(prak WIN32 MACOSX_BUNDLE
         AttackController.h AttackController.cpp
         Event.h Event.cpp
         EventBus.h EventBus.cpp
+        Utilities.h Utilities.cpp
+        RandomColor.h RandomColor.cpp
     )
 find_package(Boost REQUIRED)
 
