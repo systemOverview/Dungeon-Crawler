@@ -21,9 +21,9 @@ public:
         "#..___...#"
         "#..___...#"
         "#........#"
-        "#######X##"
+        "#######.##"
         "#...?....#"
-        "#P.......#"
+        "#.....P..#"
         "##########",
 
         "##########"
@@ -39,7 +39,7 @@ public:
 
     };
     Character* m_humanCharacter;
-    GraphicalUI *GUI;
+    GraphicalUI* GUI;
 
 public:
     DungeonCrawler();
