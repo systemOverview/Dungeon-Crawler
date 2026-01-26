@@ -13,6 +13,7 @@ public:
         TileChange,
         QCharacterChange,
         VisualizationStatus,
+        DjikstraSearch
     };
     // Start of notifyListeners templates
     // Used templates for these to be able to overload based on enum, in case in future i had to implement
@@ -43,22 +44,17 @@ public:
         VisualizationStatusEvent::notifyListeners(new VisualizationStatusEvent(status));
     }
 
-    // Start of subscribeToEvent templates.
-    // SubscribeToEvent allows objects to subscribe to certain events, and possibly set filters depending on the event type.
-    // They follow this syntax :EventBus::subscribeToEvent<EventBus::type>(parameters);
     template <Type eventType>
-    inline static void subscribeToEvent(EventListener* listener) // General template
-    {
-        switch (eventType){
-        case CharacterHealthChange: {CharacterHealthChangeEvent::registerListener(listener);break;}
-        case AnimateTile: {AnimateTileEvent::registerListener(listener);break;}
-        case TileChange : {TileChangeEvent::registerListener(listener);break;}
-        case QCharacterChange: {QCharacterChangeEvent::registerListener(listener);break;}
-        case VisualizationStatus: {VisualizationStatusEvent::registerListener(listener);break;}
-
-        default : {throw std::runtime_error( "Template is of an unexisting enum value." );}
-        }
+    static typename std::enable_if<eventType==Type::DjikstraSearch, void>::type transmitEvent(DjikstraSearchEvent* event) {
+        DjikstraSearchEvent::notifyListeners(event);
     }
+
+    template <Type eventType>
+    static typename std::enable_if<eventType==Type::DjikstraSearch, void>::type transmitEvent(std::vector<DjikstraSearchEvent::Loop> loops, std::vector<std::pair<int,int>> startingSearchRange, std::pair<int,int> startingTileCords, std::pair<int,int> targetTileCords) {
+        DjikstraSearchEvent::notifyListeners(new DjikstraSearchEvent(loops, startingSearchRange,startingTileCords,targetTileCords));
+    }
+
+
     //Start of unsubscribe templates.
     template <Type eventType>
     static typename std::enable_if<eventType==Type::QCharacterChange, void>::type unsubscribeFromEvent(EventListener* eventListener, QCharacter* QCharacterToStopListeningTo) {
@@ -70,11 +66,28 @@ public:
         TileChangeEvent::deregisterListener(eventListener);
         QCharacterChangeEvent::deregisterListener(eventListener);
         VisualizationStatusEvent::deregisterListener(eventListener);
-
+        DjikstraSearchEvent::registerListener(eventListener);
     };
 
+    // Start of subscribeToEvent(wrapper for Event::registerListener) definitions.
+    // SubscribeToEvent allows objects to subscribe to certain events, and possibly set filters depending on the event type.
+    // They follow this syntax :EventBus::subscribeToEvent<EventBus::type>(parameters);
+    template <Type eventType>
+    inline static void subscribeToEvent(EventListener* eventListener) // General template
+    {
+        switch (eventType){
+        case CharacterHealthChange: {CharacterHealthChangeEvent::registerListener(eventListener);break;}
+        case AnimateTile: {AnimateTileEvent::registerListener(eventListener);break;}
+        case TileChange : {TileChangeEvent::registerListener(eventListener);break;}
+        case QCharacterChange: {QCharacterChangeEvent::registerListener(eventListener);break;}
+        case VisualizationStatus: {VisualizationStatusEvent::registerListener(eventListener);break;}
+        case DjikstraSearch : {DjikstraSearchEvent::registerListener(eventListener); break;}
 
-    //TileChangeEvent templates.
+        default : {throw std::runtime_error( "subscribeToEvent template is of an unexisting enum value." );}
+        }
+    }
+    //Only for event types with overloaded registerListener.
+    //TileChangeEvent registerListener templates.
     template <Type eventType>
     static typename std::enable_if<eventType==Type::TileChange, void>::type subscribeToEvent(EventListener* eventListener, Tile* TileToListenTo) {
         TileChangeEvent::registerListener(eventListener, TileToListenTo);
@@ -84,7 +97,7 @@ public:
     static typename std::enable_if<eventType==Type::TileChange, void>::type subscribeToEvent(EventListener* eventListener, std::vector<Tile*> TilesToListenTo) {
         TileChangeEvent::registerListener(eventListener, TilesToListenTo);
     }
-    //CharacterHealthChangeEvent templates.
+    //CharacterHealthChangeEvent registerListener templates.
     template <Type eventType>
     static typename std::enable_if<eventType==Type::CharacterHealthChange, void>::type subscribeToEvent(EventListener* eventListener, Character* characterToListenTo) {
         CharacterHealthChangeEvent::registerListener(eventListener, characterToListenTo);
@@ -94,7 +107,7 @@ public:
     static typename std::enable_if<eventType==Type::CharacterHealthChange, void>::type subscribeToEvent(EventListener* eventListener, std::vector<Character*> CharactersToListenTo) {
         CharacterHealthChangeEvent::registerListener(eventListener, CharactersToListenTo);
     }
-    //QCharacterChangeEvent templates.
+    //QCharacterChangeEvent registerListener templates.
     template <Type eventType>
     static typename std::enable_if<eventType==Type::QCharacterChange, void>::type subscribeToEvent(EventListener* eventListener, QCharacter* QcharacterToListenTo) {
         QCharacterChangeEvent::registerListener(eventListener, QcharacterToListenTo);

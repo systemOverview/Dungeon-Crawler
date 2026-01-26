@@ -1,5 +1,6 @@
 #include "Event.h"
 #include "EventBus.h"
+#include "Tile.h"
 #include <QtCore/qdebug.h>
 
 EventListener::~EventListener()
@@ -119,21 +120,6 @@ void QCharacterChangeEvent::deregisterListener(EventListener *eventListener)
 }
 void QCharacterChangeEvent::deregisterListener(EventListener* eventListener, QCharacter* QCharacter)
 {
-    // assert(QCharacterPreferenceRegister.count(eventListener)>0 && "Event listener tried to deregister from specific event it is not subscribed to");
-    // for (auto listenerQCharacterPair = QCharacterPreferenceRegister.begin(); listenerQCharacterPair!=QCharacterPreferenceRegister.end(); listenerQCharacterPair++){
-    //     if ((*listenerQCharacterPair).first==eventListener){
-    //     for (auto it = (*listenerQCharacterPair).second.begin(); it!=(*listenerQCharacterPair).second.end();){
-    //         if ((*it)==QCharacter){
-    //             it = (*listenerQCharacterPair).second.erase(it);
-    //         }
-    //         else{
-    //             it++;
-    //         }
-    //     }
-    //     }
-    // }
-    //    inline static std::map<EventListener*, std::vector<QCharacter*>> QCharacterPreferenceRegister = {};
-
     deregisterListenerAccordingToRegister(eventListener,QCharacter, &QCharacterPreferenceRegister);
 }
 
@@ -166,3 +152,49 @@ void VisualizationStatusEvent::notifyListeners(VisualizationStatusEvent* event) 
         (*it)->onVisualizationChange(event);
     }
 }
+
+
+//Start of DjikstraSearchEvent definitions.
+
+
+
+DjikstraSearchEvent::DjikstraSearchEvent(std::vector<Loop> loops, std::vector<std::pair<int,int>> startingSearchRange, std::pair<int,int> startingTileCords, std::pair<int,int> targetTileCords)
+    :m_loops{loops}, m_startingSearchRange{startingSearchRange}, m_startingTileCords {startingTileCords}, m_targetTileCords(targetTileCords){}
+
+
+std::vector<std::pair<int,int>> DjikstraSearchEvent::getStartingSearchRange() const
+{
+    return m_startingSearchRange;
+}
+
+std::pair<int, int> DjikstraSearchEvent::getStartingTileCords() const{return m_startingTileCords;}
+
+std::pair<int, int> DjikstraSearchEvent::getTargetTileCords() const {return m_targetTileCords; }
+
+std::vector<DjikstraSearchEvent::Loop> DjikstraSearchEvent::getLoops() const{return m_loops;}
+
+
+
+void DjikstraSearchEvent::notifyListeners(DjikstraSearchEvent *event)
+{
+    for (auto it = EventListeners.begin(); it!=EventListeners.end(); it++){
+        (*it)->onDjikstraSearch(event);
+    }
+}
+
+
+
+// Start of Loop Definitions
+
+std::pair<int, int> DjikstraSearchEvent::Loop::getExtractedTileCords() const{return m_extractedTileCords;}
+std::vector<DjikstraSearchEvent::Loop::Neighbour> DjikstraSearchEvent::Loop::getNeighbourTiles() const{return m_neighbourTiles;}
+DjikstraSearchEvent::Loop::Loop(std::pair<int, int> extractedTileCords, std::vector<DjikstraSearchEvent::Loop::Neighbour> neighbourTiles) :
+    m_extractedTileCords{extractedTileCords}, m_neighbourTiles(neighbourTiles){}
+void DjikstraSearchEvent::Loop::setExtractedTile(std::pair<int, int> extractedTileCords) {m_extractedTileCords = extractedTileCords;}
+void DjikstraSearchEvent::Loop::addNeighbourTile (Neighbour neighbour) {m_neighbourTiles.push_back(neighbour);}
+    // Start of Loop::Neighbour Definitions
+DjikstraSearchEvent::Loop::Neighbour::Neighbour(std::pair<int, int> cords, float djikstraValue, bool wasDjikstraValueUpdated) : m_cords{cords}, m_djikstraValue{djikstraValue}, m_wasDjikstraValueUpdated{wasDjikstraValueUpdated}{};
+std::pair<int, int> DjikstraSearchEvent::Loop::Neighbour::getCords() {return m_cords;}
+float DjikstraSearchEvent::Loop::Neighbour::getDjikstraValue() {return m_djikstraValue;}
+bool DjikstraSearchEvent::Loop::Neighbour::wasDjikstraValueUpdated(){return m_wasDjikstraValueUpdated;}
+

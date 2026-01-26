@@ -79,6 +79,7 @@ class CharacterHealthChangeEvent;
 class TileChangeEvent;
 class QCharacterChangeEvent;
 class VisualizationStatusEvent;
+class DjikstraSearchEvent;
 class EventListener{
 public:
     virtual void onCharacterHealthChange(CharacterHealthChangeEvent* event){};
@@ -86,6 +87,7 @@ public:
     virtual void onTileChange(TileChangeEvent* event){};
     virtual void onQCharacterChange(QCharacterChangeEvent* event){};
     virtual void onVisualizationChange(VisualizationStatusEvent* event){};
+    virtual void onDjikstraSearch(DjikstraSearchEvent* event){};
     ~EventListener();
 };
 
@@ -192,7 +194,7 @@ public:
     static void registerListener(EventListener* eventListener, std::vector<QCharacter*> ListOfQCharactersToListenTo);
 };
 
-class VisualizationStatusEvent : private Event<QCharacterChangeEvent>
+class VisualizationStatusEvent : private Event<VisualizationStatusEvent>
 {
     friend class EventBus;
 public:
@@ -210,6 +212,55 @@ public:
 };
 
 
+//Start of DjikstraSearchEvent declaration.
+//This event contains the information about one Djikstra Loop (from the moment it picks a tile out of queue, till it finds the shortest path of that  run).
+class DjikstraSearchEvent : private Event<DjikstraSearchEvent>
+{
+    friend class EventBus;
+public:
+    struct Loop{
+        struct Neighbour{
+        private:
+            std::pair<int,int> m_cords;
+            float m_djikstraValue;
+            bool m_wasDjikstraValueUpdated;
+        public :
+            Neighbour(std::pair<int,int> cords, float djikstraValue, bool wasDjikstraValueUpdated);
+            std::pair<int,int>  getCords();
+            float getDjikstraValue();
+            bool wasDjikstraValueUpdated();
+
+        };
+    private:
+        std::pair<int,int> m_extractedTileCords = {}; // The (strictly one) tile that was extracted from the queue ie the one with the shortest djikstra value in the queue.
+        std::vector<Neighbour> m_neighbourTiles = {};
+        int loopId;
+    public:
+        Loop(std::pair<int,int> extractedTileCords = {}, std::vector<Neighbour> = {});;
+        void setExtractedTile(std::pair<int,int> extractedTileCords);
+        void addNeighbourTile(Neighbour neighbour);
+
+        std::pair<int, int> getExtractedTileCords() const;
+        std::vector<Neighbour> getNeighbourTiles() const;
+    };
+
+
+
+private:
+    std::vector<Loop> m_loops;
+    std::vector<std::pair<int,int>> m_startingSearchRange = {}; //the cords of tiles that were added to the queue of Djikstra at the start. So the GUI can animate setting up the matrix for example.
+    std::pair<int,int> m_startingTileCords;
+    std::pair<int,int> m_targetTileCords;
+public:
+    DjikstraSearchEvent(std::vector<Loop> loops, std::vector<std::pair<int,int>> startingSearchRange, std::pair<int,int> startingTileCords, std::pair<int,int> targetTileCords);
+
+    std::vector<std::pair<int,int>> getStartingSearchRange() const;
+    std::vector<Loop> getLoops() const;
+    std::pair<int,int> getStartingTileCords() const;
+    std::pair<int,int> getTargetTileCords() const;
+    static void notifyListeners(DjikstraSearchEvent* event);
+    using Event::registerListener;
+};
 
 
 #endif // EVENT_H
