@@ -1,5 +1,6 @@
 #ifndef LEVELGRAPH_H
 #define LEVELGRAPH_H
+#include <limits.h>
 #include <map>
 #include <vector>
 #include "tile.h"
@@ -17,6 +18,8 @@ public:
     void setTile(Tile* newTile);
     float getWeight();
     std::vector<std::pair<Vertex*, float>>  getNeighbours();
+    bool isNeighbour(Vertex* vertex);
+    float getNeighbourWeight(Vertex* vertex);
 
 };
 
@@ -31,7 +34,7 @@ public:
     Vertex* addVertex(Tile* tile, float weight);
     void setupAlldges();
     void setupEdgesForVertex(Vertex* vertex);
-    bool isEdgeBetweenTilesPossible(std::string_view firstTileTexture, std::string_view SecondTileTexture);
+    bool isEdgeBetweenTilesPossible(char firstTileTexture, char SecondTileTexture) const;
     Vertex* getVertex(std::pair<int,int> cords);
     std::vector<std::pair<int,int>> getShortestsPathBetweenTwoTiles(Vertex* startingVertex, Vertex* targetVertex, std::string_view algorithmToUse="");
     std::vector<std::pair<int,int>> getShortestsPathBetweenTwoTilesDjikstra(Vertex* startingVertex, Vertex* targetVertex);

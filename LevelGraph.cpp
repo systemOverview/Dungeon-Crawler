@@ -1,5 +1,8 @@
 #include "LevelGraph.h"
 #include <qDebug>
+#include <algorithm>
+#include <ranges>
+#include <random>
 
 Vertex::Vertex(Tile* tile, float weight) : m_tile{tile}, m_weight{weight}{};
 
@@ -26,6 +29,23 @@ std::vector<std::pair<Vertex*, float>> Vertex::getNeighbours(){
     return m_neighbours;
 }
 
+bool Vertex::isNeighbour(Vertex* vertex)
+{
+    for (auto neighbour : m_neighbours){
+        if (neighbour.first==vertex){return true;}
+    }
+    return false;
+}
+
+float Vertex::getNeighbourWeight(Vertex *vertex)
+{
+    for (auto neighbour : m_neighbours){
+        if (neighbour.first==vertex){return neighbour.second;}
+    }
+    assert("Checking for unexisting neighbour in Djikstra.");
+    return 0;
+}
+
 // graph definitions
 
 
@@ -50,28 +70,64 @@ void LevelGraph::setupAlldges()
 
 void LevelGraph::setupEdgesForVertex(Vertex *vertex)
 {
-
     Tile* tile = vertex->getTile();
+    std::vector<std::pair<int,int>> diagonalNeighbours;
+    std::vector<std::pair<int,int>> cardinalNeighbours;
+    bool isDiagonal = false;
+
     for (int i=tile->getRow()-1; i<=tile->getRow()+1 ; i++){
         for (int j=tile->getColumn()-1; j<=tile->getColumn()+1; j++){
-            if ((i!=tile->getRow() || j!=tile->getColumn()) && m_vertexes.count({i,j})){
-                Vertex* neighbourVertex = m_vertexes[{i,j}];
-                Tile* neighbourTile = neighbourVertex->getTile();
+            isDiagonal=!isDiagonal;
 
-                if (isEdgeBetweenTilesPossible(tile->getTexture(), neighbourTile->getTexture())){
-                    vertex->addNeighbour(neighbourVertex, 1);
+            if ((i!=tile->getRow() || j!=tile->getColumn()) && m_vertexes.count({i,j})){
+
+                if (isDiagonal){
+                    diagonalNeighbours.push_back({i,j});
+                }
+                else{
+                    cardinalNeighbours.push_back({i,j});
                 }
             }
         }
     }
+
+    for (std::pair<int,int> cords : diagonalNeighbours ){
+        Vertex* neighbourVertex = m_vertexes[cords];
+        Tile* neighbourTile = neighbourVertex->getTile();
+
+        if (isEdgeBetweenTilesPossible(tile->getTexture(), neighbourTile->getTexture())){
+            vertex->addNeighbour(neighbourVertex, 1.4); // very precise square root of 2
+        }
+    }
+
+    for (std::pair<int,int> cords : cardinalNeighbours ){
+        Vertex* neighbourVertex = m_vertexes[cords];
+        Tile* neighbourTile = neighbourVertex->getTile();
+
+        if (isEdgeBetweenTilesPossible(tile->getTexture(), neighbourTile->getTexture())){
+            vertex->addNeighbour(neighbourVertex, 1);
+        }
+    }
+    // for (int i=tile->getRow()-1; i<=tile->getRow()+1 ; i++){
+    //     for (int j=tile->getColumn()-1; j<=tile->getColumn()+1; j++){
+    //         if ((i!=tile->getRow() || j!=tile->getColumn()) && m_vertexes.count({i,j})){
+    //             Vertex* neighbourVertex = m_vertexes[{i,j}];
+    //             Tile* neighbourTile = neighbourVertex->getTile();
+
+    //             if (isEdgeBetweenTilesPossible(tile->getTexture(), neighbourTile->getTexture())){
+    //                 vertex->addNeighbour(neighbourVertex, 1);
+    //             }
+    //         }
+    //     }
+    // }
 }
 
-bool LevelGraph::isEdgeBetweenTilesPossible(std::string_view firstTileTexture, std::string_view secondTileTexture)
+bool LevelGraph::isEdgeBetweenTilesPossible(char firstTileTexture, char secondTileTexture) const
 {
-    if (secondTileTexture=="#" || secondTileTexture=="$" || secondTileTexture=="X" ){ // treat level changer and closed doors as not a possible path
+    if (secondTileTexture=='#' || secondTileTexture=='$' || secondTileTexture=='X' ){ // treat level changer and closed doors as not a possible path
         return false;
     }
-    else if (firstTileTexture=="_" && (secondTileTexture!="<" && secondTileTexture!="_")){
+    else if (firstTileTexture=='_' && (secondTileTexture!='<' && secondTileTexture!='_')){ // character at pit can only move to pit or ramp
         return false;
     }
     return true;
@@ -92,64 +148,82 @@ std::vector<std::pair<int, int> > LevelGraph::getShortestsPathBetweenTwoTiles(Ve
 {
     return getShortestsPathBetweenTwoTilesDjikstra(startingVertex, targetVertex);
 }
+
 std::vector<std::pair<int, int> > LevelGraph::getShortestsPathBetweenTwoTilesDjikstra(Vertex *startingVertex, Vertex *targetVertex)
 {
-    std::bitset<200> visited;
-    auto bitsetIndex = [](Vertex* vertex) -> int {
-        return (vertex->getTile()->getRow()*10+vertex->getTile()->getColumn());
+    // utils and non-djikstra related (events).
+    std::vector<DjikstraSearchEvent::Loop> loops;
+    std::vector<std::pair<int,int>> startingSearchRange; // The cords of the vertexes we are going to search through, which is basically cords of m_vertexes, but to keep encapsulation and sepearation of concerns, other components don't need to know about the vertexes themselves.
+    constexpr std::pair<int,int> UNEXISTING_TILE = {-1,1};
+    int counter = 0;
+    // initialization
+    std::map<Vertex*, float> distanceRegister;
+    auto compare = [&distanceRegister](Vertex* leftVertex, Vertex* rightVertex) {
+        return (distanceRegister[leftVertex]<distanceRegister[rightVertex]);
     };
-    std::vector<Vertex*> visitedVertexes;
-    std::map<Vertex*, std::vector<std::pair<int,int>>> pathTowardsVertex;
-    std::map<Vertex*, float> djikstraValues;
-    visitedVertexes.push_back(startingVertex);
-    djikstraValues[startingVertex] = 0;
-    visited[bitsetIndex(startingVertex)]=1;
-    pathTowardsVertex[startingVertex] = {};
-    while (true){
-        std::pair<Vertex*, float> shortestPath = {nullptr, 10000};
-        Vertex* leadingVertex = nullptr; // the vertex the shortestPath originated from.
-        int counter=0;
-        for (auto it = visitedVertexes.begin(); it!=visitedVertexes.end();it++){
-            std::vector<std::pair<Vertex*, float>> neighbours = (*it)->getNeighbours();
-            for (auto nit = neighbours.begin(); nit!=neighbours.end(); nit++){
-                if (!visited[bitsetIndex((*nit).first)]){
+    std::map<std::pair<int,int>, std::pair<int,int>> previousRegister; // Tile N2 is the neighbour that led to finding Tile N1.
+    std::vector<Vertex*> queue;
+
+    for (auto const& [position, vertex] : m_vertexes){
+        startingSearchRange.push_back(position); // utils.
+        distanceRegister[vertex] = std::numeric_limits<float>::infinity();
+        previousRegister[vertex->getTile()->getCordsAsPair()] =UNEXISTING_TILE;
+        // UNEXISTING_TILE is {-1,-1} and signifies an out of range Tile, ie : no previous vertex
+        //(if this doesn't get updated by the end of the algorithm, it is either its a starting vertex, or one that is not reached).
+        queue.push_back(vertex);
+
+    }
+    distanceRegister[startingVertex] = 0;
+
+    //
+
+    while (!queue.empty()){
+        DjikstraSearchEvent::Loop loop;
+        auto minimumVertexIterator = std::min_element(queue.begin(), queue.end(), compare); // iterator
+        Vertex* minimumVertex = *(minimumVertexIterator);
+        queue.erase(minimumVertexIterator);
+
+        loop.setExtractedTile(minimumVertex->getTile()->getCordsAsPair()); // EVENT RELATED.
+
+        if (minimumVertex==targetVertex){
+            break;
+        }
+        for (auto vertex : queue){
+            if (minimumVertex->isNeighbour(vertex)){
+                float newDjikstraValue = distanceRegister[minimumVertex]+minimumVertex->getNeighbourWeight(vertex);
+                if (newDjikstraValue < distanceRegister[vertex]){
+                    distanceRegister[vertex] = newDjikstraValue;
+                    loop.addNeighbourTile({vertex->getTile()->getCordsAsPair(), newDjikstraValue, true});
+                    previousRegister[vertex->getTile()->getCordsAsPair()] = minimumVertex->getTile()->getCordsAsPair();
                     counter++;
-                    float value = (*nit).second+djikstraValues[*it];
-                    int intValue = value;
-                    EventBus::transmitEvent<EventBus::AnimateTile>((*nit).first->getTile(), {AnimateTileEvent::overlayText}, std::to_string(intValue));
-                    if (value<shortestPath.second){
-                        shortestPath = {nit->first, value};
-                        leadingVertex = (*it);
-                    }
+                }
+                else{
+                    loop.addNeighbourTile({vertex->getTile()->getCordsAsPair(), newDjikstraValue, false});
                 }
             }
         }
-
-
-        if (shortestPath.first==nullptr){
-            EventBus::transmitEvent<EventBus::VisualizationStatus>(VisualizationStatusEvent::Start);
-            return {};
-        }
-        visitedVertexes.push_back(shortestPath.first);
-        visited[bitsetIndex(shortestPath.first)]=1;
-        djikstraValues[shortestPath.first] = shortestPath.second;
-        std::vector<std::pair<int,int>> leadingVertexPath = pathTowardsVertex[leadingVertex];
-        int newDirectionRow  = (shortestPath.first->getTile()->getRow())-leadingVertex->getTile()->getRow();
-        int newDirectionColumn  = (shortestPath.first->getTile()->getColumn()-leadingVertex->getTile()->getColumn());
-        leadingVertexPath.push_back({newDirectionRow, newDirectionColumn});
-        pathTowardsVertex[shortestPath.first] = leadingVertexPath;
-        int v = shortestPath.second;
-        std::string vv = std::to_string(v);
-        EventBus::transmitEvent<EventBus::AnimateTile>((shortestPath).first->getTile(), {AnimateTileEvent::colorizeTile, AnimateTileEvent::overlayText}, vv);
-
-
-        if (shortestPath.first == targetVertex){
-            EventBus::transmitEvent<EventBus::VisualizationStatus>(VisualizationStatusEvent::Start);
-            return pathTowardsVertex[targetVertex];
-        }
+        loops.push_back(loop);// EVENT RELATED.
     }
-    return {};
+    std::vector<std::pair<int,int>> path = {};
+     std::pair<int,int> currentVertexCords = targetVertex->getTile()->getCordsAsPair();
+    std::pair<int,int> previousVertexCords = previousRegister[currentVertexCords];
+     while (previousVertexCords!=UNEXISTING_TILE){
+        int newDirectionRow  = (currentVertexCords.first-previousVertexCords.first);
+        int newDirectionColumn  = (currentVertexCords.second-previousVertexCords.second);
+        path.push_back({newDirectionRow, newDirectionColumn});
+        currentVertexCords = previousVertexCords;
+        previousVertexCords = previousRegister[previousVertexCords];
+    }
+    std::reverse(path.begin(), path.end());
+
+    // REFACTOR
+    std::vector<Tile*> GIVETOGUI;
+    EventBus::transmitEvent<EventBus::DjikstraSearch>(loops, startingSearchRange, startingVertex->getTile()->getCordsAsPair(), targetVertex->getTile()->getCordsAsPair());
+    return path;
+
 }
+
+
 
 bool LevelGraph::doesVectorHasElement(std::vector<Vertex *> vector, Vertex *element)
 {
