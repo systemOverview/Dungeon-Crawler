@@ -1,8 +1,6 @@
 #ifndef GUARDCONTROLLER_H
 #define GUARDCONTROLLER_H
 #include "AbstractUI.h"
-#include "Level.h"
-#include "tile.h"
 
 class GuardController : public AbstractController
 {
