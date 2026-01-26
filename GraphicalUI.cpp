@@ -86,7 +86,7 @@ void GraphicalUI::draw(Level *level){
         this->level = level;
     }
     QGameField* gameField = mainWindow->getGameField();
-    Overlay* overlay = new Overlay(gameField, m_Qtiles);
+    QOverlay* overlay = new QOverlay(gameField, m_Qtiles);
     gameField->setChild(overlay);
     overlay->setGeometry(gameField->rect());
     overlay->show();
@@ -104,7 +104,7 @@ void GraphicalUI::draw(Level *level){
     overlay->setQTilesRegister(m_Qtiles);
     overlay->raise();
 
-    moverlay = overlay;
+    m_overlayWidget = overlay;
 
 
 }
@@ -157,7 +157,7 @@ void GraphicalUI::DjikstraVisualizeLoop(DjikstraSearchEvent* event, DjikstraSear
     }
     for (DjikstraSearchEvent::Loop::Neighbour& neighbour : loop.getNeighbourTiles()){
         QTile* neighbourQTile = m_Qtiles.at(neighbour.getCords());
-        moverlay->addArrowFromCords(loop.getExtractedTileCords(), neighbour.getCords(), loopId, loopId);
+        m_overlayWidget->addArrowFromCords(loop.getExtractedTileCords(), neighbour.getCords(), loopId, loopId);
         if (neighbour.wasDjikstraValueUpdated()){
             m_graphMatrix->setElementText(neighbour.getCords(), Utilities::FloatToString(neighbour.getDjikstraValue(), 1));
             m_graphMatrix->visualizeElement(neighbour.getCords(), 200);
@@ -169,7 +169,7 @@ void GraphicalUI::DjikstraVisualizeLoop(DjikstraSearchEvent* event, DjikstraSear
 
 
     Utilities::QtSleepMilliSeconds(1000);
-    moverlay->removeArrowsByGroupId(loopId);
+    m_overlayWidget->removeArrowsByGroupId(loopId);
 
 }
 

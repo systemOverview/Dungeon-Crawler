@@ -30,7 +30,7 @@ private:
     std::vector<QWidget *> m_healthBars;
     std::map<std::pair<int,int>, QTile*> m_Qtiles;
     std::vector<QTile*> m_temporarelyAlteredTiles;
-    Overlay* moverlay = nullptr;
+    QOverlay* m_overlayWidget = nullptr;
     QGraphMatrix* m_graphMatrix = nullptr;
     QDjikstraPreviousRegister* m_prevRegisterWidget = nullptr;
     QTypeWriter* m_algorithmStepExplainerField = nullptr;
