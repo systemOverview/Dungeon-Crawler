@@ -1,10 +1,9 @@
 #ifndef ATTACKCONTROLLER_H
 #define ATTACKCONTROLLER_H
 #include "AbstractUI.h"
-#include "LevelGraph.h"
-#include "Level.h"
 #include "Observer.h"
 #include <QtCore/qdebug.h>
+class LevelGraph;
 class AttackController : public AbstractController, public Observer
 {
 private:

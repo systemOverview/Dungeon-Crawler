@@ -1,4 +1,6 @@
 #include "AttackController.h"
+#include "LevelGraph.h"
+#include "Level.h"
 
 AttackController::AttackController(Level *level, LevelGraph *graph): m_level{level}, m_graph{graph}
 {
@@ -7,6 +9,7 @@ AttackController::AttackController(Level *level, LevelGraph *graph): m_level{lev
 
 std::pair<int, int> AttackController::DjikstraMove()
 {
+    qDebug() << m_path;
     std::pair<int,int> move = {0,0};
     if (!isPath){
         std::pair<int,int> attackerCords = m_character->getTile()->getCordsAsPair();
@@ -18,7 +21,6 @@ std::pair<int, int> AttackController::DjikstraMove()
             return {0,0};
         }
         it = m_path.begin();
-        isPath = true;
         move = *it;
         it++;
     }
@@ -31,6 +33,7 @@ std::pair<int, int> AttackController::DjikstraMove()
             it++;
         }
     }
+    // return {0,0};
     return move;
 }
 
