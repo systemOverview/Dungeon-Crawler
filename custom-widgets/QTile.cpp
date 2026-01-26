@@ -2,16 +2,29 @@
 #include <QStyleOption>
 #include <QtGui/qpainter.h>
 #include <QtWidgets/qlabel.h>
+#include <QApplication>
 
+// I am not very sure if fetching/adding a respectively unexisting/already existing tile should be an assertion or exception.
+// But following the logic of the program, the tile (x,y) domain range is fixed (0,0 -> (9,9) and
+// can not allow for a missing or an extra tile, so an attempt to fetch an unexisting tile or to add an existing one would
+// mean that there is a flaw somewhere and even by catching it as an exception there is nothing to do about it, so an assertion
+// made more sense.
 QTile::QTile(QWidget* parent, Tile* tile, QGridLayout* gameBoard) : QWidget(parent), m_tile{tile}, m_gameBoard(gameBoard){
+    assert(QTilesRegister.count(tile->getCordsAsPair())==0 && "QTile being constructed already exists.");
     tile->registerObserver(this);
     EventBus::subscribeToEvent<EventBus::TileChange>(this, tile);
-    setFixedSize(50, 50);
+    setMinimumSize(50, 50);
     m_texturePath = QString::fromStdString(m_tile->getTexturePath());
     if (tile->hasCharacter()) {
         setQCharacter( new QCharacter(tile->getCharacter()));
     }
+    QTilesRegister[tile->getCordsAsPair()] = this;
+}
 
+QTile *QTile::getQTileByCords(std::pair<int, int> cords)
+{
+    assert(QTilesRegister.count(cords)!=0 && "QTile being fetched does not exist.");
+    return (QTilesRegister[cords]);
 
 }
 
@@ -70,16 +83,17 @@ void QTile::reactToChange(std::string changedMemberName)
 {
 }
 
-void QTile::colorize()
+void QTile::markAsVisited()
 {
-    QGraphicsColorizeEffect* effect = new QGraphicsColorizeEffect;
-    effect->setColor(QColor(0, 0, 255));
-    effect->setStrength(0.6);
-    setGraphicsEffect(effect);
+    m_appliedEffect = new QGraphicsColorizeEffect;
+    m_appliedEffect->setColor(QColor(0, 0, 255));
+    m_appliedEffect->setStrength(0.6);
+    setGraphicsEffect(m_appliedEffect);
     QTile::addTemporarelyAlteredTiles(this);
-
-
+    graphicsEffect();
 }
+
+void QTile::unmarkAsVisited(){delete m_appliedEffect;}
 
 void QTile::configurePainterForTextOverlay(QPainter *painter)
 {
@@ -90,6 +104,7 @@ void QTile::configurePainterForTextOverlay(QPainter *painter)
     QFont font = painter->font();
     font.setPixelSize(48);
     painter->setFont(font);
+
 
 }
 
@@ -128,12 +143,11 @@ void QTile::paintEvent(QPaintEvent* event)
     QRect rect = this->rect();
     painter.setPen(QPen(Qt::red));
     painter.setFont(QFont("Times", 12, QFont::Bold));
-    painter.drawText(textureImage.rect(), Qt::AlignCenter, "Text");
 
     painter.drawImage(rect, textureImage);
     if (m_textOverlay!=""){
         configurePainterForTextOverlay(&painter);
-        painter.drawText(rect, QString::fromStdString(m_textOverlay));
+        painter.drawText(rect, Qt::AlignCenter, QString::fromStdString(m_textOverlay));
     }
 
     if (m_QCharacter){
@@ -153,6 +167,11 @@ void QTile::paintEvent(QPaintEvent* event)
         painter.fillRect(healthRect, brush);
     }
 
+}
+
+void QTile::mousePressEvent(QMouseEvent *event)
+{
+    qDebug() << m_tile->getCordsAsPair();
 }
 
 std::pair<QRect, QRect> QTile::getRects(){

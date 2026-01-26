@@ -12,21 +12,26 @@ class QTile : public QWidget, public Observer, public EventListener
     Q_OBJECT
 private:
     inline static int counter = 0;
+    inline static std::map<std::pair<int,int>, QTile*> QTilesRegister = {};
     Tile* m_tile; // The tile it represents, QTile is a view, and m_tile is the model.
     QString m_texturePath;
     QCharacter* m_QCharacter; // The character on that tile.
     QGridLayout* m_gameBoard;
     std::string m_textOverlay; //for algorithms visualization;
+    QGraphicsColorizeEffect* m_appliedEffect;
     inline static std::vector<QTile*> TemporarelyAlteredTiles; // stores qtiles whom style changed temporarly for algorithm visualizations
 public:
     QTile(QWidget* parent, Tile* tile, QGridLayout* gameBoard);
+    static QTile* getQTileByCords(std::pair<int,int> cords);
     QCharacter* getQCharacter();
     void setQCharacter(QCharacter* QChar);
     std::pair<QRect, QRect> getRects();
-    void paintEvent(QPaintEvent* event); // QWidget subclasses must have this function explicity included to use stylesheets.
+    void paintEvent(QPaintEvent* event) override;
+    void mousePressEvent(QMouseEvent *event) override;
     void reactToChange(std::string changedMemberName="") override;
     void changeStyleTemporarly();
-    void colorize();
+    void markAsVisited();
+    void unmarkAsVisited();
     void configurePainterForTextOverlay(QPainter* painter);
     std::string getTextOverlay();
     void setTextOverlay(std::string text);
@@ -34,6 +39,8 @@ public:
     static void removeEffectFromTemporarelyAlteredTiles();
     void onTileChange(TileChangeEvent* event) override;
     virtual void onQCharacterChange(QCharacterChangeEvent* event) override;
+    // int heightForWidth(int width) const override;
+    // QSize sizeHint() const override;
 
 };
 
