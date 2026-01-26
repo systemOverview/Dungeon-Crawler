@@ -5,19 +5,32 @@
 #include "DungeonCrawler.h"
 #include "MainWindow.h"
 #include "startscreen.h"
+#include "UiStrings.h"
 #include <QTimer>
+#include <QtCore/qpropertyanimation.h>
+#include <QtWidgets/qapplication.h>
+#include <QtWidgets/qlabel.h>
+#include <QtWidgets/qmessagebox.h>
 
 
 GraphicalUI::GraphicalUI(Level *lvl, DungeonCrawler *d)
 {
     EventBus::subscribeToEvent<EventBus::AnimateTile>(this);
     EventBus::subscribeToEvent<EventBus::VisualizationStatus>(this);
+    EventBus::subscribeToEvent<EventBus::DjikstraSearch>(this);
 
     level = lvl;
     dc = d;
     startScreen = new StartScreen(this);
     mainWindow = new MainWindow(lvl, this);
     m_visualizationLoop = new QEventLoop();
+    m_graphMatrix = mainWindow->findChild<QGraphMatrix*> ("tileMatrixContainer");
+    m_algorithmStepExplainerField = mainWindow->findChild<QTypeWriter*> ("algorithmStepExplainerField");
+
+    // m_prevRegisterWidget = new QDjikstraPreviousRegister(mainWindow);
+    if (m_graphMatrix==nullptr) assert(0 && "Graph Matrix Widget is not found");
+    if (m_algorithmStepExplainerField==nullptr) assert (0 && "Algorithm Step Explainer Field is not found");
+
 }
 
 GraphicalUI::~GraphicalUI()
@@ -72,63 +85,92 @@ void GraphicalUI::draw(Level *level){
     if (level!=this->level){
         this->level = level;
     }
+    QGameField* gameField = mainWindow->getGameField();
+    Overlay* overlay = new Overlay(gameField, m_Qtiles);
+    gameField->setChild(overlay);
+    overlay->setGeometry(gameField->rect());
+    overlay->show();
+
     QGridLayout *gameBoard = mainWindow->getGameBoard();
     std::vector<std::vector<Tile *> > *tiles = level->getTiles();
     for (int rowIterator = 0; rowIterator < level->getHeight(); rowIterator++) {
         for (int colIterator = 0; colIterator < level->getWidth(); colIterator++) {
             Tile *currentTile = (*tiles)[rowIterator][colIterator];
-            QTile* tileWidget = new QTile(nullptr, currentTile, gameBoard);
-
+            QTile* tileWidget = new QTile(gameField, currentTile, gameBoard);
             m_Qtiles[{rowIterator, colIterator}] = tileWidget;
             gameBoard->addWidget(tileWidget, rowIterator, colIterator);
         }
     }
+    overlay->setQTilesRegister(m_Qtiles);
+    overlay->raise();
+
+    moverlay = overlay;
 
 
 }
 
 void GraphicalUI::quitVisualizationLoop()
 {
+    mainWindow->centralWidget()->setLayout(nullptr);
+    djikstraTest = false;
+    QWidget* widget = new QWidget(mainWindow->centralWidget());
     m_isVisualizeModeOn = false;
     m_visualizationLoop->quit();
 }
 
-void GraphicalUI::onAnimateTile(AnimateTileEvent* event) {
-    qDebug() << event;
-    m_animationsQueue.emplace(event);
+
+void GraphicalUI::onDjikstraSearch(DjikstraSearchEvent *event)
+{
+
+    assert (m_graphMatrix!=nullptr && "Graph matrix is not available. ");
+    int counter = 0;
+    DjikstaInitialSetup(event);
+    for (auto& loop : event->getLoops()){
+        DjikstraVisualizeLoop(event, loop, counter++);
+    }
+
+
 }
 
-void GraphicalUI::onVisualizationChange(VisualizationStatusEvent* eventt)
+void GraphicalUI::DjikstaInitialSetup(DjikstraSearchEvent* event)
 {
-    if (eventt->getStatus()==VisualizationStatusEvent::Quit){
-        return;
+    m_algorithmStepExplainerField->setText(QString::fromStdString(DjikstraStrings::InitialSetup.at(DjikstraStrings::Intro)));
+    m_graphMatrix->initializeMatrix(event->getStartingSearchRange(), "∞", 50);
+    m_graphMatrix->setTextlessElementsStatusToBlocked();
+    m_algorithmStepExplainerField->setText("");
+    // Utilities::QtSleepMilliSeconds(1000);
+
+    m_algorithmStepExplainerField->setText(QString::fromStdString(DjikstraStrings::InitialSetup.at(DjikstraStrings::SetStartingToZero)));
+    std::pair<int,int> startingTileCords = event->getStartingTileCords();
+    m_graphMatrix->setElementText(startingTileCords, {"0"});
+    m_graphMatrix->setElementState(startingTileCords, QGraphMatrix::DjikstraState::Calculated);
+}
+
+void GraphicalUI::DjikstraVisualizeLoop(DjikstraSearchEvent* event, DjikstraSearchEvent::Loop loop, int loopId)
+{
+    QTile* extractedQTile = m_Qtiles.at(loop.getExtractedTileCords());
+    m_graphMatrix->setElementState(loop.getExtractedTileCords(), QGraphMatrix::DjikstraState::Calculated);
+    Utilities::QtSleepMilliSeconds(1000);
+    if (loopId==0){
+        m_algorithmStepExplainerField->setText(QString::fromStdString(DjikstraStrings::Explainers.at(DjikstraStrings::RemoveStartingFromQueue)));
+        m_algorithmStepExplainerField->setText(QString::fromStdString(DjikstraStrings::Explainers.at(DjikstraStrings::ExplainDjikstraValues)));
     }
-    while (m_isVisualizeModeOn && !m_animationsQueue.empty()){
-        AnimateTileEvent* event = m_animationsQueue.front();
-        QGridLayout *gameBoard = mainWindow->getGameBoard();
-        std::string overlayText (event->getOverlayText());
-        Tile* tile = event->getAffectedTile();
-        QTile* tileToVisualize = m_Qtiles[{tile->getRow(),tile->getColumn()}];
-        auto v = event->getVisualizations();
-        for (auto it = v.begin(); it!=v.end(); it++){
-            switch (*it){
-            case AnimateTileEvent::colorizeTile :{tileToVisualize->colorize();break;
-            }
-
-            case AnimateTileEvent::overlayText :{
-                if (overlayText!=tileToVisualize->getTextOverlay()){
-                    tileToVisualize->setTextOverlay(overlayText);
-                }
-                break;
-            }
-
-            }
+    for (DjikstraSearchEvent::Loop::Neighbour& neighbour : loop.getNeighbourTiles()){
+        QTile* neighbourQTile = m_Qtiles.at(neighbour.getCords());
+        moverlay->addArrowFromCords(loop.getExtractedTileCords(), neighbour.getCords(), loopId, loopId);
+        if (neighbour.wasDjikstraValueUpdated()){
+            m_graphMatrix->setElementText(neighbour.getCords(), Utilities::FloatToString(neighbour.getDjikstraValue(), 1));
+            m_graphMatrix->visualizeElement(neighbour.getCords(), 200);
         }
-        QTimer::singleShot(m_loopDuration, m_visualizationLoop, &QEventLoop::quit);
-        m_visualizationLoop->exec();
-        qDebug() << m_loopDuration;
-        m_animationsQueue.pop();
+        else{
+            Utilities::QtSleepMilliSeconds(200);
+        }
     }
+
+
+    Utilities::QtSleepMilliSeconds(1000);
+    moverlay->removeArrowsByGroupId(loopId);
+
 }
 
 std::pair<int, int> GraphicalUI::move()
@@ -138,6 +180,7 @@ std::pair<int, int> GraphicalUI::move()
 
 void GraphicalUI::move(std::pair<int, int> xymove)
 {
+    mainWindow->findChild<QGraphMatrix*> ("tileMatrixContainer")->resetMatrix();
     lastMove = xymove;
     dc->move();
 }
@@ -174,6 +217,9 @@ std::pair<int, int> GraphicalUI::translateMove(int step)
     case 9:
         xymove = {-1, 1};
         return xymove;
+    default:
+        throw std::invalid_argument("Invalid or unhandled step identifier supplied to the translation function. ");
+
     }
 }
 

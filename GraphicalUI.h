@@ -6,9 +6,13 @@
 #include "AbstractUI.h"
 #include "Level.h"
 #include "MainWindow.h"
+#include "QDjikstraPreviousRegister.h"
 #include "QTile.h"
 #include "EventBus.h"
-
+#include "Utilities.h"
+#include "QGraphMatrix.h"
+#include <QTextEdit>
+#include "QTypeWriter.h"
 class DungeonCrawler;
 class GraphicalUI : public AbstractUI, public AbstractController, public EventListener
 {
@@ -26,6 +30,11 @@ private:
     std::vector<QWidget *> m_healthBars;
     std::map<std::pair<int,int>, QTile*> m_Qtiles;
     std::vector<QTile*> m_temporarelyAlteredTiles;
+    Overlay* moverlay = nullptr;
+    QGraphMatrix* m_graphMatrix = nullptr;
+    QDjikstraPreviousRegister* m_prevRegisterWidget = nullptr;
+    QTypeWriter* m_algorithmStepExplainerField = nullptr;
+    bool djikstraTest = true;
 
 public:
     GraphicalUI(Level *lvl, DungeonCrawler *d);
@@ -45,8 +54,13 @@ public:
     void playSound(QString soundLink, float volume);
     void switchWindow();
     void deleteAllTiles();
-    void onAnimateTile(AnimateTileEvent* event) override;
-    void onVisualizationChange(VisualizationStatusEvent* event) override;
+    // Event Functions
+    void onDjikstraSearch(DjikstraSearchEvent* event) override;
+
+    // Djikstra Visualization functions.
+    void DjikstaInitialSetup(DjikstraSearchEvent* event);
+    void DjikstraVisualizeLoop(DjikstraSearchEvent* event, DjikstraSearchEvent::Loop loop, int loopId);
+
 };
 
 #endif // GRAPHICALUI_H
