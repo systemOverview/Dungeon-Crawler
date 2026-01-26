@@ -5,9 +5,63 @@
 #include "Tile.h"
 #include <QtCore/qdebug.h>
 
-std::string_view Tile::getTexture() const
+Tile::Tile(int row, int col, char texture, std::string texturePath) :
+    m_row{row}, m_column{col}, m_texture{texture},  m_texturePath{texturePath}{}
+
+Tile::~Tile() = default;
+
+Tile* Tile::GenerateTile(char texture, int row, int column)
 {
-    return texture;
+    switch(texture){
+    case '.' : return new Floor(row, column);
+    case '#' : return new Wall(row, column);
+    case 'X' : return new Door(row,column);
+    case '?' : return new Switch(row, column);
+    case '_' : return new Pit(row, column);
+    case '<' : return new Ramp(row, column);
+    case '$' : return new LevelChanger(row, column);
+    default : return new Floor(row, column);
+        // players in the game string that generates the tiles are represented by different characters, Level handles generating them,
+        // and we assume they are on a floor.
+    }
+
+
+
+    // else if (gameString[i] == 'X') {
+    //     Door *door = new Door(row, column);
+    //     doors.push_back(door);
+    //     (tiles)[row][column] = door;
+    //     m_graph->addVertex(door, 1);
+    // }
+
+    // else if (gameString[i] == '?') {
+    //     Switch *switcher = new Switch(row, column);
+    //     (tiles)[row][column] = switcher;
+    //     theSwitch = switcher;
+    //     m_graph->addVertex(switcher, 1);
+    // }
+
+    // else if (gameString[i] == '_') {
+    //     Pit *pit = new Pit(row, column);
+    //     (tiles)[row][column] = pit;
+    //     m_graph->addVertex(pit, 1);
+    // }
+
+    // else if (gameString[i] == '<') {
+    //     Ramp *ramp = new Ramp(row, column);
+    //     (tiles)[row][column] = ramp;
+    //     m_graph->addVertex(ramp, 1);
+    // }
+
+    // else if (gameString[i] == '$') {
+    //     LevelChanger *levelChanger = new LevelChanger(row, column);
+    //     (tiles)[row][column] = levelChanger;}
+
+}
+
+char Tile::getTexture() const
+{
+    return m_texture;
 }
 
 bool Tile::hasCharacter() const
@@ -26,19 +80,19 @@ void Tile::setCharacter(Character *characterToPlace)
     EventBus::transmitEvent<EventBus::TileChange>(this, TileChangeEvent::Character);
 }
 
-int Tile::getRow()
+int Tile::getRow() const
 {
-    return row;
+    return m_row;
 }
 
-int Tile::getColumn()
+int Tile::getColumn() const
 {
-    return column;
+    return m_column;
 }
 
-std::pair<int, int> Tile::getCordsAsPair()
+std::pair<int, int> Tile::getCordsAsPair() const
 {
-    return {row, column};
+    return {m_row, m_column};
 }
 
 bool Tile::moveTo(Tile *desTile, Character *who)
@@ -90,10 +144,19 @@ std::pair<bool, Tile *> Tile::onEnter(Character *who)
     return result;
 }
 
-std::string Tile::getTexturePath()
-{
-    return m_texturePath;
+std::string Tile::getTexturePath() const {return m_texturePath;}
+
+
+Portal::Portal(int row, int column, int portalId)
+    : Tile(row, column, 'O', "") {
+    setPortalId(portalId);
 }
+
+bool Portal::isEntrable() { return true; }
+
+void Portal::setPortal(Portal *portal) { portalToAccess = portal; }
+
+void Portal::setPortalId(int portalId) {m_portalId = portalId;setTexturePath(m_portalTexturesRegister[portalId]);}
 
 std::pair<bool, Tile *> Portal::onEnter(Character *who)
 {
@@ -113,11 +176,11 @@ void Door::notify()
 {
     state = !state;
     if (state) {
-        texture = "/";
+        m_texture = '/';
         setTexturePath(":/pics/textures/doors/door2.png");
 
     } else {
-        texture = "X";
+        m_texture = 'X';
         setTexturePath(":/pics/textures/doors/door1.png");
     }
     EventBus::transmitEvent<EventBus::TileChange>(this, TileChangeEvent::DoorStatus);
@@ -128,13 +191,15 @@ void Door::notify()
 
 bool Pit::onLeave(Tile *desTile, Character *who)
 {
-    if (desTile->getTexture() != "<" && desTile->getTexture() != "_") {
+    if (desTile->getTexture() != '<' && desTile->getTexture() != '_') {
         return false;
     }
     return true;
 }
 
-std::string Wall::getTexturePath()
-{
-    return m_texturePath;
+
+
+void Tile::setTexturePath(std::string texturePath){
+    m_texturePath = texturePath;
+    EventBus::transmitEvent<EventBus::TileChange>(this, TileChangeEvent::TextureChange);
 }

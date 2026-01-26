@@ -6,6 +6,10 @@
 #define PRAK_CHARACTER_H
 #include "AbstractUI.h"
 #include "EventBus.h"
+#include "StationaryController.h"
+#include "GuardController.h"
+#include "AttackController.h"
+class LevelGraph;
 class QCharacter;
 class StationaryController;
 class Tile;
@@ -13,46 +17,44 @@ class TerminalUI;
 class Character
 {
 protected:
-    std::string m_texture;
-    std::string m_texturePath;
+    char m_texture;
+    std::string m_texturePath = "/pics/textures/char/front/char_front_1.png";
     int m_strength{};
     int m_stamina{};
     int m_hitPoints{};
-    bool m_isHuman{true};
     Tile *currentTile; // The tile the player is at
-    AbstractController *m_controller;
-    QCharacter* m_QCharacter; // it's QT widget.
+    AbstractController* m_controller;
+    QCharacter* m_QCharacter; // its QT widget.
 
 
 public:
-    Character(std::string_view txt,
-              std::string_view texturePath,
-              int strength,
-              int stamina,
-              Tile *tile = nullptr,
-              bool isHuman = true)
-        : m_texture(txt)
-        , m_texturePath(texturePath)
-        , currentTile(tile)
+
+    Character(char texture,int strength = 20 ,int stamina = 20, Tile* tile = nullptr )
+        : m_texture(texture)
         , m_strength(strength)
         , m_stamina(stamina)
-        , m_isHuman(isHuman)
+        , currentTile(tile)
+
     {
+
         m_hitPoints = getMaxHP();
     };
+
+    static Character* GenerateCharacter(char texture,  Tile* tile=nullptr, Level* level = nullptr, LevelGraph* levelGraph = nullptr);
+
     AbstractUI *getTerminal();
     void setController(AbstractController *controller);
 
-    std::string getTexture() const;
+    char getTexture() const;
     std::string getTexturePath() const;
-    bool isHuman();
-    virtual AbstractController *getController();
-    Tile *getTile() const;
+    bool isHuman() const;
+    virtual AbstractController* getController() const;
+    Tile* getTile() const;
     void setTile(Tile *newTile);
     virtual std::pair<int, int> move();
-    int getMaxHP();
-    int getCurrentHP();
-    bool isAlive();
+    int getMaxHP() const;
+    int getCurrentHP() const;
+    bool isAlive() const;
     void decrementFromHP(int amount);
     void attackPlayer(Character *characterToAttack);
     void setQCharacter(QCharacter* QCharacter);
@@ -63,32 +65,33 @@ public:
 
 class Zombie : public Character
 {
+
 public:
-    Zombie(std::string_view txt,
-           std::string_view texturePath,
-           int strength,
-           int stamina,
-           AbstractController *controller,
+
+    Zombie(char texture,
            Tile *tile = nullptr)
-        : Character(txt, texturePath, strength, stamina, tile, false)
+        : Character(texture, 10, 5, tile)
     {
-        m_controller = controller;
-        m_controller->attachCharacter(this);
+        switch (texture){
+        case 'S' : m_controller  = new class StationaryController(); m_texturePath = "/pics/textures/zombie/zombie_right.png"; break;
+        case 'G' : m_controller = new class GuardController(); m_texturePath = "/pics/textures/zombie/assassin.png"; break;
+        default : throw std::logic_error("Zombie type does not have an assigned controller. ");
+        }
+        if (m_controller){m_controller->attachCharacter(this);}
     };
 };
 
 class Attacker : public Character
 {
 public:
-    Attacker(std::string_view txt,
-           std::string_view texturePath,
-           int strength,
-           int stamina,
-           AbstractController* controller,
+    Attacker(char texture,
+             Level* level ,
+             LevelGraph* levelGraph,
            Tile *tile = nullptr)
-        : Character(txt, texturePath, strength, stamina, tile, false)
+        : Character(texture, 10, 5, tile)
     {
-        m_controller = controller;
+        m_texturePath = "/pics/textures/zombie/attacker.png";
+        m_controller = new AttackController(level, levelGraph);
         m_controller->attachCharacter(this);
     };
 };

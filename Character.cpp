@@ -7,12 +7,23 @@
 #include "header.h"
 #include <qDebug>
 
+Character* Character::GenerateCharacter(char texture,  Tile* tile, Level* level , LevelGraph* levelGraph)
+{
+    switch (texture){
+    case 'P' : return new Character(texture, 20, 20, tile);
+    case 'S' : return new Zombie(texture, tile);
+    case 'G' : return new Zombie(texture,tile);
+    case 'A' : return new Attacker(texture,  level, levelGraph,tile);
+    default : throw std::logic_error("Character type not handled at Character factory.");
+    }
+}
+
 void Character::setController(AbstractController *controller)
 {
     m_controller = controller;
 }
 
-std::string Character::getTexture() const
+char Character::getTexture() const
 {
     return m_texture;
 }
@@ -22,12 +33,12 @@ std::string Character::getTexturePath() const
     return m_texturePath;
 }
 
-bool Character::isHuman()
+bool Character::isHuman() const
 {
-    return m_isHuman;
+    return m_texture=='P';
 }
 
-AbstractController *Character::getController()
+AbstractController *Character::getController() const
 {
     return m_controller;
 }
@@ -47,17 +58,17 @@ std::pair<int, int> Character::move()
     return m_controller->move();
 }
 
-int Character::getMaxHP()
+int Character::getMaxHP() const
 {
     return (20 + m_stamina * 5);
 }
 
-int Character::getCurrentHP()
+int Character::getCurrentHP() const
 {
     return m_hitPoints;
 }
 
-bool Character::isAlive()
+bool Character::isAlive() const
 {
     return m_hitPoints > 0;
 }
