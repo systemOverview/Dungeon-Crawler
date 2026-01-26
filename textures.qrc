@@ -27,6 +27,8 @@
         <file>textures/extra/white-bg.png</file>
         <file>textures/sounds/grunt.wav</file>
         <file>textures/zombie/attacker.png</file>
+        <file>textures/portal/portal2.png</file>
+        <file>textures/portal/portal3.png</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>
