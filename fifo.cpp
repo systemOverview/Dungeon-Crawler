@@ -74,11 +74,6 @@ void Queue<T>::pop_back()
 
     Element<T> *toReturn = arrayPtr[size - 1];
     size--;
-    // capacity = 12
-    // Size = 7
-    // pop_back -> size = 6
-    //
-
     if (size < capacity / 2) {
         this->resize(capacity / 2);
     }
