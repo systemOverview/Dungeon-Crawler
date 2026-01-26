@@ -9,19 +9,15 @@
 
 DungeonCrawler::DungeonCrawler()
 {
-    m_humanCharacter = new Character("P",
-                                              "/pics/textures/char/front/char_front_1.png",
-                                              20,
-                                              20);
-    for (auto& gameString : gameStrings){
-        Level *lvl = new Level(10, 10, gameString);
-        levels.push_back(lvl);
-    }
+    m_humanCharacter = Character::GenerateCharacter('P');
+    Level *lvl = new Level(10, 10, gameStrings.at(0));
+    levels.push_back(lvl);
     currentLevel = levels.begin();
     (*currentLevel)->placePlayingCharacter(m_humanCharacter);
     GUI = new GraphicalUI(*(currentLevel), this);
     m_humanCharacter->setController(GUI);
     // GUI->getStartScreen()->show();
+    GUI->getMainWindow()->setGeometry(110,100,500,500);
     GUI->getMainWindow()->show();
     GUI->draw(*currentLevel);
 }
@@ -78,7 +74,7 @@ void DungeonCrawler::move()
     int newColumn = currentTile->getColumn() + moveToPerform.second;
     Tile *wantedTile = (*currentLevel)->getTile(newRow, newColumn);
     bool isMoveAllowed = currentTile->moveTo(wantedTile, humanCharacter);
-    if (isMoveAllowed && wantedTile->getTexture()=="$"){
+    if (isMoveAllowed && wantedTile->getTexture()=='$'){
         levelUp();
     }
     else{
