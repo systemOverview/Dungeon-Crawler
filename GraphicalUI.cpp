@@ -27,7 +27,6 @@ GraphicalUI::GraphicalUI(Level *lvl, DungeonCrawler *d)
     m_graphMatrix = mainWindow->findChild<QGraphMatrix*> ("tileMatrixContainer");
     m_algorithmStepExplainerField = mainWindow->findChild<QTypeWriter*> ("algorithmStepExplainerField");
 
-    // m_prevRegisterWidget = new QDjikstraPreviousRegister(mainWindow);
     if (m_graphMatrix==nullptr) assert(0 && "Graph Matrix Widget is not found");
     if (m_algorithmStepExplainerField==nullptr) assert (0 && "Algorithm Step Explainer Field is not found");
 

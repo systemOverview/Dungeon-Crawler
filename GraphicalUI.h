@@ -6,7 +6,6 @@
 #include "AbstractUI.h"
 #include "Level.h"
 #include "MainWindow.h"
-#include "QDjikstraPreviousRegister.h"
 #include "QTile.h"
 #include "EventBus.h"
 #include "Utilities.h"
@@ -32,7 +31,6 @@ private:
     std::vector<QTile*> m_temporarelyAlteredTiles;
     QOverlay* m_overlayWidget = nullptr;
     QGraphMatrix* m_graphMatrix = nullptr;
-    QDjikstraPreviousRegister* m_prevRegisterWidget = nullptr;
     QTypeWriter* m_algorithmStepExplainerField = nullptr;
     bool djikstraTest = true;
 

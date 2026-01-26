@@ -1,5 +1,4 @@
 #include "QOverLay.h"
-#include "QDjikstraPreviousRegister.h"
 
 void QOverlay::setRect(QRect r){rectn = r;setGeometry(r);}
 
