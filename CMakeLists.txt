@@ -47,6 +47,7 @@ qt_add_executable(prak WIN32 MACOSX_BUNDLE
         EventBus.h EventBus.cpp
         Utilities.h Utilities.cpp
         RandomColor.h RandomColor.cpp
+        UiStrings.h
     )
 find_package(Boost REQUIRED)
 
