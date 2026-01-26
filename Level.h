@@ -34,7 +34,7 @@ public:
     void placePlayingCharacter(Character*c);
     Character *getPlayableCharacter();
     std::vector<Character *> getNonPlayableCharacters();
-    void setPortals();
+    void setPortals(std::map<int, std::vector<std::pair<int,int>>> portalsCords);
     void setDefaultTiles();
     LevelGraph* getGraph();
 };

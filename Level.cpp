@@ -13,94 +13,47 @@ Level::Level(int height, int width, std::string gameString)
     gameHeight = height;
     gameWidth = width;
     setDefaultTiles();
-
+    std::map<int, Tile*> charactersTiles;
     std::vector<Door *> doors;
     Switch *theSwitch = nullptr;
+    std::map<int,std::vector<std::pair<int,int>>> portalsCords; //portalId : vector containing cords of portals with that id
 
-    for (int i = 0; i < gameString.length(); i++) {
+    for (int i=0; i<gameString.length(); i++){
         int row = i / 10;
         int column = i % 10;
-        if (gameString[i] == '#') {
-            Wall *wall = new Wall(row, column);
-            (tiles)[row][column] = wall;
+        if (gameString[i]=='0' || gameString[i]=='1' || gameString[i]=='2'){
+            int portalIdConvertedToInt = gameString[i] - '0';
+            portalsCords[portalIdConvertedToInt].push_back({row, column});
+
         }
-
-        else if (gameString[i] == 'X') {
-            Door *door = new Door(row, column);
-            doors.push_back(door);
-            (tiles)[row][column] = door;
-            m_graph->addVertex(door, 1);
+        Tile* tile = Tile::GenerateTile(gameString[i], row, column);
+        (tiles)[row][column] = tile;
+        if (dynamic_cast<Door*>(tile)!=nullptr){
+            doors.push_back(dynamic_cast<Door*>(tile));
         }
-
-        else if (gameString[i] == '?') {
-            Switch *switcher = new Switch(row, column);
-            (tiles)[row][column] = switcher;
-            theSwitch = switcher;
-            m_graph->addVertex(switcher, 1);
+        else if (dynamic_cast<Switch*>(tile)!=nullptr){
+            theSwitch = dynamic_cast<Switch*>(tile);
         }
+        if (gameString[i]!='#'){m_graph->addVertex(tile, 1);} // wall, don't add to graph
+        if (gameString[i]=='P' || gameString[i]=='S' || gameString[i] == 'G' || gameString[i]=='A'){charactersTiles.insert({i, tile});} // character.
 
-        else if (gameString[i] == '_') {
-            Pit *pit = new Pit(row, column);
-            (tiles)[row][column] = pit;
-            m_graph->addVertex(pit, 1);
-        }
-
-        else if (gameString[i] == '<') {
-            Ramp *ramp = new Ramp(row, column);
-            (tiles)[row][column] = ramp;
-            m_graph->addVertex(ramp, 1);
-        }
-
-        else if (gameString[i] == '$') {
-            LevelChanger *levelChanger = new LevelChanger(row, column);
-            (tiles)[row][column] = levelChanger;
-        }
-
-        else {
-            Floor *floor = new Floor(row, column);
-            (tiles)[row][column] = floor;
-            m_graph->addVertex(floor, 1);
-
-            if (gameString[i] == 'P') {
-                m_playingCharacterPosition = {row, column};
-            }
-
-            else if (gameString[i] == 'S') {
-                StationaryController *stationaryController = new StationaryController;
-                Character *crc = new Zombie("S",
-                                            "/pics/textures/zombie/zombie_right.png",
-                                            10,
-                                            5,
-                                            stationaryController);
-                placeCharacter(crc, row, column, false);
-
-            }
-
-            else if (gameString[i] == 'G') {
-                GuardController *guardController = new GuardController;
-                Character *crc = new Zombie("G",
-                                            "/pics/textures/zombie/assassin.png",
-                                            10,
-                                            5,
-                                            guardController);
-                placeCharacter(crc, row, column, false);
-            }
-
-            else if (gameString[i] == 'A') {
-                AttackController* attackController = new AttackController(this, m_graph);
-                Character *crc = new Attacker("A",
-                                            "/pics/textures/zombie/attacker.png",
-                                            10,
-                                            5,
-                                            attackController);
-                placeCharacter(crc, row, column, false);
-            }
-        }
     }
-    m_graph->setupAlldges();
+
+    for (auto const& [stringIndex,tile] : charactersTiles){
+        if (gameString[stringIndex]=='P'){m_playingCharacterPosition = {stringIndex/10, stringIndex%10}; continue;}
+        Character* character = Character::GenerateCharacter(gameString[stringIndex], tile, this, m_graph);
+        placeCharacter(character,stringIndex/10 , stringIndex%10, false);
+
+
+    }
+
+    setPortals(portalsCords);
     for (auto door : doors) {
         theSwitch->attach(door);
     }
+    m_graph->setupAlldges();
+
+
 }
 
 Tile *Level::getTile(int row, int col)
@@ -156,18 +109,23 @@ std::vector<Character *> Level::getNonPlayableCharacters()
     return nonPlayableCharacters;
 }
 
-void Level::setPortals()
+void Level::setPortals(std::map<int, std::vector<std::pair<int,int>>> portalsCords)
 {
-    delete (tiles)[3][2];
-    delete (tiles)[5][7];
-    Portal *firstPortal = new Portal(3, 2);
-    Portal *secondPortal = new Portal(5, 7);
-    (tiles)[3][2] = firstPortal;
-    (tiles)[5][7] = secondPortal;
-    firstPortal->setPortal(secondPortal);
-    secondPortal->setPortal(firstPortal);
-    m_graph->getVertex({3,2})->setTile(firstPortal);
-    m_graph->getVertex({5,7})->setTile(secondPortal);
+
+    for (int i=0; i<3; i++){
+        std::pair<int,int> firstCords =portalsCords[i].at(0);
+        std::pair<int,int> secondCords =portalsCords[i].at(1);
+
+        Portal* firstPortal = new Portal(firstCords.first, firstCords.second, i);
+        Portal* secondPortal = new Portal(secondCords.first, secondCords.second, i);
+        (tiles)[firstCords.first][firstCords.second] = firstPortal;
+        (tiles)[secondCords.first][secondCords.second] = secondPortal;
+        firstPortal->setPortal(secondPortal);
+        secondPortal->setPortal(firstPortal);
+        m_graph->addVertex(firstPortal, 1);
+        m_graph->addVertex(secondPortal, 1);
+
+    }
 }
 
 void Level::setDefaultTiles()
