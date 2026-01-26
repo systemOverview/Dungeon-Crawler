@@ -58,3 +58,19 @@ QCharacter::~QCharacter()
 {
 }
 
+// Start of StaticQCharacter definitions.
+
+
+StaticQCharacter::StaticQCharacter(QString texturePath) : m_texturePath{texturePath}
+{
+    setFixedSize(70,70);
+}
+
+void StaticQCharacter::paintEvent(QPaintEvent *event)
+{
+    QPainter painter(this);
+    QImage textureImage (m_texturePath);
+
+    QRect rect = this->rect();
+    painter.drawImage(rect, textureImage);
+}

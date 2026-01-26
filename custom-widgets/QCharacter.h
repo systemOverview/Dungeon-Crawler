@@ -24,4 +24,12 @@ public:
     Character *getCharacter() const;
 };
 
+class StaticQCharacter : public QWidget{ // for the explainer character
+    QString m_texturePath;
+
+public:
+    StaticQCharacter(QString texturePath);
+    void paintEvent(QPaintEvent* event);
+
+};
 #endif // QCHARACTER_H
