@@ -20,7 +20,7 @@ namespace DjikstraStrings{
 
     std::map<DjikstraStringID, std::string>  Explainers ={
             {RemoveStartingFromQueue, "Now that we have everything setup, we start the algorithm. We extract "
-                                      "from the queue, the node that has the minimum Djikstra value, which at start would be ﬁ"
+                                      "from the queue, the node that has the minimum Djikstra value, which at start would be"
                                       "the starting node.  "},
             {ExplainDjikstraValues,
                     "Then we loop through the neighbours. For each neighbour, we calculate a simple equation. "
