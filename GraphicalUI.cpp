@@ -136,27 +136,36 @@ void GraphicalUI::DjikstaInitialSetup(DjikstraSearchEvent* event)
     m_algorithmStepExplainerField->setText(QString::fromStdString(DjikstraStrings::InitialSetup.at(DjikstraStrings::Intro)));
     m_graphMatrix->initializeMatrix(event->getStartingSearchRange(), "∞", 50);
     m_graphMatrix->setTextlessElementsStatusToBlocked();
+    Utilities::QtSleepMilliSeconds(SleepTimeAfterTextDisplay);
     m_algorithmStepExplainerField->setText("");
-    // Utilities::QtSleepMilliSeconds(1000);
 
     m_algorithmStepExplainerField->setText(QString::fromStdString(DjikstraStrings::InitialSetup.at(DjikstraStrings::SetStartingToZero)));
     std::pair<int,int> startingTileCords = event->getStartingTileCords();
     m_graphMatrix->setElementText(startingTileCords, {"0"});
     m_graphMatrix->setElementState(startingTileCords, QGraphMatrix::DjikstraState::Calculated);
+    Utilities::QtSleepMilliSeconds(SleepTimeAfterTextDisplay);
+
 }
 
 void GraphicalUI::DjikstraVisualizeLoop(DjikstraSearchEvent* event, DjikstraSearchEvent::Loop loop, int loopId)
 {
+    auto previousRegister = loop.getPreviousRegister();
     QTile* extractedQTile = m_Qtiles.at(loop.getExtractedTileCords());
     m_graphMatrix->setElementState(loop.getExtractedTileCords(), QGraphMatrix::DjikstraState::Calculated);
-    Utilities::QtSleepMilliSeconds(1000);
+    std::vector<std::pair<int,int>> path = {LevelGraph::generatePathFromPreviousRegister(previousRegister, loop.getExtractedTileCords(), LevelGraph::PathDirection::FromStartingToTarget, LevelGraph::PathCoordinateSystem::Absolute)};
+    m_overlayWidget->addArrowBetweenMultipleTiles(path);
+    Utilities::QtSleepMilliSeconds(100);
+    qDebug() << loop.getExtractedTileCords() <<  path;
     if (loopId==0){
         m_algorithmStepExplainerField->setText(QString::fromStdString(DjikstraStrings::Explainers.at(DjikstraStrings::RemoveStartingFromQueue)));
+        Utilities::QtSleepMilliSeconds(SleepTimeAfterTextDisplay);
         m_algorithmStepExplainerField->setText(QString::fromStdString(DjikstraStrings::Explainers.at(DjikstraStrings::ExplainDjikstraValues)));
+        Utilities::QtSleepMilliSeconds(SleepTimeAfterTextDisplay);
     }
+
     for (DjikstraSearchEvent::Loop::Neighbour& neighbour : loop.getNeighbourTiles()){
         QTile* neighbourQTile = m_Qtiles.at(neighbour.getCords());
-        m_overlayWidget->addArrowFromCords(loop.getExtractedTileCords(), neighbour.getCords(), loopId, loopId);
+        m_overlayWidget->addEdge(loop.getExtractedTileCords(), neighbour.getCords(), loopId, loopId);
         if (neighbour.wasDjikstraValueUpdated()){
             m_graphMatrix->setElementText(neighbour.getCords(), Utilities::FloatToString(neighbour.getDjikstraValue(), 1));
             m_graphMatrix->visualizeElement(neighbour.getCords(), 200);
@@ -167,7 +176,7 @@ void GraphicalUI::DjikstraVisualizeLoop(DjikstraSearchEvent* event, DjikstraSear
     }
 
 
-    Utilities::QtSleepMilliSeconds(1000);
+    Utilities::QtSleepMilliSeconds(100);
     m_overlayWidget->removeArrowsByGroupId(loopId);
 
 }

@@ -16,6 +16,8 @@ class DungeonCrawler;
 class GraphicalUI : public AbstractUI, public AbstractController, public EventListener
 {
 private:
+    inline static int SleepTimeAfterTextDisplay = 1000;  // in milliseconds
+private:
     bool m_isVisualizeModeOn=true;
     QDialog* startScreen;
     MainWindow *mainWindow;
