@@ -187,11 +187,15 @@ void DjikstraSearchEvent::notifyListeners(DjikstraSearchEvent *event)
 // Start of Loop Definitions
 
 std::pair<int, int> DjikstraSearchEvent::Loop::getExtractedTileCords() const{return m_extractedTileCords;}
+
+std::map<std::pair<int, int>, std::pair<int, int> > DjikstraSearchEvent::Loop::getPreviousRegister() {return m_previousRegister;}
 std::vector<DjikstraSearchEvent::Loop::Neighbour> DjikstraSearchEvent::Loop::getNeighbourTiles() const{return m_neighbourTiles;}
 DjikstraSearchEvent::Loop::Loop(std::pair<int, int> extractedTileCords, std::vector<DjikstraSearchEvent::Loop::Neighbour> neighbourTiles) :
     m_extractedTileCords{extractedTileCords}, m_neighbourTiles(neighbourTiles){}
 void DjikstraSearchEvent::Loop::setExtractedTile(std::pair<int, int> extractedTileCords) {m_extractedTileCords = extractedTileCords;}
 void DjikstraSearchEvent::Loop::addNeighbourTile (Neighbour neighbour) {m_neighbourTiles.push_back(neighbour);}
+
+void DjikstraSearchEvent::Loop::setPreviousRegisterAtLoopEnd(std::map<std::pair<int, int>, std::pair<int, int> > reg) {m_previousRegister = reg;}
     // Start of Loop::Neighbour Definitions
 DjikstraSearchEvent::Loop::Neighbour::Neighbour(std::pair<int, int> cords, float djikstraValue, bool wasDjikstraValueUpdated) : m_cords{cords}, m_djikstraValue{djikstraValue}, m_wasDjikstraValueUpdated{wasDjikstraValueUpdated}{};
 std::pair<int, int> DjikstraSearchEvent::Loop::Neighbour::getCords() {return m_cords;}

@@ -232,16 +232,20 @@ public:
 
         };
     private:
-        std::pair<int,int> m_extractedTileCords = {}; // The (strictly one) tile that was extracted from the queue ie the one with the shortest djikstra value in the queue.
+        std::pair<int,int> m_extractedTileCords = {}; // The (strictly one) tile that was extracted from the queue
+        //ie the one with the shortest djikstra value in the queue.
+
         std::vector<Neighbour> m_neighbourTiles = {};
-        int loopId;
+        std::map<std::pair<int,int>, std::pair<int,int>> m_previousRegister= {}; // stores the previous register state at loop end.
     public:
         Loop(std::pair<int,int> extractedTileCords = {}, std::vector<Neighbour> = {});;
         void setExtractedTile(std::pair<int,int> extractedTileCords);
         void addNeighbourTile(Neighbour neighbour);
+        void setPreviousRegisterAtLoopEnd(std::map<std::pair<int,int>, std::pair<int,int>> reg);
 
         std::pair<int, int> getExtractedTileCords() const;
         std::vector<Neighbour> getNeighbourTiles() const;
+        std::map<std::pair<int,int>, std::pair<int,int>> getPreviousRegister();
     };
 
 
