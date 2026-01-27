@@ -25,6 +25,15 @@ public:
 
 class LevelGraph : public Subject, public EventListener
 {
+public:
+    enum PathCoordinateSystem {
+        Absolute,
+        Relative
+    };
+    enum PathDirection {
+        FromStartingToTarget,
+        FromTargetToStarting,
+    };
 private:
     // std::vector<Vertex*> m_vertexes;
     std::map<std::pair<int,int>, Vertex*> m_vertexes; // position : vertex
@@ -38,8 +47,17 @@ public:
     Vertex* getVertex(std::pair<int,int> cords);
     std::vector<std::pair<int,int>> getShortestsPathBetweenTwoTiles(Vertex* startingVertex, Vertex* targetVertex, std::string_view algorithmToUse="");
     std::vector<std::pair<int,int>> getShortestsPathBetweenTwoTilesDjikstra(Vertex* startingVertex, Vertex* targetVertex);
+    static std::vector<std::pair<int,int>> generatePathFromPreviousRegister
+        (std::map<std::pair<int,int>, std::pair<int,int>>& previousRegister,
+        std::pair<int,int> itemToLookupPath,PathDirection pathDirection = PathDirection::FromStartingToTarget,
+        PathCoordinateSystem pathCoordinateSystem = PathCoordinateSystem::Relative
+        );
+    // This function is used by the LevelGraph itself, and the GUI to generate an arrow mapping the whole path.
+    // The GUI only receives an event from the Level Graph and does not hold an object, therefore made static.
+
     bool doesVectorHasElement(std::vector<Vertex*> vector, Vertex* element);
     void onTileChange(TileChangeEvent* event) override;
+
 };
 
 #endif // LEVELGRAPH_H

@@ -156,7 +156,7 @@ std::vector<std::pair<int, int> > LevelGraph::getShortestsPathBetweenTwoTilesDji
     std::vector<std::pair<int,int>> startingSearchRange; // The cords of the vertexes we are going to search through, which is basically cords of m_vertexes, but to keep encapsulation and sepearation of concerns, other components don't need to know about the vertexes themselves.
     constexpr std::pair<int,int> UNEXISTING_TILE = {-1,1};
     int counter = 0;
-    // initialization
+    // initialization phase
     std::map<Vertex*, float> distanceRegister;
     auto compare = [&distanceRegister](Vertex* leftVertex, Vertex* rightVertex) {
         return (distanceRegister[leftVertex]<distanceRegister[rightVertex]);
@@ -167,7 +167,7 @@ std::vector<std::pair<int, int> > LevelGraph::getShortestsPathBetweenTwoTilesDji
     for (auto const& [position, vertex] : m_vertexes){
         startingSearchRange.push_back(position); // utils.
         distanceRegister[vertex] = std::numeric_limits<float>::infinity();
-        previousRegister[vertex->getTile()->getCordsAsPair()] =UNEXISTING_TILE;
+        previousRegister[vertex->getTile()->getCordsAsPair()] =UNEXISTING_TILE; // sentinel value
         // UNEXISTING_TILE is {-1,-1} and signifies an out of range Tile, ie : no previous vertex
         //(if this doesn't get updated by the end of the algorithm, it is either its a starting vertex, or one that is not reached).
         queue.push_back(vertex);
@@ -175,7 +175,7 @@ std::vector<std::pair<int, int> > LevelGraph::getShortestsPathBetweenTwoTilesDji
     }
     distanceRegister[startingVertex] = 0;
 
-    //
+    // node selection phase
 
     while (!queue.empty()){
         DjikstraSearchEvent::Loop loop;
@@ -188,20 +188,22 @@ std::vector<std::pair<int, int> > LevelGraph::getShortestsPathBetweenTwoTilesDji
         if (minimumVertex==targetVertex){
             break;
         }
+        // distance calculation and relaxation
         for (auto vertex : queue){
             if (minimumVertex->isNeighbour(vertex)){
                 float newDjikstraValue = distanceRegister[minimumVertex]+minimumVertex->getNeighbourWeight(vertex);
                 if (newDjikstraValue < distanceRegister[vertex]){
                     distanceRegister[vertex] = newDjikstraValue;
-                    loop.addNeighbourTile({vertex->getTile()->getCordsAsPair(), newDjikstraValue, true});
+                    loop.addNeighbourTile({vertex->getTile()->getCordsAsPair(), newDjikstraValue, true});// EVENT RELATED.
                     previousRegister[vertex->getTile()->getCordsAsPair()] = minimumVertex->getTile()->getCordsAsPair();
                     counter++;
                 }
                 else{
-                    loop.addNeighbourTile({vertex->getTile()->getCordsAsPair(), newDjikstraValue, false});
+                    loop.addNeighbourTile({vertex->getTile()->getCordsAsPair(), newDjikstraValue, false});// EVENT RELATED.
                 }
             }
         }
+        loop.setPreviousRegisterAtLoopEnd(previousRegister);
         loops.push_back(loop);// EVENT RELATED.
     }
     std::vector<std::pair<int,int>> path = {};
@@ -219,7 +221,44 @@ std::vector<std::pair<int, int> > LevelGraph::getShortestsPathBetweenTwoTilesDji
     // REFACTOR
     std::vector<Tile*> GIVETOGUI;
     EventBus::transmitEvent<EventBus::DjikstraSearch>(loops, startingSearchRange, startingVertex->getTile()->getCordsAsPair(), targetVertex->getTile()->getCordsAsPair());
-    return path;
+    return generatePathFromPreviousRegister(previousRegister, targetVertex->getTile()->getCordsAsPair());
+
+}
+
+std::vector<std::pair<int, int> > LevelGraph::generatePathFromPreviousRegister(std::map<std::pair<int, int>, std::pair<int, int>>& previousRegister, std::pair<int, int> itemToLookupPath, PathDirection pathDirection, PathCoordinateSystem pathCoordinateSystem)
+{
+    constexpr std::pair<int,int> UNEXISTING_TILE = {-1,1}; //sentinel value
+    std::vector<std::pair<int,int>> path;
+    std::pair<int,int> currentVertexCords = itemToLookupPath;
+    std::pair<int,int> previousVertexCords = previousRegister[currentVertexCords];
+    if (pathCoordinateSystem == Absolute){path.push_back(currentVertexCords);}
+    while (previousVertexCords!=UNEXISTING_TILE){
+        switch (pathCoordinateSystem){
+        case Relative : {
+            int newDirectionRow  = (currentVertexCords.first-previousVertexCords.first);
+            int newDirectionColumn  = (currentVertexCords.second-previousVertexCords.second);
+            path.push_back({newDirectionRow, newDirectionColumn});
+            break;
+        }
+        case Absolute : {
+            path.push_back(previousVertexCords);
+            break;
+        }
+        default : throw std::invalid_argument("Unhandled path coordinate system. ");break;
+
+        }
+        currentVertexCords = previousVertexCords;
+        previousVertexCords = previousRegister[previousVertexCords];
+    }
+    // The register stores the previous tile cords, so if starting is 0 and target is n,
+    // n refers to n-1, n-1 refers to n-2 and so on, which means that the path from the while loop would by default
+    // be from target to starting, depending on the pathDirection flag, we either reverse it or leave it as it is.
+
+    switch (pathDirection){
+    case FromTargetToStarting : return path;
+    case FromStartingToTarget : std::reverse(path.begin(), path.end()); return path;
+    default : throw std::invalid_argument("Unhandled direction path. ");
+    }
 
 }
 
