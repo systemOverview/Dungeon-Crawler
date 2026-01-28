@@ -4,6 +4,7 @@ project(prak LANGUAGES CXX)
 find_package(Qt6 6.5 REQUIRED COMPONENTS Core Widgets)
 find_package(Qt6 REQUIRED COMPONENTS Multimedia)
 find_package(Qt6 REQUIRED COMPONENTS Widgets)
+find_package(nlohmann_json 3.12.0 REQUIRED)
 
 qt_standard_project_setup()
 
@@ -47,7 +48,10 @@ qt_add_executable(prak WIN32 MACOSX_BUNDLE
         EventBus.h EventBus.cpp
         Utilities.h Utilities.cpp
         RandomColor.h RandomColor.cpp
-        UiStrings.h
+        Constants.h
+        gamedata/level.json
+        JsonObjects.cpp
+        JsonObjects.h
     )
 find_package(Boost REQUIRED)
 
@@ -62,6 +66,7 @@ target_link_libraries(prak
 )
 target_link_libraries(prak PRIVATE Qt6::Widgets)
 target_link_libraries(prak PRIVATE custom-widgets)
+target_link_libraries(prak PUBLIC nlohmann_json::nlohmann_json)
 
 
 include(GNUInstallDirs)
@@ -78,6 +83,5 @@ qt_generate_deploy_app_script(
     NO_UNSUPPORTED_PLATFORM_ERROR
 )
 install(SCRIPT ${deploy_script})
-
 
 
