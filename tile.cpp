@@ -2,61 +2,37 @@
 // Created by MBK on 12.11.25.
 //
 
-#include "Tile.h"
+#include "tile.h"
 #include <QtCore/qdebug.h>
 
-Tile::Tile(int row, int col, char texture, std::string texturePath) :
-    m_row{row}, m_column{col}, m_texture{texture},  m_texturePath{texturePath}{}
+Tile::Tile(int row, int col, char texture, std::string texturePath, int djikstraExtraCost) :
+    m_row{row}, m_column{col}, m_texture{texture},  m_texturePath{texturePath}, m_djikstraExtraCost{djikstraExtraCost}{}
 
 Tile::~Tile() = default;
 
-Tile* Tile::GenerateTile(char texture, int row, int column)
+Tile* Tile::GenerateTile(char texture, int row, int column, int djikstraExtraCost)
 {
     switch(texture){
-    case '.' : return new Floor(row, column);
-    case '#' : return new Wall(row, column);
-    case 'X' : return new Door(row,column);
-    case '?' : return new Switch(row, column);
-    case '_' : return new Pit(row, column);
-    case '<' : return new Ramp(row, column);
+    case '.' : return new Floor(row, column, djikstraExtraCost);
+    case '#' : return new Wall(row, column, djikstraExtraCost);
+    case 'X' : return new Door(row,column, true, djikstraExtraCost);
+    case '/' : return new Door(row,column,false, djikstraExtraCost);
+    case '?' : return new Switch(row, column, djikstraExtraCost);
+    case '_' : return new Pit(row, column, djikstraExtraCost);
+    case '<' : return new Ramp(row, column, djikstraExtraCost);
     case '$' : return new LevelChanger(row, column);
-    default : return new Floor(row, column);
-        // players in the game string that generates the tiles are represented by different characters, Level handles generating them,
-        // and we assume they are on a floor.
+    case '!' : return new GameWinner (row, column);
+
+    default :
+    {
+        if (texture-'0'<10){ // portals are identified by numbers
+            std::cout << "texture" << texture-'0';
+            return new Portal(row, column, texture-'0');
+        }
+        return new Floor(row, column, djikstraExtraCost);
     }
 
-
-
-    // else if (gameString[i] == 'X') {
-    //     Door *door = new Door(row, column);
-    //     doors.push_back(door);
-    //     (tiles)[row][column] = door;
-    //     m_graph->addVertex(door, 1);
-    // }
-
-    // else if (gameString[i] == '?') {
-    //     Switch *switcher = new Switch(row, column);
-    //     (tiles)[row][column] = switcher;
-    //     theSwitch = switcher;
-    //     m_graph->addVertex(switcher, 1);
-    // }
-
-    // else if (gameString[i] == '_') {
-    //     Pit *pit = new Pit(row, column);
-    //     (tiles)[row][column] = pit;
-    //     m_graph->addVertex(pit, 1);
-    // }
-
-    // else if (gameString[i] == '<') {
-    //     Ramp *ramp = new Ramp(row, column);
-    //     (tiles)[row][column] = ramp;
-    //     m_graph->addVertex(ramp, 1);
-    // }
-
-    // else if (gameString[i] == '$') {
-    //     LevelChanger *levelChanger = new LevelChanger(row, column);
-    //     (tiles)[row][column] = levelChanger;}
-
+    }
 }
 
 char Tile::getTexture() const
@@ -95,52 +71,15 @@ std::pair<int, int> Tile::getCordsAsPair() const
     return {m_row, m_column};
 }
 
-bool Tile::moveTo(Tile *desTile, Character *who)
-{
-    if (onLeave(desTile, who)) {
-        std::pair<bool, Tile *> onEnterResult = desTile->onEnter(who);
-        if (onEnterResult.first == false) {
-            return false;
-        }
 
-        Tile *tileToMoveTo;
-
-        if (onEnterResult.second != nullptr) {
-            tileToMoveTo= onEnterResult.second; // if onEnter returns a non-nullptr as it's second argument, then it is the portal that the player will access
-        } else {
-            tileToMoveTo= desTile; // if onEnter returns a nullptr as it's second argument, then the desTile is a normal tile to be accessed
-        }
-        if (tileToMoveTo->hasCharacter()) {
-            Character *characterAtWantedTile = tileToMoveTo->getCharacter();
-            if (characterAtWantedTile->isHuman()!= who->isHuman()) { // then it means they are a human and a zombie, which means that they can fight
-                who->attackPlayer(characterAtWantedTile);
-                if (characterAtWantedTile->isAlive()) {
-                    characterAtWantedTile->attackPlayer(who);
-
-                } else {
-                    who->setTile(tileToMoveTo);
-                    tileToMoveTo->setCharacter(who);
-                    setCharacter(nullptr);
-                }
-            }
-        } else {
-            who->setTile(tileToMoveTo);
-            tileToMoveTo->setCharacter(who);
-            setCharacter(nullptr);
-        }
-        return true;
-    }
-    return false;
-}
-
-bool Tile::onLeave(Tile *desTile, Character *who)
+bool Tile::onLeave(Tile *desTile)
 {
     return true;
 }
 
-std::pair<bool, Tile *> Tile::onEnter(Character *who)
+std::pair<bool, Tile *> Tile::onEnter()
 {
-    std::pair<bool, Tile *> result(isEntrable(), nullptr);
+    std::pair<bool, Tile *> result(isEntrable(), this);
     return result;
 }
 
@@ -150,24 +89,46 @@ std::string Tile::getTexturePath() const {return m_texturePath;}
 Portal::Portal(int row, int column, int portalId)
     : Tile(row, column, 'O', "") {
     setPortalId(portalId);
+    EventBus::transmitEvent<EventBus::PortalCreation>(this);
+    EventBus::subscribeToEvent<EventBus::PortalCreation>(this, portalId);
+
 }
 
 bool Portal::isEntrable() { return true; }
 
-void Portal::setPortal(Portal *portal) { portalToAccess = portal; }
+void Portal::setPortal(Portal *portal) { m_siblingPortal = portal; }
 
-void Portal::setPortalId(int portalId) {m_portalId = portalId;setTexturePath(m_portalTexturesRegister[portalId]);}
-
-std::pair<bool, Tile *> Portal::onEnter(Character *who)
+void Portal::setPortalId(int portalId)
 {
-    std::pair<bool, Tile *> result(isEntrable(), portalToAccess);
+    m_portalId = portalId;
+    setTexturePath(m_portalTexturesRegister[portalId%3]);}
+
+int Portal::getPortalId(){return m_portalId;}
+
+Portal* Portal::getSiblingPortal()
+{
+    return m_siblingPortal;
+}
+
+std::pair<bool, Tile *> Portal::onEnter()
+{
+    std::pair<bool, Tile *> result(isEntrable(), m_siblingPortal);
     return result;
 }
 
-std::pair<bool, Tile *> Switch::onEnter(Character *who)
+void Portal::onPortalCreation(PortalCreationEvent *event)
+{
+    qDebug() << m_portalId;
+    assert(m_siblingPortal==nullptr && "More than two portals with the same id"); // for now maximum amount of portals with the same id is 2
+    setPortal(event->getCreatedPortal());
+    event->getCreatedPortal()->setPortal(this);
+
+}
+
+std::pair<bool, Tile *> Switch::onEnter()
 {
     activate();
-    std::pair<bool, Tile *> result(isEntrable(), nullptr);
+    std::pair<bool, Tile *> result(isEntrable(), this);
     return result;
 }
 
@@ -189,7 +150,7 @@ void Door::notify()
 
 /*pit*/
 
-bool Pit::onLeave(Tile *desTile, Character *who)
+bool Pit::onLeave(Tile *desTile)
 {
     if (desTile->getTexture() != '<' && desTile->getTexture() != '_') {
         return false;
@@ -202,4 +163,38 @@ bool Pit::onLeave(Tile *desTile, Character *who)
 void Tile::setTexturePath(std::string texturePath){
     m_texturePath = texturePath;
     EventBus::transmitEvent<EventBus::TileChange>(this, TileChangeEvent::TextureChange);
+}
+
+int Tile::getDjikstraExtraCost() const
+{
+    return m_djikstraExtraCost;
+}
+
+void Tile::SetAllowedDjikstraValueChanges(int amount)
+{
+    AllowedDjikstraValueChanges = amount;
+}
+
+bool Tile::setDjikstraExtraCost(int cost)
+{
+    if (Tile::AllowedDjikstraValueChanges>0){
+        m_djikstraExtraCost = cost;
+        Tile::AllowedDjikstraValueChanges-=1;
+        return true;
+    }
+    return false;
+}
+
+// Tile *Tile::generateTileFromJSONState(TileState &tile)
+// {
+//     return Tile::GenerateTile(tile.texture, tile.row, tile.col);
+// }
+
+void to_json(json &jsonObject, const Tile* tileObject){
+    jsonObject = json {
+            {"texture",  tileObject->getTexture() },
+             {"row", tileObject->getRow()},
+             {"column", tileObject->getColumn()},
+               {"Djikstra Extra Cost", tileObject->getDjikstraExtraCost()}
+    };
 }
