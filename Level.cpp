@@ -8,24 +8,25 @@
 #include "AttackController.h"
 #include <qDebug>
 
-Level::Level(int height, int width, std::string gameString)
+void Level::addCharacter(Character* character)
 {
-    gameHeight = height;
-    gameWidth = width;
+    m_characters.push_back(character);
+    if (character->getTexture()!='P') {
+        nonPlayableCharacters.push_back(character);
+    }
+}
+
+Level::Level(int height, int width, std::string gameString, bool isActive) :
+    m_gameHeight {height}, m_gameWidth{width}
+{
+
     setDefaultTiles();
     std::map<int, Tile*> charactersTiles;
     std::vector<Door *> doors;
     Switch *theSwitch = nullptr;
-    std::map<int,std::vector<std::pair<int,int>>> portalsCords; //portalId : vector containing cords of portals with that id
-
     for (int i=0; i<gameString.length(); i++){
         int row = i / 10;
         int column = i % 10;
-        if (gameString[i]=='0' || gameString[i]=='1' || gameString[i]=='2'){
-            int portalIdConvertedToInt = gameString[i] - '0';
-            portalsCords[portalIdConvertedToInt].push_back({row, column});
-
-        }
         Tile* tile = Tile::GenerateTile(gameString[i], row, column);
         (tiles)[row][column] = tile;
         if (dynamic_cast<Door*>(tile)!=nullptr){
@@ -35,26 +36,83 @@ Level::Level(int height, int width, std::string gameString)
             theSwitch = dynamic_cast<Switch*>(tile);
         }
         if (gameString[i]!='#'){m_graph->addVertex(tile, 1);} // wall, don't add to graph
-        if (gameString[i]=='P' || gameString[i]=='S' || gameString[i] == 'G' || gameString[i]=='A'){charactersTiles.insert({i, tile});} // character.
-
+        if (gameString[i]=='P' || gameString[i]=='S' || gameString[i] == 'G' || gameString[i]=='A'){
+            if (gameString[i]=='P'){
+                m_initialHumanCharacterTile = tile;
+                addCharacter(HumanCharacter);
+                continue;
+            }
+            qDebug() << gameString[i] << tile->getCordsAsPair();
+            Character* character = Character::GenerateCharacter(gameString[i], -1, tile, this, m_graph);
+            addCharacter(character);
     }
 
-    for (auto const& [stringIndex,tile] : charactersTiles){
-        if (gameString[stringIndex]=='P'){m_playingCharacterPosition = {stringIndex/10, stringIndex%10}; continue;}
-        Character* character = Character::GenerateCharacter(gameString[stringIndex], tile, this, m_graph);
-        placeCharacter(character,stringIndex/10 , stringIndex%10, false);
-
-
+    if (theSwitch){
+        for (auto door : doors) {
+            theSwitch->attach(door);
+        }
     }
-
-    setPortals(portalsCords);
-    for (auto door : doors) {
-        theSwitch->attach(door);
     }
     m_graph->setupAlldges();
-
-
+    assert(m_initialHumanCharacterTile!=nullptr && "No tile for the human character was assigned" );
 }
+
+Level::Level(json levelJson)
+{
+    setDefaultTiles();
+    std::map<int, Tile*> charactersTiles;
+    std::vector<Door *> doors;
+    Switch *theSwitch = nullptr;
+    std::cout << levelJson["Level"]["Characters"];
+
+    for (const auto& tileJson : levelJson["Level"]["Tiles"]){
+        // std::cout << tileJson.at("row").get<int>() ;
+        char texture = tileJson.at("texture").get<char>();
+        Tile* tile = Tile::GenerateTile(texture, tileJson.at("row"), tileJson.at("column"), tileJson.at("Djikstra Extra Cost"));
+        (tiles)[tileJson.at("row")][tileJson.at("column")] = tile;
+
+        if (dynamic_cast<Door*>(tile)!=nullptr){
+            doors.push_back(dynamic_cast<Door*>(tile));
+        }
+        else if (dynamic_cast<Switch*>(tile)!=nullptr){
+            theSwitch = dynamic_cast<Switch*>(tile);
+        }
+        if (texture!='#'){m_graph->addVertex(tile, 1);} // wall, don't add to graph
+
+    }
+    for (const auto& characterJson : levelJson["Level"]["Characters"]){
+
+        char texture = characterJson.at("texture").get<char>();
+        int row = characterJson.at("row").get<int>();
+        int col = characterJson.at("column").get<int>();
+        int HP = characterJson.at("HP").get<int>();
+        std::cout <<"char"<<  texture;
+        Tile* tile = tiles[row][col];
+            if (texture=='P'){
+                m_initialHumanCharacterTile = tile;
+                if (HP!=-100){ // sentinel value, explained in jsonobjects.cpp
+                HumanCharacter->decrementFromHP(HumanCharacter->getMaxHP() - HP);
+                }
+                addCharacter(HumanCharacter);
+                continue;
+            }
+            qDebug() << texture << tile->getCordsAsPair();
+            Character* character = Character::GenerateCharacter(texture, HP, tile, this, m_graph);
+            addCharacter(character);
+    }
+
+    if (theSwitch){
+        for (auto door : doors) theSwitch->attach(door);
+    }
+
+    m_graph->setupAlldges();
+    assert(m_initialHumanCharacterTile!=nullptr && "No tile for the human character was assigned" );
+    qDebug() << "generated";
+}
+
+
+
+
 
 Tile *Level::getTile(int row, int col)
 {
@@ -69,39 +127,17 @@ std::vector<std::vector<Tile *>> *Level::getTiles()
 
 int Level::getHeight() const
 {
-    return gameHeight;
+    return m_gameHeight;
 }
 
 int Level::getWidth() const
 {
-    return gameWidth;
-}
-
-void Level::placeCharacter(Character *c, int row, int col, bool isPlayable)
-{
-    Tile *tileToPlaceAt = tiles[row][col];
-    tileToPlaceAt->setCharacter(c);
-    c->setTile(tileToPlaceAt);
-    characters.push_back(c);
-    if (isPlayable) {
-        playableCharacter = c;
-    } else {
-        nonPlayableCharacters.push_back(c);
-    }
-}
-
-void Level::placePlayingCharacter(Character *c)
-{
-    // this function is called by the dungeon controller, since the playing character is the same across all levels
-    // everytime a player levels up, the controller calls this to place the character. The other characters (NPCs)
-    // don't move across levels.
-
-    placeCharacter(c, m_playingCharacterPosition.first, m_playingCharacterPosition.second, true);
+    return m_gameWidth;
 }
 
 Character *Level::getPlayableCharacter()
 {
-    return playableCharacter;
+    return HumanCharacter;
 }
 
 std::vector<Character *> Level::getNonPlayableCharacters()
@@ -109,31 +145,13 @@ std::vector<Character *> Level::getNonPlayableCharacters()
     return nonPlayableCharacters;
 }
 
-void Level::setPortals(std::map<int, std::vector<std::pair<int,int>>> portalsCords)
-{
-
-    for (int i=0; i<3; i++){
-        std::pair<int,int> firstCords =portalsCords[i].at(0);
-        std::pair<int,int> secondCords =portalsCords[i].at(1);
-
-        Portal* firstPortal = new Portal(firstCords.first, firstCords.second, i);
-        Portal* secondPortal = new Portal(secondCords.first, secondCords.second, i);
-        (tiles)[firstCords.first][firstCords.second] = firstPortal;
-        (tiles)[secondCords.first][secondCords.second] = secondPortal;
-        firstPortal->setPortal(secondPortal);
-        secondPortal->setPortal(firstPortal);
-        m_graph->addVertex(firstPortal, 1);
-        m_graph->addVertex(secondPortal, 1);
-
-    }
-}
 
 void Level::setDefaultTiles()
 {
-    for (int i = 0; i < gameHeight; i++) {
+    for (int i = 0; i < m_gameHeight; i++) {
         std::vector<Tile *> row;
         tiles.push_back(row);
-        for (int j = 0; j < gameWidth; j++) {
+        for (int j = 0; j < m_gameWidth; j++) {
             tiles[i].push_back(nullptr);
         }
     }
@@ -142,4 +160,72 @@ void Level::setDefaultTiles()
 LevelGraph *Level::getGraph()
 {
     return m_graph;
+}
+
+void Level::activateLevel()
+{
+    for (auto character : m_characters){
+        Tile* tileToPlaceAt = character->getTile();
+
+        if (character->getTexture()=='P'){
+            tileToPlaceAt = m_initialHumanCharacterTile;
+        }
+        assert(tileToPlaceAt!=nullptr);
+        tileToPlaceAt->setCharacter(character);
+        character->setTile(tileToPlaceAt);
+
+    }
+    m_isActivated = true;
+    Tile::SetAllowedDjikstraValueChanges(3);
+}
+
+Tile *Level::getInitialHumanCharacterTile() const
+{
+    return m_initialHumanCharacterTile;
+}
+
+bool Level::isActivated() const
+{
+    return m_isActivated;
+}
+
+void Level::removeCharacter(Character *character)
+{
+    for (auto it = m_characters.begin(); it!=m_characters.end();)
+    {
+        if (*it==character){
+            it = m_characters.erase(it);
+        }
+        else{
+            it++;
+        }
+    }
+
+    for (auto it = nonPlayableCharacters.begin(); it!=nonPlayableCharacters.end();)
+    {
+        if (*it==character){
+            it = nonPlayableCharacters.erase(it);
+        }
+        else{
+            it++;
+        }
+    }
+}
+
+Level::~Level()
+{
+    for (std::vector<Tile*> row : tiles){
+        for (Tile* tile : row){
+            delete tile;
+            tile = nullptr;
+        }
+        row.clear();
+    }
+    tiles.clear();
+    for (Character* NPC : nonPlayableCharacters){
+        delete NPC;
+        NPC = nullptr;
+    }
+    nonPlayableCharacters.clear();
+    delete m_graph;
 }
