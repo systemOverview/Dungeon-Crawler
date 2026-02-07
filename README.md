@@ -1,6 +1,6 @@
 # Dungeon Crawler
 
-A C++ project for the programming 2 class at HDA. 10*10 game field, with one human characters against multiple computer characters. The goal is to get to the final tile of the last level without dying. 
+A C++ project for the programming 2 class at HDA. 10*10 game field, with one human characters against multiple computer characters (with multiple types, all of them follow the same sequence of moves except "Attacker" that uses Dijkstra algorithm to find the shortest path to the human. The goal is to get to the final tile of the last level without dying. 
 
 The game also features a Dijkstra algorithm visualizer as a fun add-on. Enable visualization mode on the dropbox after starting a game, and one of the characters (type Attacker) will explain to you how he implemented Dijkstra to find the shortest path to you!
 
