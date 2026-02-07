@@ -1,6 +1,7 @@
 #include "QGameField.h"
 #include <QtGui/qpainter.h>
 #include <QLayout>
+#include <QFontDatabase>
 QGameField::QGameField(QWidget* parent)
     : QWidget{parent}
 {
@@ -8,7 +9,9 @@ QGameField::QGameField(QWidget* parent)
 
 void QGameField::paintEvent(QPaintEvent *event)
 {
-
+    QPainter painter(this);
+    QImage image(":/pics/textures/start screen/bloody_frame.png");
+    painter.drawImage(rect(), image);
 }
 
 void QGameField::resizeEvent(QResizeEvent *event)
