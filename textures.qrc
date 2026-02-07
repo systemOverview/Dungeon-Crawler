@@ -29,6 +29,19 @@
         <file>textures/zombie/attacker.png</file>
         <file>textures/portal/portal2.png</file>
         <file>textures/portal/portal3.png</file>
+        <file alias="greenzombie">textures/zombie/greenzombie.png</file>
+        <file>textures/other tiles/winner.png</file>
+        <file>textures/sounds/fight.mp3</file>
+        <file>textures/sounds/punch.wav</file>
+        <file>textures/sounds/punch_2.wav</file>
+        <file>textures/sounds/death.wav</file>
+        <file>textures/sounds/gameover.mp3</file>
+        <file>textures/sounds/win.ogg</file>
     </qresource>
     <qresource prefix="/"/>
+    <qresource prefix="/fonts">
+        <file>emulogic-font</file>
+        <file alias="Emulogic.ttf">fonts/Emulogic.ttf</file>
+        <file alias="dejavu">fonts/DejaVuSansMono.ttf</file>
+    </qresource>
 </RCC>
