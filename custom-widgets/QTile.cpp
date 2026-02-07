@@ -3,7 +3,8 @@
 #include <QtGui/qpainter.h>
 #include <QtWidgets/qlabel.h>
 #include <QApplication>
-
+#include <QtWidgets/qmessagebox.h>
+#include "Utilities.h"
 // I am not very sure if fetching/adding a respectively unexisting/already existing tile should be an assertion or exception.
 // But following the logic of the program, the tile (x,y) domain range is fixed (0,0 -> (9,9) and
 // can not allow for a missing or an extra tile, so an attempt to fetch an unexisting tile or to add an existing one would
@@ -11,7 +12,6 @@
 // made more sense.
 QTile::QTile(QWidget* parent, Tile* tile, QGridLayout* gameBoard) : QWidget(parent), m_tile{tile}, m_gameBoard(gameBoard){
     assert(QTilesRegister.count(tile->getCordsAsPair())==0 && "QTile being constructed already exists.");
-    tile->registerObserver(this);
     EventBus::subscribeToEvent<EventBus::TileChange>(this, tile);
     setMinimumSize(50, 50);
     m_texturePath = QString::fromStdString(m_tile->getTexturePath());
@@ -19,6 +19,9 @@ QTile::QTile(QWidget* parent, Tile* tile, QGridLayout* gameBoard) : QWidget(pare
         setQCharacter( new QCharacter(tile->getCharacter()));
     }
     QTilesRegister[tile->getCordsAsPair()] = this;
+    if (m_tile->getDjikstraExtraCost()>0){
+        markAsVisited();
+    }
 }
 
 QTile *QTile::getQTileByCords(std::pair<int, int> cords)
@@ -33,7 +36,7 @@ QCharacter *QTile::getQCharacter()
     return m_QCharacter;
 }
 
-void QTile::setQCharacter(QCharacter *QChar)
+void QTile::setQCharacter(QCharacter* QChar)
 {
 
     if (QChar){
@@ -43,10 +46,9 @@ void QTile::setQCharacter(QCharacter *QChar)
         EventBus::unsubscribeFromEvent<EventBus::QCharacterChange>(this, m_QCharacter);
     }
     m_QCharacter = QChar;
-    auto a = m_QCharacter;
-    repaint();
+    update();
 }
-void QTile::onTileChange(TileChangeEvent *event)
+void QTile::onTileChange(TileChangeEvent* event)
 {
     assert("QTile subscribed to wrong tile"&&event->getChangedTile()->getCordsAsPair()==m_tile->getCordsAsPair());
     switch (event->getChangeType()){
@@ -55,6 +57,7 @@ void QTile::onTileChange(TileChangeEvent *event)
     case TileChangeEvent::Character : {
         if (m_tile->hasCharacter()){
             setQCharacter(m_tile->getCharacter()->getQChatacter());
+
         }
         else{
             setQCharacter(nullptr);
@@ -67,10 +70,13 @@ void QTile::onTileChange(TileChangeEvent *event)
 
 void QTile::onQCharacterChange(QCharacterChangeEvent *event)
 {
+
     switch(event->getChangeType()){
     case QCharacterChangeEvent::healthbar: {
-        repaint();return;}
+        update();return;}
     case QCharacterChangeEvent::death: {
+        delete m_QCharacter;
+        m_QCharacter = nullptr;
         setQCharacter(nullptr);
         return;
     }
@@ -89,7 +95,6 @@ void QTile::markAsVisited()
     m_appliedEffect->setColor(QColor(0, 0, 255));
     m_appliedEffect->setStrength(0.6);
     setGraphicsEffect(m_appliedEffect);
-    QTile::addTemporarelyAlteredTiles(this);
     graphicsEffect();
 }
 
@@ -119,19 +124,18 @@ void QTile::setTextOverlay(std::string text)
     repaint();
 }
 
-void QTile::addTemporarelyAlteredTiles(QTile *Qtile)
+void QTile::deleteAllQTiles()
 {
-    TemporarelyAlteredTiles.push_back(Qtile);
+    for (auto [position,QTile] :QTilesRegister){
+        delete QTile;
+        QTile = nullptr;
+    }
+    QTilesRegister.clear();
 }
 
-void QTile::removeEffectFromTemporarelyAlteredTiles()
+QTile::~QTile()
 {
-    for (auto it = TemporarelyAlteredTiles.begin(); it!=TemporarelyAlteredTiles.end();){
-        if ((*it)->graphicsEffect()){
-        (*it)->graphicsEffect()->setEnabled(false);
-        }
-        it = TemporarelyAlteredTiles.erase(it);
-    }
+    EventBus::unsubscribeFromAllEvents(this);
 }
 
 
@@ -169,9 +173,15 @@ void QTile::paintEvent(QPaintEvent* event)
 
 }
 
-void QTile::mousePressEvent(QMouseEvent *event)
+void QTile::mouseDoubleClickEvent(QMouseEvent *event)
 {
-    qDebug() << m_tile->getCordsAsPair();
+    if (!m_tile->setDjikstraExtraCost(5)){
+        QMessageBox msg (QMessageBox::Icon::Critical, "Djikstra limit reached", "You can only manipulate three tiles djikstra values per level.");
+        msg.exec();
+    }
+    else{
+        markAsVisited();
+    }
 }
 
 std::pair<QRect, QRect> QTile::getRects(){

@@ -19,7 +19,6 @@ private:
     QGridLayout* m_gameBoard;
     std::string m_textOverlay; //for algorithms visualization;
     QGraphicsColorizeEffect* m_appliedEffect;
-    inline static std::vector<QTile*> TemporarelyAlteredTiles; // stores qtiles whom style changed temporarly for algorithm visualizations
 public:
     QTile(QWidget* parent, Tile* tile, QGridLayout* gameBoard);
     static QTile* getQTileByCords(std::pair<int,int> cords);
@@ -27,7 +26,7 @@ public:
     void setQCharacter(QCharacter* QChar);
     std::pair<QRect, QRect> getRects();
     void paintEvent(QPaintEvent* event) override;
-    void mousePressEvent(QMouseEvent *event) override;
+    void mouseDoubleClickEvent(QMouseEvent *event) override;
     void reactToChange(std::string changedMemberName="") override;
     void changeStyleTemporarly();
     void markAsVisited();
@@ -39,9 +38,8 @@ public:
     static void removeEffectFromTemporarelyAlteredTiles();
     void onTileChange(TileChangeEvent* event) override;
     virtual void onQCharacterChange(QCharacterChangeEvent* event) override;
-    // int heightForWidth(int width) const override;
-    // QSize sizeHint() const override;
-
+    static void deleteAllQTiles();
+    ~QTile();
 };
 
 
