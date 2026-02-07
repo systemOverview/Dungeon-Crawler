@@ -4,16 +4,17 @@
 
 #include "Character.h"
 #include "Level.h"
+#include "QCharacter.h"
 #include "header.h"
 #include <qDebug>
 
-Character* Character::GenerateCharacter(char texture,  Tile* tile, Level* level , LevelGraph* levelGraph)
+Character* Character::GenerateCharacter(char texture, int hitPoints,  Tile* tile, Level* level , LevelGraph* levelGraph)
 {
     switch (texture){
-    case 'P' : return new Character(texture, 20, 20, tile);
-    case 'S' : return new Zombie(texture, tile);
-    case 'G' : return new Zombie(texture,tile);
-    case 'A' : return new Attacker(texture,  level, levelGraph,tile);
+    case 'P' : return new Character(texture, 20, 20, tile, hitPoints);
+    case 'S' : return new Zombie(texture, tile, hitPoints);
+    case 'G' : return new Zombie(texture,tile, hitPoints);
+    case 'A' : return new Attacker(texture,  level, levelGraph,tile, hitPoints);
     default : throw std::logic_error("Character type not handled at Character factory.");
     }
 }
@@ -68,6 +69,8 @@ int Character::getCurrentHP() const
     return m_hitPoints;
 }
 
+int Character::getStrength() const {return m_strength;}
+
 bool Character::isAlive() const
 {
     return m_hitPoints > 0;
@@ -77,9 +80,7 @@ void Character::decrementFromHP(int amountToDecrement)
 {
     m_hitPoints -= amountToDecrement;
     EventBus::transmitEvent<EventBus::CharacterHealthChange>(this);
-    if (!isAlive()){
-        delete this;
-    }
+
 }
 
 void Character::attackPlayer(Character *characterToAttack)
@@ -93,13 +94,24 @@ void Character::setQCharacter(QCharacter* QCharacter){
     m_QCharacter = QCharacter;
 }
 
-QCharacter *Character::getQChatacter()
+QCharacter* Character::getQChatacter()
 {
     return m_QCharacter;
 }
 
 Character::~Character()
 {
-    EventBus::transmitEvent<EventBus::CharacterHealthChange>(this);
+
+    // EventBus::transmitEvent<EventBus::CharacterHealthChange>(this);
 }
 
+
+
+void to_json(json &jsonObject, const Character *characterObject){
+    jsonObject = json {
+             {"texture",  characterObject->getTexture() },
+             {"row", characterObject->getTile()->getRow()},
+             {"column", characterObject->getTile()->getColumn()},
+             {"HP", characterObject->getCurrentHP()}
+    };
+}

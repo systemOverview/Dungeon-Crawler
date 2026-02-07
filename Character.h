@@ -9,6 +9,10 @@
 #include "StationaryController.h"
 #include "GuardController.h"
 #include "AttackController.h"
+#include <nlohmann/json.hpp>
+
+using json = nlohmann::json;
+
 class LevelGraph;
 class QCharacter;
 class StationaryController;
@@ -29,18 +33,25 @@ protected:
 
 public:
 
-    Character(char texture,int strength = 20 ,int stamina = 20, Tile* tile = nullptr )
+    Character(char texture,int strength = 20 ,int stamina = 20, Tile* tile = nullptr ,int hitPoints = -1)
         : m_texture(texture)
         , m_strength(strength)
         , m_stamina(stamina)
         , currentTile(tile)
 
     {
-
-        m_hitPoints = getMaxHP();
+        if (hitPoints<0){
+            // default is -1 (sentinel value) for starting a game with full power
+            m_hitPoints = getMaxHP();
+        }
+        else{
+            // otherwise a certain hp can be set to allow loading game state from file
+            // without having to call decrementFromHP.
+            m_hitPoints = hitPoints;
+        }
     };
 
-    static Character* GenerateCharacter(char texture,  Tile* tile=nullptr, Level* level = nullptr, LevelGraph* levelGraph = nullptr);
+    static Character* GenerateCharacter(char texture, int hitPoints=-1,  Tile* tile=nullptr, Level* level = nullptr, LevelGraph* levelGraph = nullptr);
 
     AbstractUI *getTerminal();
     void setController(AbstractController *controller);
@@ -54,6 +65,7 @@ public:
     virtual std::pair<int, int> move();
     int getMaxHP() const;
     int getCurrentHP() const;
+    int getStrength() const;
     bool isAlive() const;
     void decrementFromHP(int amount);
     void attackPlayer(Character *characterToAttack);
@@ -69,12 +81,12 @@ class Zombie : public Character
 public:
 
     Zombie(char texture,
-           Tile *tile = nullptr)
-        : Character(texture, 10, 5, tile)
+           Tile *tile = nullptr, int hitPoints = -1)
+        : Character(texture, 30, 5, tile, hitPoints)
     {
         switch (texture){
         case 'S' : m_controller  = new class StationaryController(); m_texturePath = "/pics/textures/zombie/zombie_right.png"; break;
-        case 'G' : m_controller = new class GuardController(); m_texturePath = "/pics/textures/zombie/assassin.png"; break;
+        case 'G' : m_controller = new class GuardController(); m_texturePath = "/pics/greenzombie"; break;
         default : throw std::logic_error("Zombie type does not have an assigned controller. ");
         }
         if (m_controller){m_controller->attachCharacter(this);}
@@ -87,8 +99,9 @@ public:
     Attacker(char texture,
              Level* level ,
              LevelGraph* levelGraph,
-           Tile *tile = nullptr)
-        : Character(texture, 10, 5, tile)
+           Tile *tile = nullptr,
+             int hitPoints = -1)
+        : Character(texture, 10, 5, tile, hitPoints)
     {
         m_texturePath = "/pics/textures/zombie/attacker.png";
         m_controller = new AttackController(level, levelGraph);
@@ -96,5 +109,6 @@ public:
     };
 };
 
+void to_json(json &jsonObject, const Character* characterObject);
 
 #endif //PRAK_CHARACTER_H
