@@ -45,8 +45,12 @@ public:
 
     QGridLayout *getGameBoard() const ;
     QGameField* getGameField() const;
+    QWidget* getArrowField() const;
     void prepareRightSideForVisualization();
     void generateVisualizationWidgets(QWidget* containingWidget);
+    void gameOver();
+    void gameWon();
+    void showTerminal();
 
 private:
     Ui::MainWindow* ui;

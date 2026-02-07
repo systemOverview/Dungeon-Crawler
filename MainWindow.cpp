@@ -9,8 +9,12 @@
 #include "QGameField.h"
 #include <QTextEdit>
 #include <QGraphMatrix.h>
+#include <QtWidgets/qcombobox.h>
+#include <QtWidgets/qtoolbar.h>
 #include <sstream>
-
+#include "QGameOver.h"
+#include "QTerminal.h"
+#include "QGameWon.h"
 MainWindow::MainWindow(Level *lvl, GraphicalUI *g, QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -18,12 +22,22 @@ MainWindow::MainWindow(Level *lvl, GraphicalUI *g, QWidget *parent)
     , GUI{g}
 {
     // ui->setupUi(this);
+
     QWidget* central = new QWidget(this);
     setCentralWidget(central);
 
+    QToolBar* toolbar = addToolBar("Save");
+    QAction* saveGame = new QAction("Save Game");
+    saveGame->setObjectName("saveGameButton");
+
+    QFont font;
+    font.setPixelSize(15);
+    saveGame->setFont(font);
+    toolbar->addAction(saveGame);
     QHBoxLayout* mainLayout = new QHBoxLayout(central);
 
     m_gameField = new QGameField();
+
     QWidget* rightSideContainer = new QWidget();
     // rightSideContainer->setFixedWidth(400);
     rightSideContainer->setFixedSize(400, 800);
@@ -34,9 +48,29 @@ MainWindow::MainWindow(Level *lvl, GraphicalUI *g, QWidget *parent)
 
     QVBoxLayout* rightSideLayout = new QVBoxLayout(rightSideContainer);
 
-    QPushButton* stopVisualizationButton = new QPushButton();
-    stopVisualizationButton->setText("Stop visualization");
-    connect(stopVisualizationButton, &QPushButton::clicked, [g, this]() { g->quitVisualizationLoop();});
+    QComboBox* visualizationOption =new QComboBox();
+    visualizationOption->addItem("Full visualization");
+    visualizationOption->addItem("Full visualization without text");
+    visualizationOption->addItem("Only Final path");
+    visualizationOption->addItem("None");
+    connect(visualizationOption, &QComboBox::currentIndexChanged,
+            this, [g,this](int index) {
+                switch (index) {
+                case 0:
+                    g->setVisualizationMode(GraphicalUI::FullVisualization);
+                    break;
+                case 1:
+                    g->setVisualizationMode(GraphicalUI::FullVisualizationWithoutText);
+                    break;
+                case 2:
+                    g->setVisualizationMode(GraphicalUI::OnlyFinalPath);
+                    break;
+                case 3 :
+                    g->setVisualizationMode(GraphicalUI::None);
+                    break;
+
+                }
+            });
 
     QWidget* algorithmExplainerContainer = new QWidget();
 
@@ -44,103 +78,13 @@ MainWindow::MainWindow(Level *lvl, GraphicalUI *g, QWidget *parent)
     QGridLayout* arrowsLayout = new QGridLayout(m_arrowField);
     generateArrowButtons(arrowsLayout);
 
-    rightSideLayout->addWidget(stopVisualizationButton);
+    rightSideLayout->addWidget(visualizationOption);
     rightSideLayout->addWidget(algorithmExplainerContainer);
     generateVisualizationWidgets(algorithmExplainerContainer);
     rightSideLayout->addWidget(m_arrowField);
 
     m_gameBoard = new QGridLayout(m_gameField);
-
-
-
-
-    // m_gameField = new QGameField(); //
-
-    // m_arrowField = new QWidget(); //
-    // QHBoxLayout* hlayout = new QHBoxLayout(central); //
-    // QVBoxLayout* vlayout = new QVBoxLayout(central); //
-
-    // hlayout->addWidget(m_gameField); //
-    // hlayout->addLayout(vlayout);
-
-    // QPushButton* stopVisualizationButton = new QPushButton();
-    // stopVisualizationButton->setMaximumWidth(300);
-    // stopVisualizationButton->setText("Stop visualization");
-    // connect(stopVisualizationButton, &QPushButton::clicked, [g, this]() { g->quitVisualizationLoop();});
-    // vlayout->addWidget(stopVisualizationButton, Qt::AlignTop);
-
-    // QLineEdit* algorithmStepExplainerField = new QLineEdit();
-    // algorithmStepExplainerField->setReadOnly(true);
-    // algorithmStepExplainerField->setObjectName("algorithmStepExplainerField");
-    // algorithmStepExplainerField->setStyleSheet("QLineEdit {background-color: gray; color:white;}");
-    // vlayout->addWidget(algorithmStepExplainerField); //
-
-    // vlayout->addWidget(m_arrowField);
-
-
-    // vlayout->addStretch();
-
-
-    // m_arrowField->setFixedSize(300,300);
-
-
-    // QGridLayout* gameLayout = new QGridLayout(m_gameField);
-    // QGridLayout* arrowsLayout = new QGridLayout(m_arrowField);//
-    // m_gameBoard = gameLayout;
-    // m_arrowField->setMaximumHeight(300); //
-    // generateArrowButtons(arrowsLayout); //
-}/*
-MainWindow::MainWindow(Level *lvl, GraphicalUI *g, QWidget *parent)
-    : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
-    , level{lvl}
-    , GUI{g}
-{
-    // ui->setupUi(this);
-    QWidget* central = new QWidget(this);
-    setCentralWidget(central);
-
-    // QHBoxLayout* mainLayout = new QHBoxLayout(central);
-    // mainLayout->addWidget(gameField);
-
-    QGameField* gameField = new QGameField();
-    m_gameField = gameField;
-
-    m_arrowField = new QWidget();
-    QHBoxLayout* hlayout = new QHBoxLayout(central);
-    QVBoxLayout* vlayout = new QVBoxLayout(central);
-
-    hlayout->addWidget(gameField);
-    hlayout->addLayout(vlayout);
-
-    QPushButton* stopVisualizationButton = new QPushButton();
-    stopVisualizationButton->setMaximumWidth(300);
-    stopVisualizationButton->setText("Stop visualization");
-    connect(stopVisualizationButton, &QPushButton::clicked, [g, this]() { g->quitVisualizationLoop();});
-    vlayout->addWidget(stopVisualizationButton, Qt::AlignTop);
-
-    QLineEdit* algorithmStepExplainerField = new QLineEdit();
-    algorithmStepExplainerField->setReadOnly(true);
-    algorithmStepExplainerField->setObjectName("algorithmStepExplainerField");
-    algorithmStepExplainerField->setStyleSheet("QLineEdit {background-color: gray; color:white;}");
-    vlayout->addWidget(algorithmStepExplainerField);
-
-    vlayout->addWidget(m_arrowField);
-
-
-    vlayout->addStretch();
-
-
-    m_arrowField->setFixedSize(300,300);
-
-
-    QGridLayout* gameLayout = new QGridLayout(gameField);
-    QGridLayout* arrowsLayout = new QGridLayout(m_arrowField);
-    m_gameBoard = gameLayout;
-    m_arrowField->setMaximumHeight(300);
-    generateArrowButtons(arrowsLayout);
-}*/
-
+}
 
 void MainWindow::generateArrowButtons(QGridLayout *arrowsField)
 {
@@ -169,6 +113,11 @@ void MainWindow::move(std::pair<int, int> move)
 QGameField *MainWindow::getGameField() const
 {
     return m_gameField;
+}
+
+QWidget *MainWindow::getArrowField() const
+{
+    return m_arrowField;
 }
 
 MainWindow::~MainWindow()
@@ -210,6 +159,7 @@ void MainWindow::generateVisualizationWidgets(QWidget *containingWidget)
     QPushButton* nextStepButton = new QPushButton (QIcon::fromTheme(QIcon::ThemeIcon::GoNext), "Next");
 
     QHBoxLayout* buttonsLayout = new QHBoxLayout(buttonsContainer);
+
     buttonsLayout->addWidget(previousStepButton);
     buttonsLayout->addWidget(pauseButton);
     buttonsLayout->addWidget(nextStepButton);
@@ -222,6 +172,37 @@ void MainWindow::generateVisualizationWidgets(QWidget *containingWidget)
 
 
 
+}
+
+void MainWindow::gameOver()
+{
+    auto currentRect = centralWidget()->rect();
+    QGameOver* gameOverWidget = new QGameOver();
+    gameOverWidget->setGeometry(currentRect);
+    delete centralWidget();
+    setCentralWidget(gameOverWidget);
+    gameOverWidget->enable();
+}
+
+void MainWindow::gameWon()
+{
+    auto currentRect = centralWidget()->rect();
+    QGameWon* gameWonWidget = new QGameWon();
+    gameWonWidget->setGeometry(currentRect);
+    delete centralWidget();
+    setCentralWidget(gameWonWidget);
+    gameWonWidget->enable();
+
+}
+
+void MainWindow::showTerminal()
+{
+    auto currentRect = centralWidget()->rect();
+    QTerminal* terminal = new QTerminal();
+    terminal->setGeometry(currentRect);
+    delete centralWidget();
+    setCentralWidget(terminal);
+    terminal->enable();
 }
 
 
