@@ -1,8 +1,7 @@
 #include "Event.h"
 #include "EventBus.h"
-#include "Tile.h"
-#include <QtCore/qdebug.h>
-
+#include "tile.h"
+#include "QCharacter.h"
 EventListener::~EventListener()
 {
     EventBus::unsubscribeFromAllEvents(this);
@@ -106,7 +105,12 @@ QCharacter *QCharacterChangeEvent::getChangedQCharacter() const {return m_change
 QCharacterChangeEvent::ChangeType QCharacterChangeEvent::getChangeType() const {return m_changeType;}
 
 void QCharacterChangeEvent::notifyListeners(QCharacterChangeEvent *event){
-    auto criteriaFunction = [](QCharacter* QChar, QCharacterChangeEvent* event){ return QChar == event->getChangedQCharacter();};
+    auto criteriaFunction = [](QCharacter* QChar, QCharacterChangeEvent* event){
+        if (QChar==nullptr){
+            return false;
+        }
+        return QChar == event->getChangedQCharacter();
+    };
     notifyListenersAccordingToRegister(event, &QCharacterPreferenceRegister, criteriaFunction);
 }
 void QCharacterChangeEvent::deregisterListener(EventListener *eventListener)
@@ -202,3 +206,37 @@ std::pair<int, int> DjikstraSearchEvent::Loop::Neighbour::getCords() {return m_c
 float DjikstraSearchEvent::Loop::Neighbour::getDjikstraValue() {return m_djikstraValue;}
 bool DjikstraSearchEvent::Loop::Neighbour::wasDjikstraValueUpdated(){return m_wasDjikstraValueUpdated;}
 
+//Start of PortalCreationEvent definitions.
+PortalCreationEvent::PortalCreationEvent(Portal* portal) : m_createdPortal{portal}, m_createdPortalId(portal->getPortalId()){}
+Portal *PortalCreationEvent::getCreatedPortal(){return m_createdPortal;}
+int PortalCreationEvent::getPortalId(){return m_createdPortalId;}
+void PortalCreationEvent::notifyListeners(PortalCreationEvent *event)
+{
+    auto criteriaFunction = [](int portalId, PortalCreationEvent* event){ return portalId == event->getPortalId();};
+    notifyListenersAccordingToRegister(event, &portalPreferenceRegister, criteriaFunction);
+}
+
+void PortalCreationEvent::notifySpecificListener(EventListener *eventListener, PortalCreationEvent *event)
+{
+    eventListener->onPortalCreation(event);
+}
+
+void PortalCreationEvent::deregisterListener(EventListener *eventListener)
+{
+    bool didFindAndDelete = Event::deregisterListener(eventListener); // First remove it from the main EventListeners vector.
+    if (!didFindAndDelete){return;}
+    for (auto listenerPortalPair = portalPreferenceRegister.begin(); listenerPortalPair!=portalPreferenceRegister.end(); ){
+        if ((*listenerPortalPair).first==eventListener){
+            listenerPortalPair = portalPreferenceRegister.erase(listenerPortalPair);
+        }
+        else{listenerPortalPair++;}
+    }
+}
+
+void PortalCreationEvent::registerListener(EventListener *eventListener, int portalIdToListenTo)
+{
+    {
+        portalPreferenceRegister[eventListener].push_back(portalIdToListenTo);
+        registerListener(eventListener);
+    }
+}

@@ -40,13 +40,17 @@ protected:
     static void notifyListeners(eventType* event);
     static void notifySpecificListener(EventListener* eventListener, eventType* event);
     template<typename vectorType, typename function>
-    static void notifyListenersAccordingToRegister(eventType* event, std::map<EventListener*,std::vector<vectorType*>>* preferenceRegister, function criteriaFunction){
-        for (auto eventListenerIterator = EventListeners.begin(); eventListenerIterator!=EventListeners.end(); eventListenerIterator++){
-            if (preferenceRegister->count(*eventListenerIterator)){
-                for (auto subscriptionIterator = (*preferenceRegister)[(*eventListenerIterator)].begin(); subscriptionIterator!=(*preferenceRegister)[(*eventListenerIterator)].end(); subscriptionIterator++){
+    static void notifyListenersAccordingToRegister(eventType* event, std::map<EventListener*,std::vector<vectorType>>* preferenceRegister, function criteriaFunction){
+        // BUG : taking the registers as pointers is wrong, notifications might delete listeners/trackables and invalidate the register iterator
+        // i must either add a deregistering queue or take a copy of the vector and validate before dispatching
+
+        auto listenersSnapshot = (EventListeners);
+        auto preferenceSnapshot = (*preferenceRegister);
+        for (auto eventListenerIterator = listenersSnapshot.begin(); eventListenerIterator!=listenersSnapshot.end(); eventListenerIterator++){
+            if (preferenceSnapshot.count(*eventListenerIterator)){
+                for (auto subscriptionIterator = (preferenceSnapshot)[(*eventListenerIterator)].begin(); subscriptionIterator!=(preferenceSnapshot)[(*eventListenerIterator)].end(); subscriptionIterator++){
                     if (criteriaFunction((*subscriptionIterator), event)){
                         eventType::notifySpecificListener(*eventListenerIterator, event);
-                        return;
                     }
                 }
             }
@@ -80,6 +84,7 @@ class TileChangeEvent;
 class QCharacterChangeEvent;
 class VisualizationStatusEvent;
 class DjikstraSearchEvent;
+class PortalCreationEvent;
 class EventListener{
 public:
     virtual void onCharacterHealthChange(CharacterHealthChangeEvent* event){};
@@ -88,6 +93,7 @@ public:
     virtual void onQCharacterChange(QCharacterChangeEvent* event){};
     virtual void onVisualizationChange(VisualizationStatusEvent* event){};
     virtual void onDjikstraSearch(DjikstraSearchEvent* event){};
+    virtual void onPortalCreation(PortalCreationEvent* event){};
     ~EventListener();
 };
 
@@ -139,7 +145,8 @@ public:
     enum ChangeType{
         TextureChange,
         DoorStatus,
-        Character
+        Character,
+        DjikstraValueUpdate
     };
 private:
     // Default behavior is that those who use the normal function listen to all tiles updates
@@ -265,6 +272,29 @@ public:
     static void notifyListeners(DjikstraSearchEvent* event);
     using Event::registerListener;
 };
+
+//Start of PortalCreationEvent declaration.
+// Because portals aren't created in the same time, portals are made to subscribe to alerts of new portals creations that
+// matches their id, to save them as a sibling portal.
+class Portal;
+class PortalCreationEvent : private Event<PortalCreationEvent>{
+    Portal* m_createdPortal;
+    int m_createdPortalId;
+    inline static std::map<EventListener*, std::vector<int>> portalPreferenceRegister = {}; // int refers to the portal id to track
+public:
+    PortalCreationEvent(Portal* portal);
+    Portal* getCreatedPortal();
+    int getPortalId();
+    //
+    static void notifyListeners(PortalCreationEvent* event);
+    static void notifySpecificListener(EventListener* eventListener, PortalCreationEvent* event);
+    static void deregisterListener(EventListener* eventListener);
+    // registerListener declarations
+    using Event::registerListener;
+    static void registerListener(EventListener* eventListener, int portalIdToListenTo);
+
+};
+
 
 
 #endif // EVENT_H

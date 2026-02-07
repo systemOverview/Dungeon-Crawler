@@ -13,7 +13,8 @@ public:
         TileChange,
         QCharacterChange,
         VisualizationStatus,
-        DjikstraSearch
+        DjikstraSearch,
+        PortalCreation
     };
     // Start of notifyListeners templates
     // Used templates for these to be able to overload based on enum, in case in future i had to implement
@@ -54,6 +55,10 @@ public:
         DjikstraSearchEvent::notifyListeners(new DjikstraSearchEvent(loops, startingSearchRange,startingTileCords,targetTileCords));
     }
 
+    template <Type eventType>
+    static typename std::enable_if<eventType==Type::PortalCreation, void>::type transmitEvent(Portal* portal) {
+        PortalCreationEvent::notifyListeners(new PortalCreationEvent(portal));
+    }
 
     //Start of unsubscribe templates.
     template <Type eventType>
@@ -66,7 +71,8 @@ public:
         TileChangeEvent::deregisterListener(eventListener);
         QCharacterChangeEvent::deregisterListener(eventListener);
         VisualizationStatusEvent::deregisterListener(eventListener);
-        DjikstraSearchEvent::registerListener(eventListener);
+        DjikstraSearchEvent::deregisterListener(eventListener);
+        PortalCreationEvent::deregisterListener(eventListener);
     };
 
     // Start of subscribeToEvent(wrapper for Event::registerListener) definitions.
@@ -82,7 +88,7 @@ public:
         case QCharacterChange: {QCharacterChangeEvent::registerListener(eventListener);break;}
         case VisualizationStatus: {VisualizationStatusEvent::registerListener(eventListener);break;}
         case DjikstraSearch : {DjikstraSearchEvent::registerListener(eventListener); break;}
-
+        case PortalCreation : {PortalCreationEvent::registerListener(eventListener); break;}
         default : {throw std::runtime_error( "subscribeToEvent template is of an unexisting enum value." );}
         }
     }
@@ -118,6 +124,11 @@ public:
         QCharacterChangeEvent::registerListener(eventListener, QCharactersToListenTo);
     }
 
+    //PortalCreationEvent registerListener templates.
+    template <Type eventType>
+    static typename std::enable_if<eventType==Type::PortalCreation, void>::type subscribeToEvent(EventListener* eventListener, int portalId) {
+        PortalCreationEvent::registerListener(eventListener, portalId);
+    }
 
     EventBus();
 };
