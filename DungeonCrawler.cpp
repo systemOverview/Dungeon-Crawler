@@ -128,7 +128,6 @@ void DungeonCrawler::move()
             int newRow = currentTile->getRow() + moveToPerform.first;
             int newColumn = currentTile->getColumn() + moveToPerform.second;
             Tile* wantedTile = (*currentLevel)->getTile(newRow, newColumn);
-            // bool isMoveAllowed = currentTile->moveTo(wantedTile, NPC);
             Tile* effectiveTile = getEffectiveTile(currentTile, wantedTile);
             if (effectiveTile == currentTile);
             else if  (effectiveTile->hasCharacter() && effectiveTile->getCharacter()->isHuman()==true){

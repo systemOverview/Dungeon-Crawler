@@ -5,11 +5,11 @@
 #ifndef PRAK_DUNGEONCRAWLER_H
 #define PRAK_DUNGEONCRAWLER_H
 #include "GraphicalUI.h"
+#include "JsonObjects.h"
 #include "Level.h"
 #include "TerminalUI.h"
+#include "Utilities.h"
 #include "list.h"
-#include "Utilities.h" //REMOVECODE
-#include "JsonObjects.h"
 class StartScreen;
 class DungeonCrawler
 {
