@@ -29,6 +29,7 @@ MainWindow::MainWindow(Level *lvl, GraphicalUI *g, QWidget *parent)
     QToolBar* toolbar = addToolBar("Save");
     QAction* saveGame = new QAction("Save Game");
     saveGame->setObjectName("saveGameButton");
+    connect(saveGame, &QAction::triggered, [this, g]() { g->saveGame(); });
 
     QFont font;
     font.setPixelSize(15);
