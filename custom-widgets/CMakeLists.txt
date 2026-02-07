@@ -2,7 +2,7 @@ find_package(Qt6 REQUIRED COMPONENTS Widgets)
 find_package(Qt6 REQUIRED COMPONENTS Widgets)
 find_package(Qt6 REQUIRED COMPONENTS Widgets)
 find_package(Qt6 REQUIRED COMPONENTS Widgets)
-
+find_package(nlohmann_json 3.12.0 REQUIRED)
 add_library(custom-widgets STATIC
         QCharacter.h QCharacter.cpp
         QTile.h QTile.cpp
@@ -11,6 +11,10 @@ add_library(custom-widgets STATIC
         QGraphMatrix.h QGraphMatrix.cpp
         QDjikstraPreviousRegister.h QDjikstraPreviousRegister.cpp
         QTypeWriter.h QTypeWriter.cpp
+        QGameOver.h QGameOver.cpp
+        QTerminal.h QTerminal.cpp
+        QGameWon.h QGameWon.cpp
+
 
 )
 
@@ -20,6 +24,7 @@ target_link_libraries(custom-widgets
         Qt::Widgets
 )
 target_link_libraries(custom-widgets PRIVATE Qt6::Widgets)
+target_link_libraries(custom-widgets PRIVATE nlohmann_json::nlohmann_json)
 target_link_libraries(custom-widgets PRIVATE Qt6::Widgets)
 target_link_libraries(custom-widgets PRIVATE Qt6::Widgets)
 target_link_libraries(custom-widgets PRIVATE Qt6::Widgets)
