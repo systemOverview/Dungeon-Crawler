@@ -15,31 +15,29 @@
 class DungeonCrawler;
 class GraphicalUI : public AbstractUI, public AbstractController, public EventListener
 {
-private:
-    inline static int SleepTimeAfterTextDisplay = 1000;  // in milliseconds
+public:
+    enum VisualizationMode { FullVisualization, FullVisualizationWithoutText, OnlyFinalPath, None };
+
 private:
     bool m_isVisualizeModeOn=true;
     QDialog* startScreen;
     MainWindow *mainWindow;
     int currentWindow{0};
-    QEventLoop* m_visualizationLoop;
-    int m_loopDuration = 100;
-    std::queue<AnimateTileEvent*> m_animationsQueue;
     Level* level;
     DungeonCrawler* dc;
     std::pair<int, int> lastMove;
     std::vector<QWidget *> m_healthBars;
     std::map<std::pair<int,int>, QTile*> m_Qtiles;
-    std::vector<QTile*> m_temporarelyAlteredTiles;
     QOverlay* m_overlayWidget = nullptr;
     QGraphMatrix* m_graphMatrix = nullptr;
     QTypeWriter* m_algorithmStepExplainerField = nullptr;
-    bool djikstraTest = true;
+    VisualizationMode m_visualizationMode = FullVisualization;
 
 public:
+    void setVisualizationMode(VisualizationMode mode);
     GraphicalUI(Level *lvl, DungeonCrawler *d);
     QDialog *getStartScreen();
-    QMainWindow *getMainWindow();
+    MainWindow *getMainWindow();
     void draw(Level *) override;
     void quitVisualizationLoop();
     QWidget* generateHealthBar(int percentage, QWidget *parent);
@@ -53,14 +51,13 @@ public:
     ~GraphicalUI();
     void playSound(QString soundLink, float volume);
     void switchWindow();
-    void deleteAllTiles();
     // Event Functions
     void onDjikstraSearch(DjikstraSearchEvent* event) override;
-
+    void onCharacterHealthChange(CharacterHealthChangeEvent* event) override;
     // Djikstra Visualization functions.
     void DjikstaInitialSetup(DjikstraSearchEvent* event);
     void DjikstraVisualizeLoop(DjikstraSearchEvent* event, DjikstraSearchEvent::Loop loop, int loopId);
-
+    void saveGame();
 };
 
 #endif // GRAPHICALUI_H

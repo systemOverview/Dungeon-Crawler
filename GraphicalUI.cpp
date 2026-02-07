@@ -5,25 +5,29 @@
 #include "DungeonCrawler.h"
 #include "MainWindow.h"
 #include "startscreen.h"
-#include "UiStrings.h"
+#include "Constants.h"
 #include <QTimer>
 #include <QtCore/qpropertyanimation.h>
 #include <QtWidgets/qapplication.h>
 #include <QtWidgets/qlabel.h>
 #include <QtWidgets/qmessagebox.h>
+#include <QtWidgets/qpushbutton.h>
 
+void GraphicalUI::setVisualizationMode(VisualizationMode mode)
+{
+    m_visualizationMode = mode;
+}
 
 GraphicalUI::GraphicalUI(Level *lvl, DungeonCrawler *d)
 {
     EventBus::subscribeToEvent<EventBus::AnimateTile>(this);
     EventBus::subscribeToEvent<EventBus::VisualizationStatus>(this);
     EventBus::subscribeToEvent<EventBus::DjikstraSearch>(this);
+    EventBus::subscribeToEvent<EventBus::CharacterHealthChange>(this, lvl->getPlayableCharacter());
 
     level = lvl;
     dc = d;
-    startScreen = new StartScreen(this);
     mainWindow = new MainWindow(lvl, this);
-    m_visualizationLoop = new QEventLoop();
     m_graphMatrix = mainWindow->findChild<QGraphMatrix*> ("tileMatrixContainer");
     m_algorithmStepExplainerField = mainWindow->findChild<QTypeWriter*> ("algorithmStepExplainerField");
 
@@ -52,21 +56,7 @@ void GraphicalUI::switchWindow()
     }
 }
 
-void GraphicalUI::deleteAllTiles()
-{
-    QGridLayout *gameBoard = mainWindow->getGameBoard();
-    for (int rowIterator = 0; rowIterator < level->getHeight(); rowIterator++) {
-        for (int colIterator = 0; colIterator < level->getWidth(); colIterator++) {
-            QLayoutItem *itemAtTilePosition = gameBoard->itemAtPosition(rowIterator, colIterator);
-            if (itemAtTilePosition->widget()){
-                QWidget* widgetAtTilePosition = itemAtTilePosition->widget();
-                gameBoard->removeWidget(widgetAtTilePosition);
-                delete widgetAtTilePosition;
-            }
-        }
-    }
 
-}
 
 
 
@@ -81,15 +71,18 @@ void GraphicalUI::playSound(QString soundLink, float volume)
 }
 
 void GraphicalUI::draw(Level *level){
-    if (level!=this->level){
-        this->level = level;
+    if (m_overlayWidget){
+        delete m_overlayWidget;
+        // draw is only called once per level, if it was called again that means that the previous level was finished
+        // This is also necessary so it doesn't keep trying to show arrows of deleted QTiles.
+
     }
     QGameField* gameField = mainWindow->getGameField();
-    QOverlay* overlay = new QOverlay(gameField, m_Qtiles);
-    gameField->setChild(overlay);
-    overlay->setGeometry(gameField->rect());
-    overlay->show();
+    m_overlayWidget  = new QOverlay(gameField, m_Qtiles);
 
+    gameField->setChild(m_overlayWidget );
+    m_overlayWidget ->setGeometry(gameField->rect());
+    m_overlayWidget ->show();
     QGridLayout *gameBoard = mainWindow->getGameBoard();
     std::vector<std::vector<Tile *> > *tiles = level->getTiles();
     for (int rowIterator = 0; rowIterator < level->getHeight(); rowIterator++) {
@@ -100,67 +93,87 @@ void GraphicalUI::draw(Level *level){
             gameBoard->addWidget(tileWidget, rowIterator, colIterator);
         }
     }
-    overlay->setQTilesRegister(m_Qtiles);
-    overlay->raise();
-
-    m_overlayWidget = overlay;
-
+      m_overlayWidget ->setQTilesRegister(m_Qtiles);
+      m_overlayWidget ->raise();
 
 }
-
-void GraphicalUI::quitVisualizationLoop()
-{
-    mainWindow->centralWidget()->setLayout(nullptr);
-    djikstraTest = false;
-    QWidget* widget = new QWidget(mainWindow->centralWidget());
-    m_isVisualizeModeOn = false;
-    m_visualizationLoop->quit();
-}
-
 
 void GraphicalUI::onDjikstraSearch(DjikstraSearchEvent *event)
 {
 
+    m_overlayWidget->removeAllArrows();
+    if (m_visualizationMode==None){return;}
+    if (m_visualizationMode == OnlyFinalPath){
+        for (auto loop: event->getLoops()){
+            LevelGraph graph;
+            if (loop.getExtractedTileCords()==event->getTargetTileCords()){
+                auto previousRegister = loop.getPreviousRegister();
+                QTile* extractedQTile = m_Qtiles.at(loop.getExtractedTileCords());
+                std::vector<std::pair<int,int>> path = {graph.generatePathFromPreviousRegister(previousRegister, loop.getExtractedTileCords(), LevelGraph::PathDirection::FromStartingToTarget, LevelGraph::PathCoordinateSystem::Absolute)};
+                m_overlayWidget->addArrowPathBetweenMultipleTiles(path, true);
+            }
+        }
+        return;
+    }
+    mainWindow->getArrowField()->setVisible(false);
     assert (m_graphMatrix!=nullptr && "Graph matrix is not available. ");
     int counter = 0;
     DjikstaInitialSetup(event);
     for (auto& loop : event->getLoops()){
+        if (m_isVisualizeModeOn==false){break;}
         DjikstraVisualizeLoop(event, loop, counter++);
     }
+    m_overlayWidget->highlightArrowPathAndRemoveOthers(event->getTargetTileCords(), event->getStartingTileCords());
+    // m_overlayWidget->removeAllArrows();
+    mainWindow->getArrowField()->setVisible(true);
+    // setNoTextDjikstraMode(true);
+    m_graphMatrix->resetMatrix();
+    m_algorithmStepExplainerField->setText("");
 
+}
+
+void GraphicalUI::onCharacterHealthChange(CharacterHealthChangeEvent* event)
+{
+    // assert (event->getCharacter() == level->getPlayableCharacter() && "Wrong character");
+    if (event->getCharacter()->isAlive()==false){
+        QApplication::processEvents();
+        qDebug() << "received";
+        playSound("qrc:/pics/textures/sounds/gameover.mp3", 1);
+
+        mainWindow->gameOver();
+    }
 
 }
 
 void GraphicalUI::DjikstaInitialSetup(DjikstraSearchEvent* event)
 {
-    m_algorithmStepExplainerField->setText(QString::fromStdString(DjikstraStrings::InitialSetup.at(DjikstraStrings::Intro)));
+    if (m_visualizationMode==FullVisualization){m_algorithmStepExplainerField->setText(QString::fromStdString(DjikstraStrings::InitialSetup.at(DjikstraStrings::Intro)));}
     m_graphMatrix->initializeMatrix(event->getStartingSearchRange(), "∞", 50);
     m_graphMatrix->setTextlessElementsStatusToBlocked();
-    Utilities::QtSleepMilliSeconds(SleepTimeAfterTextDisplay);
     m_algorithmStepExplainerField->setText("");
 
-    m_algorithmStepExplainerField->setText(QString::fromStdString(DjikstraStrings::InitialSetup.at(DjikstraStrings::SetStartingToZero)));
+     if (m_visualizationMode==FullVisualization) m_algorithmStepExplainerField->setText(QString::fromStdString(DjikstraStrings::InitialSetup.at(DjikstraStrings::SetStartingToZero)));
     std::pair<int,int> startingTileCords = event->getStartingTileCords();
     m_graphMatrix->setElementText(startingTileCords, {"0"});
     m_graphMatrix->setElementState(startingTileCords, QGraphMatrix::DjikstraState::Calculated);
-    Utilities::QtSleepMilliSeconds(SleepTimeAfterTextDisplay);
+     if (m_visualizationMode==FullVisualization) m_algorithmStepExplainerField->setText(QString::fromStdString(DjikstraStrings::InitialSetup.at(DjikstraStrings::CreateQueue)));
 
 }
 
 void GraphicalUI::DjikstraVisualizeLoop(DjikstraSearchEvent* event, DjikstraSearchEvent::Loop loop, int loopId)
 {
+    LevelGraph graph;
     auto previousRegister = loop.getPreviousRegister();
     QTile* extractedQTile = m_Qtiles.at(loop.getExtractedTileCords());
     m_graphMatrix->setElementState(loop.getExtractedTileCords(), QGraphMatrix::DjikstraState::Calculated);
-    std::vector<std::pair<int,int>> path = {LevelGraph::generatePathFromPreviousRegister(previousRegister, loop.getExtractedTileCords(), LevelGraph::PathDirection::FromStartingToTarget, LevelGraph::PathCoordinateSystem::Absolute)};
-    m_overlayWidget->addArrowBetweenMultipleTiles(path);
+    std::vector<std::pair<int,int>> path = {graph.generatePathFromPreviousRegister(previousRegister, loop.getExtractedTileCords(), LevelGraph::PathDirection::FromStartingToTarget, LevelGraph::PathCoordinateSystem::Absolute)};
+    m_overlayWidget->addArrowPathBetweenMultipleTiles(path);
     Utilities::QtSleepMilliSeconds(100);
-    qDebug() << loop.getExtractedTileCords() <<  path;
     if (loopId==0){
-        m_algorithmStepExplainerField->setText(QString::fromStdString(DjikstraStrings::Explainers.at(DjikstraStrings::RemoveStartingFromQueue)));
-        Utilities::QtSleepMilliSeconds(SleepTimeAfterTextDisplay);
-        m_algorithmStepExplainerField->setText(QString::fromStdString(DjikstraStrings::Explainers.at(DjikstraStrings::ExplainDjikstraValues)));
-        Utilities::QtSleepMilliSeconds(SleepTimeAfterTextDisplay);
+         if (m_visualizationMode==FullVisualization) m_algorithmStepExplainerField->setText(QString::fromStdString(DjikstraStrings::Explainers.at(DjikstraStrings::RemoveStartingFromQueue)));
+        Utilities::QtSleepMilliSeconds(QtVisualiation::SleepTimeAfterText);
+         if (m_visualizationMode==FullVisualization) m_algorithmStepExplainerField->setText(QString::fromStdString(DjikstraStrings::Explainers.at(DjikstraStrings::ExplainDjikstraValues)));
+        Utilities::QtSleepMilliSeconds(QtVisualiation::SleepTimeAfterText);
     }
 
     for (DjikstraSearchEvent::Loop::Neighbour& neighbour : loop.getNeighbourTiles()){
@@ -168,17 +181,24 @@ void GraphicalUI::DjikstraVisualizeLoop(DjikstraSearchEvent* event, DjikstraSear
         m_overlayWidget->addEdge(loop.getExtractedTileCords(), neighbour.getCords(), loopId, loopId);
         if (neighbour.wasDjikstraValueUpdated()){
             m_graphMatrix->setElementText(neighbour.getCords(), Utilities::FloatToString(neighbour.getDjikstraValue(), 1));
-            m_graphMatrix->visualizeElement(neighbour.getCords(), 200);
+            m_graphMatrix->visualizeElement(neighbour.getCords(), QtVisualiation::SleepTimeBetweenArrows);
         }
         else{
-            Utilities::QtSleepMilliSeconds(200);
+            Utilities::QtSleepMilliSeconds(QtVisualiation::SleepTimeBetweenArrows);
         }
     }
 
 
     Utilities::QtSleepMilliSeconds(100);
     m_overlayWidget->removeArrowsByGroupId(loopId);
+    m_algorithmStepExplainerField->setText("");
 
+}
+
+void GraphicalUI::saveGame()
+{
+    mainWindow->showTerminal();
+    JsonGenerator::saveGameState(dc->levels);
 }
 
 std::pair<int, int> GraphicalUI::move()
@@ -254,12 +274,13 @@ void GraphicalUI::removeHealthBars()
     };
 }
 
+
 QDialog *GraphicalUI::getStartScreen()
 {
     return startScreen;
 }
 
-QMainWindow *GraphicalUI::getMainWindow()
+MainWindow *GraphicalUI::getMainWindow()
 {
     return mainWindow;
 }
