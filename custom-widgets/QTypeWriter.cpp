@@ -1,5 +1,4 @@
 #include "QTypeWriter.h"
-
 QTypeWriter::QTypeWriter() {ensureCursorVisible();}
 
 void QTypeWriter::setText(const QString &text)
@@ -9,12 +8,10 @@ void QTypeWriter::setText(const QString &text)
         auto cursor = textCursor();
         cursor.insertText(text[i]);
         ensureCursorVisible();
-        Utilities::QtSleepMilliSeconds(SleepTimeBetweenCharactersInMilliSeconds);
+        Utilities::QtSleepMilliSeconds(QtVisualiation::TypeWriterSleepTimeBetweenCharacters);
     }
+    Utilities::QtSleepMilliSeconds(QtVisualiation::SleepTimeAfterText);
+
 
 }
 
-void QTypeWriter::setSleepTimeBetweenCharacters(int sleepTimeInMilliSeconds)
-{
-    SleepTimeBetweenCharactersInMilliSeconds = sleepTimeInMilliSeconds;
-}
