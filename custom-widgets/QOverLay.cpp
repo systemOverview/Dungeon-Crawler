@@ -2,23 +2,12 @@
 
 void QOverlay::setRect(QRect r){rectn = r;setGeometry(r);}
 
-bool QOverlay::doesEdgeExist(std::pair<int, int> from, std::pair<int, int> to, int groupId)
-{
-    try{
-        std::vector<EdgeBetweenTiles> edgeGroup = m_edgeGroups.at(groupId);
-        for (EdgeBetweenTiles edge : edgeGroup){
-            if (edge.fromTileCords == from && edge.toTileCords == to){return true;}
-        }
-        return false;
-    } catch(std::out_of_range){
-        return false;
-    }
-}
 
 QOverlay::QOverlay(QWidget *parent, std::map<std::pair<int,int>, QTile*> QTilesRegister) : QWidget(parent) {
     setAttribute(Qt::WA_TransparentForMouseEvents);
     setAttribute(Qt::WA_NoSystemBackground);
     m_QTiles = QTilesRegister;
+    m_colorGroups[999] = Qt::red; // for highlighting a path;
 }
 void QOverlay::paintEvent(QPaintEvent *) {
     QPainter p(this);
@@ -26,27 +15,29 @@ void QOverlay::paintEvent(QPaintEvent *) {
     p.setPen(QPen(Qt::red, 2));
 
 
-    for (auto& edgeGroup : m_edgeGroups){
-        for (auto edge : edgeGroup.second ){
-            p.setPen(QPen(m_colorGroups[edge.colorId], 2));
-            drawEdge(p, edge);
-        }
+
+    for (Edge* edge : m_edges ){
+        p.setPen(QPen(m_colorGroups[edge->groupId], edge->arrowWidth));
+        drawEdge(p, edge);
     }
     raise();
 
 }
 
-void QOverlay::drawEdge(QPainter &p, EdgeBetweenTiles edge)
+void QOverlay::drawEdge(QPainter &p, Edge* edge)
 {
-    const QWidget* from = m_QTiles.at(edge.fromTileCords);
-    const QWidget* to = m_QTiles.at(edge.toTileCords);
+    if (edge->draw==false){
+        return;
+    }
+    const QWidget* from = m_QTiles.at(edge->fromTileCords);
+    const QWidget* to = m_QTiles.at(edge->toTileCords);
     QPoint startcords = {from->rect().width()/2, from->rect().height()/2};
     QPoint start =  mapFromGlobal(from->mapToGlobal(startcords));
     QPoint endcords = {to->rect().width()/2, to->rect().height()/2};
     QPoint end = mapFromGlobal(to->mapToGlobal(endcords));
 
     p.drawLine(start,end);
-    if (edge.edgeType == EdgeBetweenTiles::Line){return; }
+    if (edge->edgeType == Edge::Line){return; }
 
 
     QLineF line(start, end);
@@ -70,66 +61,134 @@ void QOverlay::setQTilesRegister(std::map<std::pair<int, int>, QTile *> reg)
     m_QTiles = reg;
 }
 
-void QOverlay::addEdge(std::pair<int,int> from, std::pair<int,int>  to, int groupId, int colorGroupId, EdgeBetweenTiles::EdgeType edgeType){
-    if (doesEdgeExist(from, to, groupId)){
-        // if the edge already exists, it only updates its edge type, this is for the final calculated tiles paths.
-        // ex : draw A - > B - > C path, arrow head at C, then draw A - > B - > C -> D, it will have two arrow heads
-        // one at C and one at D, so by updating B->C edge type instead of re-adding it as a line, the arrow head is removed.
-        for (auto& edge : m_edgeGroups.at(groupId)){
-            if (edge.fromTileCords==from && edge.toTileCords==to){
-                edge.edgeType = edgeType;
-            }
-        }
-    }
-    else{
-    m_edgeGroups[groupId].push_back({from, to, colorGroupId, edgeType});
-    }
+void QOverlay::addEdge(std::pair<int,int> from, std::pair<int,int>  to, int groupId, int colorGroupId, Edge::EdgeType edgeType, int pathId){
     if (m_colorGroups.count(colorGroupId)==0){
         m_colorGroups[colorGroupId] = QColor::fromRgb(Utilities::GenerateRandomHexColor());
     }
+
+    for (Edge* edge : m_edges){
+        if (edge->fromTileCords == from && edge->toTileCords==to){
+            edge->edgeType = edgeType;
+            edge->groupId = groupId;
+            edge->pathIDs.push_back(pathId);
+
+            // m_edges.push_back({edge}); // here
+            return;
+        }
+    }
+    // if it gets here, then the edge doesn't exist yet.
+
+    Edge* edge = new Edge{from, to, edgeType, groupId, pathId};
+    m_edges.push_back({edge});
+
     update();
 }
 
-void QOverlay::addArrowBetweenMultipleTiles(std::vector<std::pair<int, int> > cordsOfTraversedTiles)
+void QOverlay::addArrowPathBetweenMultipleTiles(std::vector<std::pair<int, int> > cordsOfTraversedTiles, bool flag)
 {
+    int pathId = PATHID++;
     if (cordsOfTraversedTiles.empty()){
         return;
     }
+    std::pair<int,int> targetTileCords = cordsOfTraversedTiles.back();
+    m_pathIdRegister[targetTileCords] = pathId;
     std::pair<int,int> sentinelOutOfRangeValue = {-1,-1};
     std::pair<int,int> fromWidgetCords = sentinelOutOfRangeValue;
     std::pair<int,int> toWidgetCords = sentinelOutOfRangeValue;
+    int counter = 0;
     for (std::pair<int,int> cord : cordsOfTraversedTiles ){ // from and to start at {-1,-1}
+        if ((counter++)==0 && flag){continue;}
         if (fromWidgetCords==sentinelOutOfRangeValue){
             fromWidgetCords = cord; // to set the first cord, will never be true again
         }
         else{
             toWidgetCords=cord; // assign it to "to",
-            EdgeBetweenTiles::EdgeType edgeType = EdgeBetweenTiles::EdgeType::Line;
+            Edge::EdgeType edgeType = Edge::EdgeType::Line;
             if (cord == cordsOfTraversedTiles.back()){
-                edgeType = EdgeBetweenTiles::EdgeType::Arrow; // to make the last widget receive an arrow head.
+                edgeType = Edge::EdgeType::Arrow; // to make the last widget receive an arrow head.
             }
-
-            addEdge(fromWidgetCords, toWidgetCords, 1000, 1000, edgeType);
+            addEdge(fromWidgetCords, toWidgetCords, pathId, 1000, edgeType, pathId);
             fromWidgetCords = toWidgetCords; // then it becomes the "from"
         }
         // A,B,C widgets, A:from, B:to, then B:from, C:to
     }
 }
+void QOverlay::createPath(std::vector<std::pair<int, int> > cordsOfTraversedTiles)
+{
+
+
+
+}
+
+void QOverlay::removeAllArrows()
+{
+    for (Edge* edge : m_edges){
+        delete edge;
+        edge = nullptr;
+    }
+    m_edges.clear();
+    m_pathIdRegister.clear();
+    m_colorGroups.clear();
+    update();
+
+}
+
+void QOverlay::highlightArrowPathAndRemoveOthers(std::pair<int,int> pathTargetCords, std::pair<int, int> ignorePair)
+{
+
+    try{
+        int pathId = m_pathIdRegister[pathTargetCords];
+
+        for (auto edgeIterator = m_edges.begin(); edgeIterator!=m_edges.end();){
+            auto edgePathIDs = (*edgeIterator)->pathIDs;
+            auto edge = (*edgeIterator);
+            if ((*edgeIterator)->fromTileCords==ignorePair || std::find(edgePathIDs.begin(), edgePathIDs.end(), pathId)==edgePathIDs.end()){
+                delete (*edgeIterator);
+                edgeIterator = m_edges.erase(edgeIterator);
+                update();
+            }
+            else{
+                (*edgeIterator)->groupId = 999;
+                (*edgeIterator)->arrowWidth = 7;
+                edgeIterator++;
+                update();
+            }
+            Utilities::QtSleepMilliSeconds(10);
+        }
+        Utilities::QtSleepMilliSeconds(500);
+    }
+
+    catch(std::out_of_range){
+     return;
+    }
+
+}
 
 void QOverlay::removeArrowsByGroupId(int groupId){
-    for (auto arrowIterator = m_edgeGroups.begin(); arrowIterator!=m_edgeGroups.end(); arrowIterator++ ){
-        if ((*arrowIterator).first==groupId){
-            m_edgeGroups.erase(arrowIterator);
-            break;
+    for (auto edgeIterator = m_edges.begin(); edgeIterator!=m_edges.end(); ){
+        if ((*edgeIterator)->groupId==groupId){
+            delete (*edgeIterator);
+            edgeIterator = m_edges.erase(edgeIterator);
+            update();
+        }
+        else{
+            edgeIterator++;
         }
     }
     update();
 
 }
 
+void QOverlay::reset()
+{
+    removeAllArrows();
+    m_QTiles.clear();
+}
+
+
+
 void QOverlay::resizeEvent(QResizeEvent *event)
 {
-
 }
 
 
