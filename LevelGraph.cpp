@@ -94,7 +94,6 @@ void LevelGraph::setupEdgesForVertex(Vertex *vertex)
     for (std::pair<int,int> cords : diagonalNeighbours ){
         Vertex* neighbourVertex = m_vertexes[cords];
         Tile* neighbourTile = neighbourVertex->getTile();
-
         if (isEdgeBetweenTilesPossible(tile->getTexture(), neighbourTile->getTexture())){
             vertex->addNeighbour(neighbourVertex, 1.4); // very precise square root of 2
         }
@@ -108,18 +107,9 @@ void LevelGraph::setupEdgesForVertex(Vertex *vertex)
             vertex->addNeighbour(neighbourVertex, 1);
         }
     }
-    // for (int i=tile->getRow()-1; i<=tile->getRow()+1 ; i++){
-    //     for (int j=tile->getColumn()-1; j<=tile->getColumn()+1; j++){
-    //         if ((i!=tile->getRow() || j!=tile->getColumn()) && m_vertexes.count({i,j})){
-    //             Vertex* neighbourVertex = m_vertexes[{i,j}];
-    //             Tile* neighbourTile = neighbourVertex->getTile();
 
-    //             if (isEdgeBetweenTilesPossible(tile->getTexture(), neighbourTile->getTexture())){
-    //                 vertex->addNeighbour(neighbourVertex, 1);
-    //             }
-    //         }
-    //     }
-    // }
+    Portal* portal = dynamic_cast<Portal*>(tile);
+    if (portal) {vertex->addNeighbour(m_vertexes[portal->getSiblingPortal()->getCordsAsPair()], 1);}
 }
 
 bool LevelGraph::isEdgeBetweenTilesPossible(char firstTileTexture, char secondTileTexture) const
@@ -155,7 +145,6 @@ std::vector<std::pair<int, int> > LevelGraph::getShortestsPathBetweenTwoTilesDji
     std::vector<DjikstraSearchEvent::Loop> loops;
     std::vector<std::pair<int,int>> startingSearchRange; // The cords of the vertexes we are going to search through, which is basically cords of m_vertexes, but to keep encapsulation and sepearation of concerns, other components don't need to know about the vertexes themselves.
     constexpr std::pair<int,int> UNEXISTING_TILE = {-1,1};
-    int counter = 0;
     // initialization phase
     std::map<Vertex*, float> distanceRegister;
     auto compare = [&distanceRegister](Vertex* leftVertex, Vertex* rightVertex) {
@@ -182,21 +171,21 @@ std::vector<std::pair<int, int> > LevelGraph::getShortestsPathBetweenTwoTilesDji
         auto minimumVertexIterator = std::min_element(queue.begin(), queue.end(), compare); // iterator
         Vertex* minimumVertex = *(minimumVertexIterator);
         queue.erase(minimumVertexIterator);
-
         loop.setExtractedTile(minimumVertex->getTile()->getCordsAsPair()); // EVENT RELATED.
 
         if (minimumVertex==targetVertex){
+            loop.setPreviousRegisterAtLoopEnd(previousRegister); // EVENT RELATED
+            loops.push_back(loop);// EVENT RELATED.
             break;
         }
         // distance calculation and relaxation
         for (auto vertex : queue){
             if (minimumVertex->isNeighbour(vertex)){
-                float newDjikstraValue = distanceRegister[minimumVertex]+minimumVertex->getNeighbourWeight(vertex);
+                float newDjikstraValue = distanceRegister[minimumVertex]+minimumVertex->getNeighbourWeight(vertex)+vertex->getTile()->getDjikstraExtraCost();
                 if (newDjikstraValue < distanceRegister[vertex]){
                     distanceRegister[vertex] = newDjikstraValue;
                     loop.addNeighbourTile({vertex->getTile()->getCordsAsPair(), newDjikstraValue, true});// EVENT RELATED.
                     previousRegister[vertex->getTile()->getCordsAsPair()] = minimumVertex->getTile()->getCordsAsPair();
-                    counter++;
                 }
                 else{
                     loop.addNeighbourTile({vertex->getTile()->getCordsAsPair(), newDjikstraValue, false});// EVENT RELATED.
@@ -206,19 +195,7 @@ std::vector<std::pair<int, int> > LevelGraph::getShortestsPathBetweenTwoTilesDji
         loop.setPreviousRegisterAtLoopEnd(previousRegister);
         loops.push_back(loop);// EVENT RELATED.
     }
-    std::vector<std::pair<int,int>> path = {};
-     std::pair<int,int> currentVertexCords = targetVertex->getTile()->getCordsAsPair();
-    std::pair<int,int> previousVertexCords = previousRegister[currentVertexCords];
-     while (previousVertexCords!=UNEXISTING_TILE){
-        int newDirectionRow  = (currentVertexCords.first-previousVertexCords.first);
-        int newDirectionColumn  = (currentVertexCords.second-previousVertexCords.second);
-        path.push_back({newDirectionRow, newDirectionColumn});
-        currentVertexCords = previousVertexCords;
-        previousVertexCords = previousRegister[previousVertexCords];
-    }
-    std::reverse(path.begin(), path.end());
 
-    // REFACTOR
     std::vector<Tile*> GIVETOGUI;
     EventBus::transmitEvent<EventBus::DjikstraSearch>(loops, startingSearchRange, startingVertex->getTile()->getCordsAsPair(), targetVertex->getTile()->getCordsAsPair());
     return generatePathFromPreviousRegister(previousRegister, targetVertex->getTile()->getCordsAsPair());
@@ -233,8 +210,15 @@ std::vector<std::pair<int, int> > LevelGraph::generatePathFromPreviousRegister(s
     std::pair<int,int> previousVertexCords = previousRegister[currentVertexCords];
     if (pathCoordinateSystem == Absolute){path.push_back(currentVertexCords);}
     while (previousVertexCords!=UNEXISTING_TILE){
+
         switch (pathCoordinateSystem){
         case Relative : {
+            Tile* currentTile = m_vertexes[currentVertexCords]->getTile();
+            Tile* previousTile = m_vertexes[previousVertexCords]->getTile();
+            if (dynamic_cast<Portal*>(currentTile) && dynamic_cast<Portal*>(previousTile) && currentTile->getTexture() == previousTile->getTexture() ){
+                path.push_back({0,0});
+                break;
+            }
             int newDirectionRow  = (currentVertexCords.first-previousVertexCords.first);
             int newDirectionColumn  = (currentVertexCords.second-previousVertexCords.second);
             path.push_back({newDirectionRow, newDirectionColumn});
@@ -281,5 +265,14 @@ void LevelGraph::onTileChange(TileChangeEvent *event)
         }
     }
     }
+}
+
+LevelGraph::~LevelGraph()
+{
+    for (auto [cords, vertex] : m_vertexes){
+        delete vertex;
+        vertex = nullptr;
+    }
+    m_vertexes.clear();
 }
 
