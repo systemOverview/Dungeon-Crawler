@@ -9,7 +9,6 @@ add_library(custom-widgets STATIC
         QGameField.h QGameField.cpp
         QOverLay.h QOverLay.cpp
         QGraphMatrix.h QGraphMatrix.cpp
-        QDjikstraPreviousRegister.h QDjikstraPreviousRegister.cpp
         QTypeWriter.h QTypeWriter.cpp
         QGameOver.h QGameOver.cpp
         QTerminal.h QTerminal.cpp
