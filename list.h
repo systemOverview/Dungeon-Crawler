@@ -43,7 +43,6 @@ public:
             return *this;
         }
         T operator*() const { return (m_ptr->getValue()); }
-        Node<T>* operator->() { return (m_ptr->getValue()); }
         friend bool operator==(const Iterator &a, const Iterator &b) { return a.m_ptr == b.m_ptr; };
         friend bool operator!=(const Iterator &a, const Iterator &b) { return a.m_ptr != b.m_ptr; };
     };
