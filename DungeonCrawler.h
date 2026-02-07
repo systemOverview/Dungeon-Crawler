@@ -8,46 +8,64 @@
 #include "Level.h"
 #include "TerminalUI.h"
 #include "list.h"
+#include "Utilities.h" //REMOVECODE
+#include "JsonObjects.h"
+class StartScreen;
 class DungeonCrawler
 {
 public:
-    List<Level*>::Iterator currentLevel;
-    List<Level *> levels;
+    std::vector<Level*>::iterator currentLevel;
+    std::vector<Level *> levels;
     std::array<std::string, 2> gameStrings = {
-
+               "##########"
+               "#....$P..#"
+               "#.S.<....#"
+               "#..___...#"
+               "#.G......#"
+               "#A.......#"
+               "#######.##"
+               "#.....G..#"
+               "#.P......#"
+               "##########"
+,
         "##########"
-        "#....$...#"
-        "#.A.<..2.#"
+        "#....!...#"
+        "#1A.<..S.#"
         "#..___...#"
         "#0.___...#"
-        "#.1....1.#"
-        "#######.##"
-        "#2..?....#"
-        "#..0..P..#"
-        "##########",
-
-        "##########"
-        "#.S..$...#"
-        "#..G<....#"
-        "#..___...#"
-        "#..___...#"
-        "#..P.G...#"
-        "##########"
-        "#G.......#"
         "#........#"
+        "#######X##"
+        "#.G.?..1.#"
+        "#P.0...S.#"
         "##########"
-
     };
-    Character* m_humanCharacter;
     GraphicalUI* GUI;
+    StartScreen* m_startScreen = nullptr;
+    int m_numberOfRemainingNPCs = 0;
+    Level* m_lastLevel = nullptr;
 
 public:
+    enum GameSourceOption{
+        FromStrings,
+        FromFile
+    };
     DungeonCrawler();
-
     std::pair<int, int> translateMove(int step) const;
     bool turn();
     void move();
     void levelUp();
+    void moveCharacter(Character* character, Tile* tile, bool giveway = false);
+    //an attacker can ask the other NPCs to switch spots if he wants to access a tile controlled by them
+    // as the other NPCs don't know a path towards the character but move in predetermined paths
+
+    Tile* getEffectiveTile(Tile* currentTile, Tile* destinationTile);
+    // When moving to tile B, a player can actually land on tile C instead (portals).
+    // This function finds the actual tile the player would land on to be able to schedule resolution fights.
+
+    void holdFight(Character* attacker, Character* defender, Tile* disputedTile);
+    // attacker is the one that is trying to enter a tile already held by the defender.
+    // it deletes the loser and updates the tile and the winner, or keeps things as they were if it ended in a draw.
+    void buildGame(GameSourceOption option);
 };
 
 #endif //PRAK_DUNGEONCRAWLER_H
