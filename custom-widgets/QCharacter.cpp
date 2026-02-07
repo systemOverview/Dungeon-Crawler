@@ -42,12 +42,11 @@ QLinearGradient QCharacter::getHealthBarGradient(int width){
 void QCharacter::onCharacterHealthChange(CharacterHealthChangeEvent *event)
 {
     assert(m_character!=nullptr && "Character is deleted but still attempted to access.");
-    assert(event->getCharacter()==m_character && "QCharacter subscribed to the wrong character." );
+    qDebug() << m_character;
     m_healthPercentage= (static_cast<float>(m_character->getCurrentHP())
                           / static_cast<float>(m_character->getMaxHP()));
     if (m_healthPercentage<=0){
         EventBus::transmitEvent<EventBus::QCharacterChange>(this, QCharacterChangeEvent::death);
-        delete this;
     }
     else{
         EventBus::transmitEvent<EventBus::QCharacterChange>(this, QCharacterChangeEvent::healthbar);
