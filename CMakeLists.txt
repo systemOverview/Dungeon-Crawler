@@ -28,10 +28,7 @@ qt_add_executable(prak WIN32 MACOSX_BUNDLE
         AbstractUI.h
         PassiveAktive.cpp
         PassiveAktive.h
-        startscreen.h startscreen.cpp startscreen.ui
         textures.qrc
-        GraphicalUI.h GraphicalUI.cpp
-        MainWindow.h MainWindow.cpp MainWindow.ui
         dialog.ui
         fifo.cpp
         fifo.h
@@ -52,6 +49,7 @@ qt_add_executable(prak WIN32 MACOSX_BUNDLE
     )
 add_subdirectory(events)
 add_subdirectory(custom-widgets)
+add_subdirectory(ui)
 find_package(Boost REQUIRED)
 
 target_link_libraries(prak
