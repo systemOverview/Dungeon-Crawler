@@ -17,15 +17,13 @@ qt_add_executable(prak WIN32 MACOSX_BUNDLE
         tile.h
         Character.cpp
         Character.h
-        header.h
+
         DungeonCrawler.cpp
         DungeonCrawler.h
         Level.cpp
         Level.h
-        TerminalUI.cpp
-        TerminalUI.h
-        AbstractUI.cpp
-        AbstractUI.h
+
+
         PassiveAktive.cpp
         PassiveAktive.h
         textures.qrc
@@ -37,12 +35,11 @@ qt_add_executable(prak WIN32 MACOSX_BUNDLE
         StationaryController.h StationaryController.cpp
         GuardController.h GuardController.cpp
         Observer.h Observer.cpp
-        Subject.h Subject.cpp
+
         LevelGraph.h LevelGraph.cpp
         AttackController.h AttackController.cpp
         Utilities.h Utilities.cpp
         RandomColor.h RandomColor.cpp
-        Constants.h
         gamedata/level.json
         JsonObjects.cpp
         JsonObjects.h
