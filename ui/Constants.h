@@ -49,9 +49,8 @@ namespace QtVisualiation { // all in milliseconds
 // inline static int SleepTimeAfterArrowRemoval = 0;
 inline static int TypeWriterSleepTimeBetweenCharacters =  100;
 inline static int SleepTimeAfterText = 300;
-inline static int SleepTimeBetweenArrows = 50;
-inline static int SleepTimeAfterArrowRemoval = 50;
-
+inline static int SleepTimeBetweenArrows = 0;
+inline static int SleepTimeAfterArrowRemoval = 0;
 }
 
 namespace GameData{
