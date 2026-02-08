@@ -1,6 +1,6 @@
 find_package(Qt6 REQUIRED COMPONENTS Widgets)
 find_package(nlohmann_json 3.12.0 REQUIRED)
-target_sources(prak PRIVATE
+target_sources(DungeonCrawler PRIVATE
         QCharacter.h QCharacter.cpp
         QTile.h QTile.cpp
         QGameField.h QGameField.cpp
@@ -12,4 +12,4 @@ target_sources(prak PRIVATE
         QGameWon.h QGameWon.cpp
 )
 
-target_include_directories(prak PRIVATE  ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(DungeonCrawler PRIVATE  ${CMAKE_CURRENT_SOURCE_DIR})
