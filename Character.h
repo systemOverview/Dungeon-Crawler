@@ -5,10 +5,10 @@
 #ifndef PRAK_CHARACTER_H
 #define PRAK_CHARACTER_H
 #include "AbstractUI.h"
-#include "EventBus.h"
-#include "StationaryController.h"
-#include "GuardController.h"
 #include "AttackController.h"
+#include "GuardController.h"
+#include "StationaryController.h"
+#include "EventBus.h"
 #include <nlohmann/json.hpp>
 
 using json = nlohmann::json;
