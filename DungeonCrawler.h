@@ -7,7 +7,6 @@
 #include "GraphicalUI.h"
 #include "JsonObjects.h"
 #include "Level.h"
-#include "TerminalUI.h"
 #include "Utilities.h"
 #include "list.h"
 class StartScreen;
@@ -16,29 +15,26 @@ class DungeonCrawler
 public:
     std::vector<Level*>::iterator currentLevel;
     std::vector<Level *> levels;
-    std::array<std::string, 2> gameStrings = {
-               "##########"
-               "#....$P..#"
-               "#.S.<....#"
-               "#..___...#"
-               "#.G......#"
-               "#A.......#"
-               "#######.##"
-               "#.....G..#"
-               "#.P......#"
-               "##########"
-,
-        "##########"
-        "#....!...#"
-        "#1A.<..S.#"
-        "#..___...#"
-        "#0.___...#"
-        "#........#"
-        "#######X##"
-        "#.G.?..1.#"
-        "#P.0...S.#"
-        "##########"
-    };
+    std::array<std::string, 2> gameStrings = {"##########"
+                                              "#....$P..#"
+                                              "#.S.<....#"
+                                              "#..___...#"
+                                              "#.G......#"
+                                              "#G.......#"
+                                              "#######.##"
+                                              "#.....A..#"
+                                              "#.P......#"
+                                              "##########",
+                                              "##########"
+                                              "#....!...#"
+                                              "#1A.<..S.#"
+                                              "#..___...#"
+                                              "#0.___...#"
+                                              "#........#"
+                                              "#######X##"
+                                              "#.G.?..1.#"
+                                              "#P.0...S.#"
+                                              "##########"};
     GraphicalUI* GUI;
     StartScreen* m_startScreen = nullptr;
     int m_numberOfRemainingNPCs = 0;

@@ -17,7 +17,6 @@ class LevelGraph;
 class QCharacter;
 class StationaryController;
 class Tile;
-class TerminalUI;
 class Character
 {
 protected:
