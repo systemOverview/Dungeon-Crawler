@@ -5,7 +5,6 @@
 #include "Character.h"
 #include "Level.h"
 #include "QCharacter.h"
-#include "header.h"
 #include <qDebug>
 
 Character* Character::GenerateCharacter(char texture, int hitPoints,  Tile* tile, Level* level , LevelGraph* levelGraph)
