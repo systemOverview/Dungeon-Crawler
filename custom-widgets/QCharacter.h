@@ -3,7 +3,7 @@
 #include <QWidget>
 #include "Character.h"
 #include "Observer.h"
-#include "EventBus.h"
+#include "events/EventBus.h"
 #include "Subject.h"
 class QCharacter : public Subject, public EventListener
 {

@@ -1,12 +1,12 @@
 #ifndef QTILE_H
 #define QTILE_H
+#include <QGraphicsColorizeEffect>
 #include <QWidget>
 #include <QtWidgets/qgridlayout.h>
-#include "tile.h"
-#include "QCharacter.h"
-#include "Observer.h"
-#include <QGraphicsColorizeEffect>
 #include "EventBus.h"
+#include "Observer.h"
+#include "QCharacter.h"
+#include "tile.h"
 class QTile : public QWidget, public Observer, public EventListener
 {
     Q_OBJECT

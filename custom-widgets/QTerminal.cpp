@@ -1,9 +1,9 @@
 #include "QTerminal.h"
-#include <QtGui/qpainter.h>
 #include <QFontDatabase>
+#include <QtGui/qpainter.h>
 #include <QtWidgets/qboxlayout.h>
 #include <QtWidgets/qlabel.h>
-#include "Utilities.h";
+#include "Utilities.h"
 #include <sstream>
 void QTerminal::generateLabels()
 {
