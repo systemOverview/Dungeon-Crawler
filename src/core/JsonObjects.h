@@ -14,16 +14,7 @@ struct TileState {
 };
 
 namespace JsonGenerator{
-    void generateTiles();
     void saveGameState(std::vector<Level *> levels);
 }
-// NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(TileState, texture, row, col)
-
-// inline void generateTiles()
-// {
-//     for (auto c : GameData::GameStrings) {
-//         // generate TileState here
-//     }
-// }
 
 #endif

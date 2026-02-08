@@ -1,37 +1,22 @@
-#include <nlohmann/json.hpp>
-#include "Constants.h"
 #include "JsonObjects.h"
+#include <QStandardPaths>
+#include <QtCore/qdir.h>
+#include "Constants.h"
 #include "tile.h"
 #include <fstream>
+#include <nlohmann/json.hpp>
 
-using JSON = nlohmann::json;
-
-void JsonGenerator::generateTiles()
-{
-    {
-        std::ofstream myfile("/Users/mbk/prak/gamedata/level.json");
-        auto tilesArray = json::array();
-
-        std::string gameString = GameData::GameStrings[1];
-        for (int i=0; i<gameString.length(); i++){
-            int row = i / 10;
-            int column = i % 10;
-            JSON jsonTile = {
-                {"texture",  gameString[i]},
-                {"row", row},
-                {"column", column}
-            };
-            tilesArray.push_back(jsonTile);
-
-        }
-        JSON tileHolder = {{"Tiles", tilesArray}};
-        myfile << std::setw(4) << tileHolder << std::endl;
-    }
-}
 
 void JsonGenerator::saveGameState(std::vector<Level *> levels)
 {
-    std::ofstream myfile(GameData::DataFilePath);
+    QString storagePath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    std::string filePath = storagePath.toStdString() + "/level.json";
+    QDir qdir;
+    if (!qdir.mkpath(storagePath)) {
+        qDebug() << "failed to create dir";
+    }
+    std::ofstream file(filePath);
+
     json root;
     auto levelsArray = json::array();
 
@@ -73,9 +58,5 @@ void JsonGenerator::saveGameState(std::vector<Level *> levels)
     }
 
     root["Levels"] = levelsArray;
-    myfile << std::setw(4) << root;
-
-
-
-
+    file << std::setw(4) << root;
 }

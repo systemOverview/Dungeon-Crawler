@@ -4,6 +4,8 @@
 
 #include "DungeonCrawler.h"
 #include <QApplication>
+#include <QFile>
+#include <QStandardPaths>
 #include <QWindow>
 #include <QtCore/qtimer.h>
 #include "list.cpp"
@@ -24,16 +26,17 @@ void DungeonCrawler::buildGame(GameSourceOption option)
             m_lastLevel = lvl;
         }
     }
-    else{
-        std::ifstream file(GameData::DataFilePath);
-
+    else {
+        QString storagePath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+        std::string filePath = storagePath.toStdString() + "/level.json";
+        std::cout << filePath;
+        std::ifstream file(filePath);
         json parsedJson = json::parse(file);
-        for (const auto& level : parsedJson["Levels"]){
+        std::cout << parsedJson;
+        for (const auto& level : parsedJson["Levels"]) {
             Level* lvl = new Level(level);
             levels.push_back(lvl);
             m_lastLevel = lvl;
-
-
         }
     }
 
