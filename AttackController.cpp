@@ -9,7 +9,6 @@ AttackController::AttackController(Level *level, LevelGraph *graph): m_level{lev
 
 std::pair<int, int> AttackController::DjikstraMove()
 {
-    qDebug() << m_path;
     std::pair<int,int> move = {0,0};
     if (!isPath){
         std::pair<int,int> attackerCords = m_character->getTile()->getCordsAsPair();
@@ -23,6 +22,8 @@ std::pair<int, int> AttackController::DjikstraMove()
         it = m_path.begin();
         move = *it;
         it++;
+        qDebug() << m_path;
+
     }
     else{
         if (m_path.empty()){
@@ -41,9 +42,4 @@ std::pair<int, int> AttackController::DjikstraMove()
 std::pair<int, int> AttackController::move()
 {
     return DjikstraMove();
-}
-
-void AttackController::reactToChange(std::string changedMemberName)
-{
-    return;
 }

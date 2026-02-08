@@ -85,10 +85,6 @@ void QTile::onQCharacterChange(QCharacterChangeEvent *event)
 
 }
 
-void QTile::reactToChange(std::string changedMemberName)
-{
-}
-
 void QTile::markAsVisited()
 {
     m_appliedEffect = new QGraphicsColorizeEffect;

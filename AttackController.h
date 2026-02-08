@@ -1,10 +1,9 @@
 #ifndef ATTACKCONTROLLER_H
 #define ATTACKCONTROLLER_H
 #include "AbstractUI.h"
-#include "Observer.h"
 #include <QtCore/qdebug.h>
 class LevelGraph;
-class AttackController : public AbstractController, public Observer
+class AttackController : public AbstractController
 {
 private:
     Level* m_level;
@@ -17,7 +16,6 @@ public:
     std::pair<int, int> DjikstraMove();
     std::pair<int, int> move() override;
     std::pair<int,int> move(std::pair<int,int> startingTileCords);
-    void reactToChange(std::string changedMemberName="") override;
 
 };
 

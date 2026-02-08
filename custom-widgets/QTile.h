@@ -4,10 +4,9 @@
 #include <QWidget>
 #include <QtWidgets/qgridlayout.h>
 #include "EventBus.h"
-#include "Observer.h"
 #include "QCharacter.h"
 #include "tile.h"
-class QTile : public QWidget, public Observer, public EventListener
+class QTile : public QWidget, public EventListener
 {
     Q_OBJECT
 private:
@@ -27,7 +26,6 @@ public:
     std::pair<QRect, QRect> getRects();
     void paintEvent(QPaintEvent* event) override;
     void mouseDoubleClickEvent(QMouseEvent *event) override;
-    void reactToChange(std::string changedMemberName="") override;
     void changeStyleTemporarly();
     void markAsVisited();
     void unmarkAsVisited();
