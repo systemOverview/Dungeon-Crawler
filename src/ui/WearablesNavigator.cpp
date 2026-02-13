@@ -1,26 +1,28 @@
-#include "GraphicsNavigator.h"
+#include "WearablesNavigator.h"
+#include <QBitmap>
 #include <QtCore/qdebug.h>
 
-QString GraphicsNavigator::getFullTexturePath(int texutreIndex) {
+QString WearablesNavigator::getFullTexturePath(int texutreIndex) {
     return m_texturePathBase + QString::fromStdString(std::to_string(texutreIndex) + ".png");
 }
 
-GraphicsNavigator::GraphicsNavigator(CharacterWearables::WearableType textureType)
-    : m_texturePathBase{CharacterWearables::WEARABLES_CUT_PATH_BASE.at(textureType)} {}
+WearablesNavigator::WearablesNavigator(SpriteManager::WhichSprite whichSprite)
+    : m_spriteType{whichSprite} {}
 
-QImage GraphicsNavigator::getNextTexture() {
-    QString path = getFullTexturePath(m_currentTextureIndex++);
-    QImage texture;
-    bool check = texture.load(path);
-
-    if (check)
-        return texture;
-    else
+QImage WearablesNavigator::getNextTexture() {
+    QImage image = SpriteManager::GetImageFromSprite(m_spriteType, m_currentTextureIndex++);
+    if (image.isNull()) {
         return (outOfRangeTexture());
+    }
+    else {
+        QRect opaqueRect = QRegion(QBitmap::fromImage(image.createAlphaMask())).boundingRect();
+        image = image.copy(opaqueRect);
+        return image;
+    }
 }
 
-QImage GraphicsNavigator::getPrevTexture() {}
+QImage WearablesNavigator::getPrevTexture() {}
 
-QImage GraphicsNavigator::outOfRangeTexture() {
+QImage WearablesNavigator::outOfRangeTexture() {
     return QImage(":/res/textures/res/outofrange.png");
 }
