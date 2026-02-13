@@ -53,7 +53,8 @@ class MainWindow : public QMainWindow, public EventListener
 public slots:
     void arrowClicked(MainWindow::MoveDirection moveDirection);
     void armorButtonClicked(int armorID);
-    void characterCustomizationClicked(CharacterGraphics::CharacterPart, int whichOption);
+    void characterCustomizationClicked(CharacterGraphics::CharacterPart characterPart,
+                                       int whichOption);
 signals:
     void viewResized(QRect newViewRect);
     void characterMove(QPointF newPos);

@@ -2,9 +2,18 @@
 #include <QtCore/qtimer.h>
 #include <QtGui/qbitmap.h>
 #include <QtGui/qpainter.h>
+#include "SpriteManager.h"
 CharacterItem::CharacterItem() {
     m_timer = new QTimer();
     m_timer->setTimerType(Qt::PreciseTimer);
+    QImage base = SpriteManager::GetImageFromSprite(CharacterGraphics::CharacterPart::Base);
+    m_parts.insert({CharacterGraphics::CharacterPart::Base, QPixmap::fromImage(base)});
+
+    QImage outfit = SpriteManager::GetImageFromSprite(CharacterGraphics::CharacterPart::Outfit);
+    m_parts.insert({CharacterGraphics::CharacterPart::Outfit, QPixmap::fromImage(outfit)});
+
+    QImage head = SpriteManager::GetImageFromSprite(CharacterGraphics::CharacterPart::Head);
+    m_parts.insert({CharacterGraphics::CharacterPart::Head, QPixmap::fromImage(head)});
 }
 
 void CharacterItem::resize(qreal newTileLength) { m_size = newTileLength; }
@@ -25,12 +34,9 @@ void CharacterItem::animateMove(QPointF newPos) {
     qDebug() << pos() << newPos;
 }
 
-void CharacterItem::assignWearable(CharacterWearables::WearableType wearableType, int wearableID) {
-    QString wearablePath(CharacterWearables::WEARABLES_SPRITE_PATH_BASE.at(wearableType)
-                         + QString::number(wearableID) + ".png"); // make it a util func
-    QPixmap wearablePixmap(wearablePath);
-    wearablePixmap = wearablePixmap.copy(0, 0, 46, 50);
-    m_wearables.insert_or_assign(wearableType, wearablePixmap);
+void CharacterItem::assignPart(CharacterGraphics::CharacterPart partType, int partID) {
+    QPixmap partPixmap = QPixmap::fromImage(SpriteManager::GetImageFromSprite(partType, partID));
+    m_parts.insert_or_assign(partType, partPixmap);
     update();
 }
 
@@ -39,10 +45,7 @@ QRectF CharacterItem::boundingRect() const { return {0, 0, m_size, m_size}; }
 void CharacterItem::paint(QPainter* painter,
                           const QStyleOptionGraphicsItem* option,
                           QWidget* widget) {
-    QPixmap p(m_texutreBase);
-    p = p.copy(0, 0, 46, 50);
-    painter->drawPixmap(boundingRect(), p, p.rect());
-    for (auto [wearableType, wearablePixMap] : m_wearables) {
+    for (const auto& [wearableType, wearablePixMap] : m_parts) {
         painter->drawPixmap(boundingRect(), wearablePixMap, wearablePixMap.rect());
     }
 }

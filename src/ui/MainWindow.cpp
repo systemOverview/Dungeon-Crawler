@@ -91,7 +91,6 @@ void MainWindow::createArmorOptions() {
         QPixmap armorScaled(QPixmap::fromImage(im).scaledToHeight(100));
         QIcon icon(armorScaled);
         armorOptionButton->setIcon(icon);
-        qDebug() << armorScaled.size();
         armorOptionButton->setIconSize(armorScaled.size());
         armorOptionButton->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
 
@@ -113,6 +112,7 @@ void MainWindow::createArmorOptions() {
 
 void MainWindow::createCharacterCustomizationOptions() {
     for (int i = 0; i < int(CharacterGraphics::CharacterPart::PAST_END); i++) {
+        CharacterGraphics::CharacterPart characterPart = CharacterGraphics::CharacterPart(i);
         QWidget* options = new QWidget();
         QGridLayout* optionsLayout = new QGridLayout();
         options->setLayout(optionsLayout);
@@ -120,8 +120,7 @@ void MainWindow::createCharacterCustomizationOptions() {
         QButtonGroup* optionsButtonGroup = new QButtonGroup();
 
         std::vector<QImage> images = SpriteManager::GetSpriteVariantsAtIdle(
-            CharacterGraphics::CharacterPart(i),
-            SpriteManager::ImageProcessingMode::TrimTransparent);
+            characterPart, SpriteManager::ImageProcessingMode::TrimTransparent);
         int counter = 0;
         for (QImage& image : images) {
             QPushButton* optionButton = new QPushButton();
@@ -130,11 +129,14 @@ void MainWindow::createCharacterCustomizationOptions() {
             QIcon optionIcon(optionImage);
             optionButton->setIcon(optionIcon);
             optionButton->setIconSize({50, 100});
-            qDebug() << counter << optionButton->iconSize();
 
             optionsButtonGroup->addButton(optionButton, counter);
             optionsLayout->addWidget(optionButton, counter / 3,
                                      (counter) % 3); // 3 images per row
+
+            connect(optionButton, &QPushButton::clicked, this, [counter, characterPart, this]() {
+                characterCustomizationClicked(characterPart, counter);
+            });
             counter++;
         }
         m_sidebarToolBox->addItem(options,
@@ -339,4 +341,7 @@ void MainWindow::arrowClicked(MoveDirection moveDirection) {}
 
 void MainWindow::armorButtonClicked(int armorID) {}
 
-void MainWindow::characterCustomizationClicked(CharacterGraphics::CharacterPart, int whichOption) {}
+void MainWindow::characterCustomizationClicked(CharacterGraphics::CharacterPart characterPart,
+                                               int whichOption) {
+    m_character->assignPart(characterPart, whichOption);
+}

@@ -16,12 +16,12 @@ class CharacterItem : public QObject, public QGraphicsItem
     int m_startingPos = 0;
     qreal m_size = 300;
     int m_selectedArmor = 1;
-    std::map<CharacterWearables::WearableType, QPixmap> m_wearables = {};
+    std::map<CharacterGraphics::CharacterPart, QPixmap> m_parts = {};
 
 public slots:
     void resize(qreal newTileLength);
     void animateMove(QPointF newPos);
-    void assignWearable(CharacterWearables::WearableType wearableType, int wearableID);
+    void assignPart(CharacterGraphics::CharacterPart partType, int partID);
 
 public:
     enum { Type = UserType + 2 };
