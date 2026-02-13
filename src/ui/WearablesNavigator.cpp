@@ -6,7 +6,7 @@ QString WearablesNavigator::getFullTexturePath(int texutreIndex) {
     return m_texturePathBase + QString::fromStdString(std::to_string(texutreIndex) + ".png");
 }
 
-WearablesNavigator::WearablesNavigator(SpriteManager::WhichSprite whichSprite)
+WearablesNavigator::WearablesNavigator(CharacterGraphics::CharacterPart whichSprite)
     : m_spriteType{whichSprite} {}
 
 QImage WearablesNavigator::getNextTexture() {

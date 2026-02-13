@@ -17,7 +17,7 @@ void SpriteManager::TrimTransparent(QImage& image) {
     image = image.copy(opaqueRect);
 }
 
-QImage SpriteManager::GetImageFromSprite(WhichSprite which, int id) {
+QImage SpriteManager::GetImageFromSprite(CharacterGraphics::CharacterPart which, int id) {
     QString path(WEARABLES_SPRITE_PATH_BASE.at(which) + QString::number(id) + ".png");
     qDebug() << path;
     QImage sprite(path);
@@ -26,7 +26,7 @@ QImage SpriteManager::GetImageFromSprite(WhichSprite which, int id) {
 }
 
 std::vector<QImage> SpriteManager::GetAllImagesAtIDFromSprite(
-    WhichSprite which, int id, ImageProcessingMode imageProcessingMode) {
+    CharacterGraphics::CharacterPart which, int id, ImageProcessingMode imageProcessingMode) {
     int counter = 0;
     std::vector<QImage> images;
     while (true) {
@@ -37,7 +37,7 @@ std::vector<QImage> SpriteManager::GetAllImagesAtIDFromSprite(
     }
 }
 
-std::vector<QImage> SpriteManager::GetSpriteVariantsAtIdle(WhichSprite which,
+std::vector<QImage> SpriteManager::GetSpriteVariantsAtIdle(CharacterGraphics::CharacterPart which,
                                                            ImageProcessingMode imageProcessingMode) {
     int counter = 0;
     std::vector<QImage> images;

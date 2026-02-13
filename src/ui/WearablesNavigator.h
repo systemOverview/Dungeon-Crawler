@@ -12,10 +12,10 @@ private:
     QString m_texturePathBase;
     int m_currentTextureIndex = 0;
     QString getFullTexturePath(int texutreIndex);
-    SpriteManager::WhichSprite m_spriteType;
+    CharacterGraphics::CharacterPart m_spriteType;
 
 public:
-    WearablesNavigator(SpriteManager::WhichSprite whichSprite);
+    WearablesNavigator(CharacterGraphics::CharacterPart whichSprite);
     QImage begin();
     QImage getNextTexture();
     QImage getPrevTexture();

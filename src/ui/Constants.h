@@ -1,18 +1,20 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 #include <QtCore/qobject.h>
-#include "SpriteManager.h"
 #include <sstream>
+namespace CharacterGraphics {
+enum class CharacterPart { Base, Head, Outfit, Weapon, PAST_END };
+}
 namespace CharacterWearables {
 enum WearableType {
     Armor,
 };
 
-inline std::map<SpriteManager::WhichSprite, QString> CustomizationButtonsTexts = {
-           {SpriteManager::WhichSprite::Base, "Select a base color for your player!"},
-           {SpriteManager::WhichSprite::Head, "You can even swap heads.."},
-           {SpriteManager::WhichSprite::Outfit, "Pick an outfit for the prom"},
-           {SpriteManager::WhichSprite::Weapon, "Lot of evil creatures, chose a weapon"},
+inline std::map<CharacterGraphics::CharacterPart, QString> CustomizationButtonsTexts = {
+           {CharacterGraphics::CharacterPart::Base, "Select a base color for your player!"},
+           {CharacterGraphics::CharacterPart::Head, "You can even swap heads.."},
+           {CharacterGraphics::CharacterPart::Outfit, "Pick an outfit for the prom"},
+           {CharacterGraphics::CharacterPart::Weapon, "Lot of evil creatures, chose a weapon"},
 
 };
 extern std::map<WearableType, QString> WEARABLES_CUT_PATH_BASE;

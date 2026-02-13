@@ -74,15 +74,16 @@ void MainWindow::makeStartScreen() {
 }
 
 void MainWindow::createArmorOptions() {
-    auto v = SpriteManager::GetSpriteVariantsAtIdle(
-        SpriteManager::WhichSprite::Base, SpriteManager::ImageProcessingMode::TrimTransparent);
+    auto v
+        = SpriteManager::GetSpriteVariantsAtIdle(CharacterGraphics::CharacterPart::Base,
+                                                 SpriteManager::ImageProcessingMode::TrimTransparent);
     m_armorOptions = new QWidget();
     QGridLayout* armorOptionsLayout = new QGridLayout();
     m_armorOptions->setLayout(armorOptionsLayout);
 
     QButtonGroup* armorOptionsButtonGroup = new QButtonGroup();
     int counter = 0;
-    WearablesNavigator navig(SpriteManager::WhichSprite::Base);
+    WearablesNavigator navig(CharacterGraphics::CharacterPart::Base);
     for (auto im : v) {
         QPushButton* armorOptionButton = new QPushButton();
         armorOptionButton->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
@@ -111,7 +112,7 @@ void MainWindow::createArmorOptions() {
 }
 
 void MainWindow::createCharacterCustomizationOptions() {
-    for (int i = 0; i < int(SpriteManager::WhichSprite::PAST_END); i++) {
+    for (int i = 0; i < int(CharacterGraphics::CharacterPart::PAST_END); i++) {
         QWidget* options = new QWidget();
         QGridLayout* optionsLayout = new QGridLayout();
         options->setLayout(optionsLayout);
@@ -119,7 +120,8 @@ void MainWindow::createCharacterCustomizationOptions() {
         QButtonGroup* optionsButtonGroup = new QButtonGroup();
 
         std::vector<QImage> images = SpriteManager::GetSpriteVariantsAtIdle(
-            SpriteManager::WhichSprite(i), SpriteManager::ImageProcessingMode::TrimTransparent);
+            CharacterGraphics::CharacterPart(i),
+            SpriteManager::ImageProcessingMode::TrimTransparent);
         int counter = 0;
         for (QImage& image : images) {
             QPushButton* optionButton = new QPushButton();
@@ -137,7 +139,7 @@ void MainWindow::createCharacterCustomizationOptions() {
         }
         m_sidebarToolBox->addItem(options,
                                   CharacterWearables::CustomizationButtonsTexts.at(
-                                      SpriteManager::WhichSprite(i)));
+                                      CharacterGraphics::CharacterPart(i)));
     }
 }
 
@@ -337,4 +339,4 @@ void MainWindow::arrowClicked(MoveDirection moveDirection) {}
 
 void MainWindow::armorButtonClicked(int armorID) {}
 
-void MainWindow::characterCustomizationClicked(SpriteManager::WhichSprite, int whichOption) {}
+void MainWindow::characterCustomizationClicked(CharacterGraphics::CharacterPart, int whichOption) {}

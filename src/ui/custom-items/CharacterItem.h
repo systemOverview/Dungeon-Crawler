@@ -25,7 +25,6 @@ public slots:
 
 public:
     enum { Type = UserType + 2 };
-
     int type() const override { return Type; }
     CharacterItem();
     QRectF boundingRect() const override;
