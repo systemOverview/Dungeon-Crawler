@@ -4,9 +4,12 @@
 #include <QEvent>
 #include <QGridLayout>
 #include <QMainWindow>
+#include <QtWidgets/qgraphicsview.h>
 #include <QtWidgets/qlineedit.h>
-#include "Level.h"
+#include <QtWidgets/qtoolbox.h>
+#include "CharacterItem.h"
 #include "EventBus.h"
+#include "Level.h"
 #include "QGameField.h"
 
 class GraphicalUI;
@@ -35,6 +38,24 @@ class MainWindow;
 class MainWindow : public QMainWindow, public EventListener
 {
     Q_OBJECT
+    enum MoveDirection {
+        TopLeft,
+        TopCenter,
+        TopRight,
+        CenterLeft,
+        CenterCenter,
+        CenterRight,
+        BottomLeft,
+        BottomCenter,
+        BottomRight
+    };
+
+public slots:
+    void arrowClicked(MoveDirection moveDirection);
+    void armorButtonClicked(int armorID);
+signals:
+    void viewResized(QRect newViewRect);
+    void characterMove(QPointF newPos);
 
 public:
     explicit MainWindow(Level *lvl, GraphicalUI *g, QWidget *parent = nullptr);
@@ -53,6 +74,26 @@ public:
     void showTerminal();
 
 private:
+    QGraphicsScene* m_gameScene = nullptr;
+    QGraphicsView* m_gameView = nullptr;
+    QGraphicsScene* m_startScene = nullptr;
+    QGraphicsView* m_startView = nullptr;
+
+    QWidget* m_sidebar = nullptr;
+    QVBoxLayout* m_sidebarLayout = nullptr;
+    QWidget* m_options = nullptr;
+    QWidget* m_armorOptions = nullptr;
+
+    QToolBox* m_sidebarToolBox = nullptr;
+
+    CharacterItem* m_character;
+
+    void setupShortcuts();
+    void loadDefaultTiles();
+    void makeStartScreen();
+    void showCharOptions();
+    void createArmorOptions();
+
     Ui::MainWindow* ui;
     Level *level;
     QGridLayout* m_gameBoard;

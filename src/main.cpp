@@ -16,9 +16,10 @@ using json = nlohmann::json;
 
 int main(int argc, char *argv[])
 {
-
     QApplication a(argc, argv);
-    DungeonCrawler dc;
+    // DungeonCrawler dc;
+    MainWindow mw(nullptr, nullptr);
+    mw.show();
     return a.exec();
 }
 

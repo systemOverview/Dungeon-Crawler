@@ -2,9 +2,9 @@
 #define QOVERLAY_H
 #include <QWidget>
 #include <QtGui/qpainter.h>
+#include "EventBus.h"
 #include "QTile.h"
 #include "Utilities.h"
-#include "events/EventBus.h"
 struct Edge{
     enum EdgeType {
         Arrow,

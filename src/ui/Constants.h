@@ -2,6 +2,15 @@
 #define CONSTANTS_H
 #include <QtCore/qobject.h>
 #include <sstream>
+namespace CharacterWearables {
+constexpr int IMAGE_WIDTH = 32;
+constexpr int IMAGE_HEIGHT = 64;
+enum WearableType {
+    Armor,
+};
+extern std::map<WearableType, QString> WEARABLES_CUT_PATH_BASE;
+extern std::map<WearableType, QString> WEARABLES_SPRITE_PATH_BASE;
+} // namespace CharacterWearables
 
 namespace DjikstraStrings{
     enum DjikstraStringID {
