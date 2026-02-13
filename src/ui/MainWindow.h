@@ -11,7 +11,7 @@
 #include "EventBus.h"
 #include "Level.h"
 #include "QGameField.h"
-
+#include "SpriteManager.h"
 class GraphicalUI;
 class DungeonCrawler;
 class Arrow
@@ -51,8 +51,9 @@ class MainWindow : public QMainWindow, public EventListener
     };
 
 public slots:
-    void arrowClicked(MoveDirection moveDirection);
+    void arrowClicked(MainWindow::MoveDirection moveDirection);
     void armorButtonClicked(int armorID);
+    void characterCustomizationClicked(SpriteManager::WhichSprite, int whichOption);
 signals:
     void viewResized(QRect newViewRect);
     void characterMove(QPointF newPos);
@@ -93,6 +94,7 @@ private:
     void makeStartScreen();
     void showCharOptions();
     void createArmorOptions();
+    void createCharacterCustomizationOptions();
 
     Ui::MainWindow* ui;
     Level *level;

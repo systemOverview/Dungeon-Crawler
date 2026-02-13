@@ -10,11 +10,11 @@
 #include <QtWidgets/qtoolbar.h>
 #include "DungeonCrawler.h"
 #include "GraphicalUI.h"
-#include "GraphicsNavigator.h"
 #include "QGameField.h"
 #include "QGameOver.h"
 #include "QGameWon.h"
 #include "QTerminal.h"
+#include "WearablesNavigator.h"
 #include "ui_MainWindow.h"
 #include <sstream>
 
@@ -28,7 +28,6 @@ void MainWindow::makeStartScreen() {
     m_startView->setFrameStyle(QFrame::NoFrame);
 
     showFullScreen();
-    // this->setFixedSize(1500, 1000);
     m_startView->setScene(m_startScene);
 
     m_startView->setBackgroundBrush(Qt::black);
@@ -44,7 +43,6 @@ void MainWindow::makeStartScreen() {
     // arrow = arrow.scaled(50, 50);
     QLabel* a = new QLabel();
     a->setPixmap(arrow);
-    // a->setFixedSize(50, 50);
 
     w->setLayout(layout);
     layout->addWidget(cc, 0, 0, 2, 1);
@@ -68,40 +66,39 @@ void MainWindow::makeStartScreen() {
     m_sidebar->setStyleSheet("background-color:white");
     m_character = new CharacterItem();
     m_startScene->addItem(m_character);
-    createArmorOptions();
+    // createArmorOptions();
+    createCharacterCustomizationOptions();
     m_sidebarToolBox->setMinimumSize({400, 400});
     m_sidebarToolBox->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
     setCentralWidget(central);
 }
 
 void MainWindow::createArmorOptions() {
+    auto v = SpriteManager::GetSpriteVariantsAtIdle(
+        SpriteManager::WhichSprite::Base, SpriteManager::ImageProcessingMode::TrimTransparent);
     m_armorOptions = new QWidget();
     QGridLayout* armorOptionsLayout = new QGridLayout();
     m_armorOptions->setLayout(armorOptionsLayout);
 
     QButtonGroup* armorOptionsButtonGroup = new QButtonGroup();
     int counter = 0;
-    GraphicsNavigator navig(CharacterWearables::Armor);
-    while (true) {
+    WearablesNavigator navig(SpriteManager::WhichSprite::Base);
+    for (auto im : v) {
         QPushButton* armorOptionButton = new QPushButton();
         armorOptionButton->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
-        QImage im = navig.getNextTexture();
-        // m_startScene->addItem(new QGraphicsPixmapItem(QPixmap::fromImage(im)));
 
-        if (im == navig.outOfRangeTexture()) {
-            break;
-        }
-        QPixmap armorScaled(QPixmap::fromImage(im).scaled({50, 50}));
+        QPixmap armorScaled(QPixmap::fromImage(im).scaledToHeight(100));
         QIcon icon(armorScaled);
         armorOptionButton->setIcon(icon);
-        armorOptionButton->setIconSize({50, 50});
+        qDebug() << armorScaled.size();
+        armorOptionButton->setIconSize(armorScaled.size());
+        armorOptionButton->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
 
         QAction* action = new QAction();
         // action->setData(counter);
         // armorOptionButton->setDefaultAction(action);
 
         armorOptionsButtonGroup->addButton(armorOptionButton, counter);
-        armorOptionsLayout->addWidget(armorOptionButton);
         armorOptionsLayout->addWidget(armorOptionButton, counter / 3, (counter) % 3);
         counter++;
     }
@@ -111,6 +108,37 @@ void MainWindow::createArmorOptions() {
             &MainWindow::armorButtonClicked);
 
     m_sidebarToolBox->addItem(m_armorOptions, "Choose your armor!");
+}
+
+void MainWindow::createCharacterCustomizationOptions() {
+    for (int i = 0; i < int(SpriteManager::WhichSprite::PAST_END); i++) {
+        QWidget* options = new QWidget();
+        QGridLayout* optionsLayout = new QGridLayout();
+        options->setLayout(optionsLayout);
+
+        QButtonGroup* optionsButtonGroup = new QButtonGroup();
+
+        std::vector<QImage> images = SpriteManager::GetSpriteVariantsAtIdle(
+            SpriteManager::WhichSprite(i), SpriteManager::ImageProcessingMode::TrimTransparent);
+        int counter = 0;
+        for (QImage& image : images) {
+            QPushButton* optionButton = new QPushButton();
+            QPixmap optionImage = QPixmap::fromImage(image).scaledToHeight(100);
+
+            QIcon optionIcon(optionImage);
+            optionButton->setIcon(optionIcon);
+            optionButton->setIconSize({50, 100});
+            qDebug() << counter << optionButton->iconSize();
+
+            optionsButtonGroup->addButton(optionButton, counter);
+            optionsLayout->addWidget(optionButton, counter / 3,
+                                     (counter) % 3); // 3 images per row
+            counter++;
+        }
+        m_sidebarToolBox->addItem(options,
+                                  CharacterWearables::CustomizationButtonsTexts.at(
+                                      SpriteManager::WhichSprite(i)));
+    }
 }
 
 MainWindow::MainWindow(Level *lvl, GraphicalUI *g, QWidget *parent)
@@ -308,3 +336,5 @@ void MainWindow::showTerminal()
 void MainWindow::arrowClicked(MoveDirection moveDirection) {}
 
 void MainWindow::armorButtonClicked(int armorID) {}
+
+void MainWindow::characterCustomizationClicked(SpriteManager::WhichSprite, int whichOption) {}
