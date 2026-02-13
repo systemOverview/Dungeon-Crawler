@@ -38,7 +38,23 @@
         <file>textures/sounds/gameover.mp3</file>
         <file>textures/sounds/win.ogg</file>
     </qresource>
-    <qresource prefix="/"/>
+    <qresource prefix="/">
+        <file>characters/human/base/0.png</file>
+        <file>characters/human/base/1.png</file>
+        <file>characters/human/base/2.png</file>
+        <file>characters/human/head/0.png</file>
+        <file>characters/human/head/1.png</file>
+        <file>characters/human/head/2.png</file>
+        <file>characters/human/head/3.png</file>
+        <file>characters/human/head/4.png</file>
+        <file>characters/human/head/5.png</file>
+        <file>characters/human/head/6.png</file>
+        <file>characters/human/head/7.png</file>
+        <file>characters/human/outfit/0.png</file>
+        <file>characters/human/outfit/1.png</file>
+        <file>characters/human/outfit/2.png</file>
+        <file>characters/human/outfit/3.png</file>
+    </qresource>
     <qresource prefix="/fonts">
         <file>emulogic-font</file>
         <file alias="Emulogic.ttf">fonts/Emulogic.ttf</file>
