@@ -2,6 +2,10 @@
 #define CONSTANTS_H
 #include <QtCore/qobject.h>
 #include <sstream>
+
+namespace GameSettings {
+constexpr inline static int FPS = 5;
+}
 namespace CharacterGraphics {
 enum class CharacterPart { Base, Head, Outfit, Weapon, PAST_END };
 }

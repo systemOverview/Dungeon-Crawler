@@ -14,7 +14,6 @@
 #include "QGameOver.h"
 #include "QGameWon.h"
 #include "QTerminal.h"
-#include "WearablesNavigator.h"
 #include "ui_MainWindow.h"
 #include <sstream>
 
@@ -26,88 +25,34 @@ void MainWindow::makeStartScreen() {
     m_startScene = new QGraphicsScene();
     m_startView = new QGraphicsView();
     m_startView->setFrameStyle(QFrame::NoFrame);
-
-    showFullScreen();
     m_startView->setScene(m_startScene);
-
     m_startView->setBackgroundBrush(Qt::black);
+
     QWidget* w = new QWidget();
     QGridLayout* layout = new QGridLayout();
-    w->setStyleSheet("background-color:white");
-    QPixmap pix(":/armors/textures/arrows/Image.png");
-    pix = pix.scaled({66, 135});
-    QLabel* cc = new QLabel();
-    cc->setPixmap(pix);
-
-    QPixmap arrow(":/arrows/textures/arrows/arrowrighttrimmed.png");
-    // arrow = arrow.scaled(50, 50);
-    QLabel* a = new QLabel();
-    a->setPixmap(arrow);
-
-    w->setLayout(layout);
-    layout->addWidget(cc, 0, 0, 2, 1);
-    layout->addWidget(a, 0, 1);
-
-    m_startScene->addWidget(w);
-
-    w->setStyleSheet("background-color:black");
 
     mainLayout->addWidget(m_startView);
 
-    // buttons testing
 
     m_sidebar = new QWidget();
     m_sidebarLayout = new QVBoxLayout();
     m_sidebar->setLayout(m_sidebarLayout);
 
-    // mainLayout->addWidget(m_sidebar);
     m_sidebarToolBox = new QToolBox;
     mainLayout->addWidget(m_sidebarToolBox);
     m_sidebar->setStyleSheet("background-color:white");
+
     m_character = new CharacterItem();
     m_startScene->addItem(m_character);
     // createArmorOptions();
     createCharacterCustomizationOptions();
-    m_sidebarToolBox->setMinimumSize({400, 400});
-    m_sidebarToolBox->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
+    // m_sidebarToolBox->setMinimumSize({400, 400});
+    m_sidebarToolBox->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
+
+    mainLayout->setStretch(0, 2);
+    mainLayout->setStretch(1, 1);
+
     setCentralWidget(central);
-}
-
-void MainWindow::createArmorOptions() {
-    auto v
-        = SpriteManager::GetSpriteVariantsAtIdle(CharacterGraphics::CharacterPart::Base,
-                                                 SpriteManager::ImageProcessingMode::TrimTransparent);
-    m_armorOptions = new QWidget();
-    QGridLayout* armorOptionsLayout = new QGridLayout();
-    m_armorOptions->setLayout(armorOptionsLayout);
-
-    QButtonGroup* armorOptionsButtonGroup = new QButtonGroup();
-    int counter = 0;
-    WearablesNavigator navig(CharacterGraphics::CharacterPart::Base);
-    for (auto im : v) {
-        QPushButton* armorOptionButton = new QPushButton();
-        armorOptionButton->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
-
-        QPixmap armorScaled(QPixmap::fromImage(im).scaledToHeight(100));
-        QIcon icon(armorScaled);
-        armorOptionButton->setIcon(icon);
-        armorOptionButton->setIconSize(armorScaled.size());
-        armorOptionButton->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
-
-        QAction* action = new QAction();
-        // action->setData(counter);
-        // armorOptionButton->setDefaultAction(action);
-
-        armorOptionsButtonGroup->addButton(armorOptionButton, counter);
-        armorOptionsLayout->addWidget(armorOptionButton, counter / 3, (counter) % 3);
-        counter++;
-    }
-    connect(armorOptionsButtonGroup,
-            &QButtonGroup::idClicked,
-            this,
-            &MainWindow::armorButtonClicked);
-
-    m_sidebarToolBox->addItem(m_armorOptions, "Choose your armor!");
 }
 
 void MainWindow::createCharacterCustomizationOptions() {
@@ -119,12 +64,12 @@ void MainWindow::createCharacterCustomizationOptions() {
 
         QButtonGroup* optionsButtonGroup = new QButtonGroup();
 
-        std::vector<QImage> images = SpriteManager::GetSpriteVariantsAtIdle(
+        std::vector<QPixmap> variants = SpriteManager::GetIdleFrameVariants(
             characterPart, SpriteManager::ImageProcessingMode::TrimTransparent);
         int counter = 0;
-        for (QImage& image : images) {
+        for (QPixmap& optionImage : variants) {
             QPushButton* optionButton = new QPushButton();
-            QPixmap optionImage = QPixmap::fromImage(image).scaledToHeight(100);
+            optionImage = optionImage.scaledToHeight(100);
 
             QIcon optionIcon(optionImage);
             optionButton->setIcon(optionIcon);
