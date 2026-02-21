@@ -41,7 +41,7 @@ void JsonGenerator::saveGameState(std::vector<Level *> levels)
                                        });
         }
 
-        for (auto& tileRow : *level->getTiles()) {
+        for (auto& tileRow : level->getTiles()) {
             for (Tile* tile : tileRow) {
                 tilesArray.push_back(tile);
                 if (tile->getCharacter())

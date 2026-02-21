@@ -16,6 +16,22 @@ void Level::addCharacter(Character* character)
     }
 }
 
+Level::Level(std::string gameString) {
+    setDefaultTiles();
+    for (int i = 0; i < gameString.length(); i++) {
+        int row = i / 10;
+        int column = i % 10;
+        Tile* tile = Tile::GenerateTile(gameString[i], row, column);
+        (tiles)[row][column] = tile;
+
+        if (gameString[i] == 'P' || gameString[i] == 'S' || gameString[i] == 'G'
+            || gameString[i] == 'A') {
+            Character* character = Character::GenerateCharacter(gameString[i], -1, tile, this);
+            tile->setCharacter(character);
+        }
+    }
+}
+
 Level::Level(int height, int width, std::string gameString, bool isActive) :
     m_gameHeight {height}, m_gameWidth{width}
 {
@@ -27,6 +43,7 @@ Level::Level(int height, int width, std::string gameString, bool isActive) :
     for (int i=0; i<gameString.length(); i++){
         int row = i / 10;
         int column = i % 10;
+
         Tile* tile = Tile::GenerateTile(gameString[i], row, column);
         (tiles)[row][column] = tile;
         if (dynamic_cast<Door*>(tile)!=nullptr){
@@ -120,10 +137,7 @@ Tile *Level::getTile(int row, int col)
     return tileToReturn;
 }
 
-std::vector<std::vector<Tile *>> *Level::getTiles()
-{
-    return &tiles;
-}
+const std::vector<std::vector<Tile*> > Level::getTiles() const { return tiles; }
 
 int Level::getHeight() const
 {

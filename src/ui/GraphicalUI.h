@@ -2,28 +2,37 @@
 #define GRAPHICALUI_H
 #include <QDialog>
 #include <QMainWindow>
+#include <QObject>
 #include <QPainter>
-#include "AbstractUI.h"
-#include "Level.h"
-#include "MainWindow.h"
-#include "QTile.h"
-#include "EventBus.h"
-#include "Utilities.h"
-#include "QGraphMatrix.h"
 #include <QTextEdit>
+#include "AbstractUI.h"
+#include "EventBus.h"
+#include "Level.h"
+#include "List.tpp"
+#include "MainWindow.h"
+#include "QGraphMatrix.h"
+#include "QTile.h"
 #include "QTypeWriter.h"
+#include "Utilities.h"
 class DungeonCrawler;
-class GraphicalUI : public AbstractUI, public AbstractController, public EventListener
+class GraphicalUI : public QObject,
+                    public AbstractUI,
+                    public AbstractController,
+                    public EventListener
 {
+    Q_OBJECT
 public:
     enum VisualizationMode { FullVisualization, FullVisualizationWithoutText, OnlyFinalPath, None };
 
 private:
     bool m_isVisualizeModeOn=true;
     QDialog* startScreen;
-    MainWindow *mainWindow;
+    MainWindow* m_mainWindow = nullptr;
     int currentWindow{0};
     Level* level;
+
+    CharacterItem* m_human;
+
     DungeonCrawler* dc;
     std::pair<int, int> lastMove;
     std::vector<QWidget *> m_healthBars;
@@ -33,9 +42,26 @@ private:
     QTypeWriter* m_algorithmStepExplainerField = nullptr;
     VisualizationMode m_visualizationMode = FullVisualization;
 
+    QStateMachine* m_stateMachine = nullptr;
+    QStateMachine* m_animationMachine = nullptr;
+
+    QSequentialAnimationGroup* m_customizationAnimationLoop = nullptr;
+    List<TileItem*> m_graphicalTiles;
+
+    void startAnimationLoop();
+    void setupStateMachine();
+    void setupShortcuts();
+    QPointF calculateMove(QPointF from, QPointF to);
+
+public slots:
+    void createLevelUI(const std::vector<std::vector<Tile*> >&);
+    void moveCharacter(TileItem* toWhichTile);
+signals:
+    void gameStarted();
+
 public:
     void setVisualizationMode(VisualizationMode mode);
-    GraphicalUI(Level *lvl, DungeonCrawler *d);
+    GraphicalUI();
     QDialog *getStartScreen();
     MainWindow *getMainWindow();
     void draw(Level *) override;

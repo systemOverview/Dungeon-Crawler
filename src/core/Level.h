@@ -19,7 +19,7 @@ class Level
     // Because the human player doesn't get deleted when level changes (to keep health data)
     // humanCharacter is static, and when levels are initially constructed from a string, they save the tile where the characater is supposed to be
     // and only when the level is activeted through activate() does the level place the character at that tile
-    std::vector<std::vector<Tile *>> tiles;
+    std::vector<std::vector<Tile*>> tiles;
     std::vector<Character *> m_characters;
     std::vector<Character *> nonPlayableCharacters;
     std::pair <int,int> m_playingCharacterPosition;
@@ -31,10 +31,11 @@ class Level
 
 
 public:
+    Level(std::string gameBoard);
     Level(int height, int width, std::string gameBoard, bool isActive = false);
     Level(json levelJson);
     Tile *getTile(int row, int col);
-    std::vector<std::vector<Tile *>> *getTiles();
+    const std::vector<std::vector<Tile*>> getTiles() const;
     int getHeight() const;
     int getWidth() const;
     Character *getPlayableCharacter();

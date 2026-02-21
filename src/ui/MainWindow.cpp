@@ -1,13 +1,18 @@
 #include "MainWindow.h"
 #include <QGraphMatrix.h>
+#include <QKeyEvent>
 #include <QLineEdit>
 #include <QPushButton>
 #include <QSlider>
 #include <QTextEdit>
 #include <Qlabel>
+#include <QtCore/qtimer.h>
 #include <QtWidgets/qbuttongroup.h>
 #include <QtWidgets/qcombobox.h>
+#include <QtWidgets/qgroupbox.h>
 #include <QtWidgets/qtoolbar.h>
+#include <QtWidgets/qtoolbutton.h>
+#include "ButtonItem.h"
 #include "DungeonCrawler.h"
 #include "GraphicalUI.h"
 #include "QGameField.h"
@@ -15,6 +20,7 @@
 #include "QGameWon.h"
 #include "QTerminal.h"
 #include "ui_MainWindow.h"
+#include <TileItem.h>
 #include <sstream>
 
 void MainWindow::makeStartScreen() {
@@ -22,53 +28,62 @@ void MainWindow::makeStartScreen() {
     QHBoxLayout* mainLayout = new QHBoxLayout();
     central->setLayout(mainLayout);
 
-    m_startScene = new QGraphicsScene();
-    m_startView = new QGraphicsView();
-    m_startView->setFrameStyle(QFrame::NoFrame);
-    m_startView->setScene(m_startScene);
-    m_startView->setBackgroundBrush(Qt::black);
-
-    QWidget* w = new QWidget();
-    QGridLayout* layout = new QGridLayout();
-
-    mainLayout->addWidget(m_startView);
-
+    m_scene = new QGraphicsScene();
+    m_view = new QGraphicsView();
+    m_view->installEventFilter(this);
+    m_view->setFrameStyle(QFrame::NoFrame);
+    m_view->setScene(m_scene);
+    mainLayout->addWidget(m_view);
 
     m_sidebar = new QWidget();
     m_sidebarLayout = new QVBoxLayout();
     m_sidebar->setLayout(m_sidebarLayout);
 
     m_sidebarToolBox = new QToolBox;
-    mainLayout->addWidget(m_sidebarToolBox);
-    m_sidebar->setStyleSheet("background-color:white");
+    m_sidebarLayout->addWidget(m_sidebarToolBox);
 
-    m_character = new CharacterItem();
-    m_startScene->addItem(m_character);
-    // createArmorOptions();
+    mainLayout->addWidget(m_sidebar);
+
+    m_character = new CharacterItem(CharacterItem::CharacterType::Human);
+
     createCharacterCustomizationOptions();
-    // m_sidebarToolBox->setMinimumSize({400, 400});
     m_sidebarToolBox->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
+    m_sidebar->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
 
     mainLayout->setStretch(0, 2);
     mainLayout->setStretch(1, 1);
+
+    ButtonItem* startButton = new ButtonItem(QPixmap(GUIPaths::StartButton),
+                                             ButtonItem::ButtonType::StartButton);
+    connect(startButton, &ButtonItem::buttonClicked, this, &MainWindow::startGame);
+    startButton->setParentItem(m_character);
+    startButton->setPos((m_character->boundingRect().width() / 2)
+                            - startButton->boundingRect().width() / 2,
+                        m_character->boundingRect().height() + 20);
+    qDebug() << m_character->boundingRect() << startButton->pos();
+    m_scene->addItem(m_character);
 
     setCentralWidget(central);
 }
 
 void MainWindow::createCharacterCustomizationOptions() {
-    for (int i = 0; i < int(CharacterGraphics::CharacterPart::PAST_END); i++) {
-        CharacterGraphics::CharacterPart characterPart = CharacterGraphics::CharacterPart(i);
+    for (int i = 0; i < int(CharacterItem::CharacterPart::PAST_END); i++) {
+        CharacterItem::CharacterPart characterPart = CharacterItem::CharacterPart(i);
         QWidget* options = new QWidget();
         QGridLayout* optionsLayout = new QGridLayout();
+
         options->setLayout(optionsLayout);
 
         QButtonGroup* optionsButtonGroup = new QButtonGroup();
-
         std::vector<QPixmap> variants = SpriteManager::GetIdleFrameVariants(
-            characterPart, SpriteManager::ImageProcessingMode::TrimTransparent);
+            CharacterItem::CharacterType::Human,
+            characterPart,
+            SpriteManager::ImageProcessingMode::TrimTransparent);
         int counter = 0;
         for (QPixmap& optionImage : variants) {
             QPushButton* optionButton = new QPushButton();
+            optionButton->setStyleSheet(
+                "border-color: gray; border-width : 2px; background-color:white");
             optionImage = optionImage.scaledToHeight(100);
 
             QIcon optionIcon(optionImage);
@@ -82,119 +97,42 @@ void MainWindow::createCharacterCustomizationOptions() {
             connect(optionButton, &QPushButton::clicked, this, [counter, characterPart, this]() {
                 characterCustomizationClicked(characterPart, counter);
             });
+            QLabel l;
             counter++;
         }
         m_sidebarToolBox->addItem(options,
                                   CharacterWearables::CustomizationButtonsTexts.at(
-                                      CharacterGraphics::CharacterPart(i)));
+                                      CharacterItem::CharacterPart(i)));
     }
 }
 
-MainWindow::MainWindow(Level *lvl, GraphicalUI *g, QWidget *parent)
-    : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
-    , level{lvl}
-    , GUI{g}
-{
-    makeStartScreen();
-    // ui->setupUi(this);
 
-    // QWidget* central = new QWidget(this);
-    // setCentralWidget(central);
-
-    // QToolBar* toolbar = addToolBar("Save");
-    // QAction* saveGame = new QAction("Save Game");
-    // saveGame->setObjectName("saveGameButton");
-    // connect(saveGame, &QAction::triggered, [this, g]() { g->saveGame(); });
-
-    // QFont font;
-    // font.setPixelSize(15);
-    // saveGame->setFont(font);
-    // toolbar->addAction(saveGame);
-    // QHBoxLayout* mainLayout = new QHBoxLayout(central);
-
-    // m_gameField = new QGameField();
-
-    // QWidget* rightSideContainer = new QWidget();
-    // // rightSideContainer->setFixedWidth(400);
-    // rightSideContainer->setFixedSize(400, 800);
-    // m_arrowField = new QWidget();
-
-    // mainLayout->addWidget(m_gameField);
-    // mainLayout->addWidget(rightSideContainer, 0, Qt::AlignTop);
-
-    // QVBoxLayout* rightSideLayout = new QVBoxLayout(rightSideContainer);
-
-    // QComboBox* visualizationOption =new QComboBox();
-    // visualizationOption->addItem("Full visualization");
-    // visualizationOption->addItem("Full visualization without text");
-    // visualizationOption->addItem("Only Final path");
-    // visualizationOption->addItem("None");
-    // connect(visualizationOption, &QComboBox::currentIndexChanged,
-    //         this, [g,this](int index) {
-    //             switch (index) {
-    //             case 0:
-    //                 g->setVisualizationMode(GraphicalUI::FullVisualization);
-    //                 break;
-    //             case 1:
-    //                 g->setVisualizationMode(GraphicalUI::FullVisualizationWithoutText);
-    //                 break;
-    //             case 2:
-    //                 g->setVisualizationMode(GraphicalUI::OnlyFinalPath);
-    //                 break;
-    //             case 3 :
-    //                 g->setVisualizationMode(GraphicalUI::None);
-    //                 break;
-
-    //             }
-    //         });
-
-    // QWidget* algorithmExplainerContainer = new QWidget();
-
-    // m_arrowField = new QWidget();
-    // QGridLayout* arrowsLayout = new QGridLayout(m_arrowField);
-    // generateArrowButtons(arrowsLayout);
-
-    // rightSideLayout->addWidget(visualizationOption);
-    // rightSideLayout->addWidget(algorithmExplainerContainer);
-    // generateVisualizationWidgets(algorithmExplainerContainer);
-    // rightSideLayout->addWidget(m_arrowField);
-
-    // m_gameBoard = new QGridLayout(m_gameField);
+qreal MainWindow::calculateTextureDimension() {
+    return std::min(m_view->rect().width() / 10, m_view->rect().height() / 10);
 }
 
-void MainWindow::generateArrowButtons(QGridLayout *arrowsField)
-{
-    int counter = 0;
-    for (int i = 0; i < 3; i++) {
-        for (int j = 0; j < 3; j++) {
-            QPushButton *arrow = new QPushButton;
+void MainWindow::characterCustomizationClicked(CharacterItem::CharacterPart characterPart,
+                                               int whichOption) {
+    m_character->assignPart(characterPart, whichOption);
+}
 
-            std::ostringstream style;
-            std::pair<int, int> xymove = arrows[counter]->getMove();
-            style << "border-image : url(" << arrows[counter]->getPath()
-                  << ") 0 0 0 0 stretch stretch; height: 70px; width: 70px";
-            QString bgStyleFull = QString::fromStdString(style.str());
-            arrow->setStyleSheet(bgStyleFull);
-            connect(arrow, &QPushButton::clicked, [xymove, this]() { move(xymove); });
-            arrowsField->addWidget(arrow, i, j);
-            counter++;
+void MainWindow::startGame() {
+    centralWidget()->layout()->removeWidget(m_sidebarToolBox);
+    for (QGraphicsItem* item : m_scene->items()) {
+        if (item != m_character) {
+            m_scene->removeItem(item);
         }
     }
-}
-void MainWindow::move(std::pair<int, int> move)
-{
-    GUI->move(move);
-}
-
-QGameField *MainWindow::getGameField() const
-{
-    return m_gameField;
+    m_sidebarToolBox->hide();
+    emit gameStarted();
+    return;
 }
 
-QWidget *MainWindow::getArrowField() const
-{
-    return m_arrowField;
+MainWindow::MainWindow(QWidget* parent)
+    : QMainWindow(parent) {
+    makeStartScreen();
+    // QTimer::singleShot(10, [this]() { startGame(); });
+    // startGame(); //TEST TODO , refactor this to work with the state machines
 }
 
 MainWindow::~MainWindow()
@@ -202,25 +140,24 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-QGridLayout *MainWindow::getGameBoard() const
-{
-    return m_gameBoard;
-}
+void MainWindow::move(std::pair<int, int> move) { GUI->move(move); }
 
-void MainWindow::prepareRightSideForVisualization()
-{
-    m_arrowField->hide();
-}
-void MainWindow::generateVisualizationWidgets(QWidget *containingWidget)
-{
+QGridLayout* MainWindow::getGameBoard() const { return m_gameBoard; }
+QGameField* MainWindow::getGameField() const { return m_gameField; }
+
+QWidget* MainWindow::getArrowField() const { return m_arrowField; }
+
+void MainWindow::prepareRightSideForVisualization() { m_arrowField->hide(); }
+
+void MainWindow::generateVisualizationWidgets(QWidget* containingWidget) {
     QVBoxLayout* containingWidgetMainLayout = new QVBoxLayout(containingWidget);
     QWidget* buttonsContainer = new QWidget();
     QWidget* explainerContainer = new QWidget();
     QGraphMatrix* tileMatrixContainer = new QGraphMatrix();
     tileMatrixContainer->setObjectName("tileMatrixContainer");
 
-
-    StaticQCharacter* explainerCharacter = new StaticQCharacter(":/pics/textures/zombie/attacker.png");
+    StaticQCharacter* explainerCharacter = new StaticQCharacter(
+        ":/pics/textures/zombie/attacker.png");
     QTypeWriter* CharacterSpeech = new QTypeWriter();
     CharacterSpeech->setObjectName("algorithmStepExplainerField");
     CharacterSpeech->setReadOnly(true);
@@ -229,11 +166,13 @@ void MainWindow::generateVisualizationWidgets(QWidget *containingWidget)
     explainerContainerLayout->addWidget(CharacterSpeech);
     explainerContainerLayout->addWidget(explainerCharacter);
 
-
-
-    QPushButton* previousStepButton = new QPushButton (QIcon::fromTheme(QIcon::ThemeIcon::GoPrevious), "Previous");
-    QPushButton* pauseButton = new QPushButton (QIcon::fromTheme(QIcon::ThemeIcon::MediaPlaybackPause), "Pause");
-    QPushButton* nextStepButton = new QPushButton (QIcon::fromTheme(QIcon::ThemeIcon::GoNext), "Next");
+    QPushButton* previousStepButton = new QPushButton(QIcon::fromTheme(QIcon::ThemeIcon::GoPrevious),
+                                                      "Previous");
+    QPushButton* pauseButton = new QPushButton(QIcon::fromTheme(
+                                                   QIcon::ThemeIcon::MediaPlaybackPause),
+                                               "Pause");
+    QPushButton* nextStepButton = new QPushButton(QIcon::fromTheme(QIcon::ThemeIcon::GoNext),
+                                                  "Next");
 
     QHBoxLayout* buttonsLayout = new QHBoxLayout(buttonsContainer);
 
@@ -244,15 +183,9 @@ void MainWindow::generateVisualizationWidgets(QWidget *containingWidget)
     containingWidgetMainLayout->addWidget(explainerContainer);
     containingWidgetMainLayout->addWidget(tileMatrixContainer);
     containingWidgetMainLayout->addWidget(buttonsContainer);
-
-
-
-
-
 }
 
-void MainWindow::gameOver()
-{
+void MainWindow::gameOver() {
     auto currentRect = centralWidget()->rect();
     QGameOver* gameOverWidget = new QGameOver();
     gameOverWidget->setGeometry(currentRect);
@@ -261,19 +194,16 @@ void MainWindow::gameOver()
     gameOverWidget->enable();
 }
 
-void MainWindow::gameWon()
-{
+void MainWindow::gameWon() {
     auto currentRect = centralWidget()->rect();
     QGameWon* gameWonWidget = new QGameWon();
     gameWonWidget->setGeometry(currentRect);
     delete centralWidget();
     setCentralWidget(gameWonWidget);
     gameWonWidget->enable();
-
 }
 
-void MainWindow::showTerminal()
-{
+void MainWindow::showTerminal() {
     auto currentRect = centralWidget()->rect();
     QTerminal* terminal = new QTerminal();
     terminal->setGeometry(currentRect);
@@ -282,11 +212,24 @@ void MainWindow::showTerminal()
     terminal->enable();
 }
 
-void MainWindow::arrowClicked(MoveDirection moveDirection) {}
+TileItem* MainWindow::addTileToScene(int row, int col, char textureID) {
+    TileItem* tile = new TileItem(row, col, textureID);
+    m_scene->addItem(tile);
+    connect(this, &MainWindow::dimensionsChanged, tile, &GameItem::resize);
+    return tile;
+}
 
-void MainWindow::armorButtonClicked(int armorID) {}
+CharacterItem* MainWindow::getHumanCharachter() const { return m_character; }
 
-void MainWindow::characterCustomizationClicked(CharacterGraphics::CharacterPart characterPart,
-                                               int whichOption) {
-    m_character->assignPart(characterPart, whichOption);
+bool MainWindow::eventFilter(QObject* obj, QEvent* event) {
+    if (event->type() == QEvent::Resize) {
+        QGraphicsView* view = qobject_cast<QGraphicsView*>(obj);
+        QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
+        if (view) {
+            GameItem::SetSideLength(calculateTextureDimension());
+            emit dimensionsChanged();
+        }
+        m_scene->setSceneRect(m_scene->itemsBoundingRect());
+    }
+    return false;
 }
