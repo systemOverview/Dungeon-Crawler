@@ -20,7 +20,6 @@ qt_add_executable(DungeonCrawler WIN32 MACOSX_BUNDLE
     src/ui/animations/CMakeLists.txt
     src/ui/animations/CharacterAnimation.h src/ui/animations/CharacterAnimation.cpp
     src/ui/custom-items/TileItem.h src/ui/custom-items/TileItem.cpp
-    src/ui/custom-items/GameLayout.h src/ui/custom-items/GameLayout.cpp
     src/ui/custom-items/GameItem.h src/ui/custom-items/GameItem.cpp
 
 
