@@ -37,9 +37,6 @@
         <file>textures/sounds/death.wav</file>
         <file>textures/sounds/gameover.mp3</file>
         <file>textures/sounds/win.ogg</file>
-        <file>gui/buttons/arrow-up.png</file>
-        <file>gui/buttons/arrowbackground.png</file>
-        <file>gui/buttons/arrowpointer.png</file>
     </qresource>
     <qresource prefix="/">
         <file>characters/human/base/0.png</file>
