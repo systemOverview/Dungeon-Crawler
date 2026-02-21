@@ -33,7 +33,7 @@ StartScreen::~StartScreen()
 
 void StartScreen::switchWindow(DungeonCrawler::GameSourceOption option)
 {
-    m_dungeonCrawler->buildGame(option);
+    m_dungeonCrawler->build(option);
 }
 
 void StartScreen::paintEvent(QPaintEvent *event)
