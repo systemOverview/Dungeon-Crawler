@@ -55,9 +55,6 @@
         <file>characters/human/outfit/2.png</file>
         <file>characters/human/outfit/3.png</file>
         <file>gui/buttons/start.png</file>
-        <file>gui/buttons/arrow-up.png</file>
-        <file>gui/buttons/arrowbackground.png</file>
-        <file>gui/buttons/arrowpointer.png</file>
         <file>characters/goblin/base/0.png</file>
     </qresource>
     <qresource prefix="/fonts">
