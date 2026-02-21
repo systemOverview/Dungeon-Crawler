@@ -38,3 +38,5 @@ std::string Utilities::FloatToString(float number, int precision)
     return formattedNumber.str();
 
 }
+
+
