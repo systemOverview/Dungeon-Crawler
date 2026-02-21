@@ -5,16 +5,26 @@
 #ifndef PRAK_DUNGEONCRAWLER_H
 #define PRAK_DUNGEONCRAWLER_H
 #include "GraphicalUI.h"
-#include "JsonObjects.h"
 #include "Level.h"
-#include "Utilities.h"
-#include "list.h"
+#include "List.tpp"
 class StartScreen;
-class DungeonCrawler
+class DungeonCrawler : public QObject
 {
+    Q_OBJECT
 public:
     std::vector<Level*>::iterator currentLevel;
-    std::vector<Level *> levels;
+    List<Level*> m_levels;
+    std::string m_gameString = "##########"
+                               "#........#"
+                               "#...<....#"
+                               "#..___...#"
+                               "#........#"
+                               "#........#"
+                               "#######.##"
+                               "#........#"
+                               "#........#"
+                               "##########";
+
     std::array<std::string, 2> gameStrings = {"##########"
                                               "#....$P..#"
                                               "#.S.<....#"
@@ -35,10 +45,12 @@ public:
                                               "#.G.?..1.#"
                                               "#P.0...S.#"
                                               "##########"};
-    GraphicalUI* GUI;
+    GraphicalUI* m_GUI;
     StartScreen* m_startScreen = nullptr;
     int m_numberOfRemainingNPCs = 0;
     Level* m_lastLevel = nullptr;
+public slots:
+    void buildGame();
 
 public:
     enum GameSourceOption{
@@ -61,7 +73,7 @@ public:
     void holdFight(Character* attacker, Character* defender, Tile* disputedTile);
     // attacker is the one that is trying to enter a tile already held by the defender.
     // it deletes the loser and updates the tile and the winner, or keeps things as they were if it ended in a draw.
-    void buildGame(GameSourceOption option);
+    void build(GameSourceOption option);
 };
 
 #endif //PRAK_DUNGEONCRAWLER_H

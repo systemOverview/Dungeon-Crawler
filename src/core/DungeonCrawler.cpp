@@ -8,21 +8,24 @@
 #include <QStandardPaths>
 #include <QWindow>
 #include <QtCore/qtimer.h>
-#include "list.cpp"
 #include "startscreen.h"
 
-DungeonCrawler::DungeonCrawler()
-{
-
-    m_startScreen = new StartScreen(this);
-    m_startScreen->show();
+void DungeonCrawler::buildGame() {
+    Level* level = new Level(gameStrings[0]);
+    m_levels.push_back(level);
+    m_GUI->createLevelUI(level->getTiles());
 }
-void DungeonCrawler::buildGame(GameSourceOption option)
-{
+
+DungeonCrawler::DungeonCrawler() {
+    m_GUI = new GraphicalUI();
+
+    connect(m_GUI, &GraphicalUI::gameStarted, this, &DungeonCrawler::buildGame);
+}
+void DungeonCrawler::build(GameSourceOption option) {
     if (option==GameSourceOption::FromStrings){
         for (std::string& gameString : gameStrings){
             Level* lvl = new Level(10, 10, gameString, true);
-            levels.push_back(lvl);
+            m_levels.push_back(lvl);
             m_lastLevel = lvl;
         }
     }
@@ -35,21 +38,19 @@ void DungeonCrawler::buildGame(GameSourceOption option)
         std::cout << parsedJson;
         for (const auto& level : parsedJson["Levels"]) {
             Level* lvl = new Level(level);
-            levels.push_back(lvl);
+            m_levels.push_back(lvl);
             m_lastLevel = lvl;
         }
     }
 
     m_startScreen->hide();
 
-
-
-    currentLevel = levels.begin();
+    // currentLevel = m_levels.begin();
     (*currentLevel)->activateLevel();
-    GUI = new GraphicalUI(*(currentLevel), this);
-    GUI->getMainWindow()->show();
-    GUI->draw(*currentLevel);
-    m_numberOfRemainingNPCs = (*currentLevel)->getNonPlayableCharacters().size();
+    // m_GUI = new GraphicalUI(*(currentLevel), this);
+    // m_GUI->getMainWindow()->show();
+    // m_GUI->draw(*currentLevel);
+    // m_numberOfRemainingNPCs = (*currentLevel)->getNonPlayableCharacters().size();
 }
 
 std::pair<int, int> DungeonCrawler::translateMove(int step) const
@@ -90,14 +91,14 @@ std::pair<int, int> DungeonCrawler::translateMove(int step) const
 
 bool DungeonCrawler::turn()
 {
-    GUI->getMainWindow()->show();
-    GUI->draw(*currentLevel);
+    m_GUI->getMainWindow()->show();
+    m_GUI->draw(*currentLevel);
     return true;
 }
 
 void DungeonCrawler::move()
 {
-    std::pair<int, int> moveToPerform = GUI->getLastMove();
+    std::pair<int, int> moveToPerform = m_GUI->getLastMove();
     Character* humanCharacter = (*currentLevel)->getPlayableCharacter();
     Tile* currentTile = humanCharacter->getTile();
     int newRow = currentTile->getRow() + moveToPerform.first;
@@ -109,8 +110,8 @@ void DungeonCrawler::move()
         return ;
     }
     if (effectiveTile->getTexture()=='!'){
-        GUI->playSound("qrc:/pics/textures/sounds/win.ogg", 1);
-        GUI->getMainWindow()->gameWon();
+        m_GUI->playSound("qrc:/pics/textures/sounds/win.ogg", 1);
+        m_GUI->getMainWindow()->gameWon();
         return;
     }
     if (effectiveTile == currentTile);
@@ -145,18 +146,17 @@ void DungeonCrawler::move()
         }
     }
 
-    JsonGenerator::saveGameState(levels);
-
+    // JsonGenerator::saveGameState(levels);
 }
 
 void DungeonCrawler::levelUp()
 {
     QTile::deleteAllQTiles();
     delete (*currentLevel);
-    currentLevel = levels.erase(currentLevel);
+    // currentLevel = m_levels.erase(currentLevel);
     // TODO refacor this
     (*currentLevel)->activateLevel();
-    GUI->draw(*currentLevel);
+    m_GUI->draw(*currentLevel);
     m_numberOfRemainingNPCs = (*currentLevel)->getNonPlayableCharacters().size();
 
 
@@ -224,7 +224,7 @@ void DungeonCrawler::holdFight(Character* attacker, Character* defender, Tile *d
     }
 
     if (killer){
-        GUI->playSound("qrc:/pics/textures/sounds/death.wav", 1);
+        m_GUI->playSound("qrc:/pics/textures/sounds/death.wav", 1);
         victim->getTile()->setCharacter(nullptr);
         moveCharacter(killer, disputedTile);
         assert (victim!=nullptr );
@@ -234,13 +234,15 @@ void DungeonCrawler::holdFight(Character* attacker, Character* defender, Tile *d
 
     }
     else{
-        GUI->playSound("qrc:/pics/textures/sounds/punch.wav", 1);
+        m_GUI->playSound("qrc:/pics/textures/sounds/punch.wav", 1);
     }
     if (killer && killer->getTexture()=='P'){
         m_numberOfRemainingNPCs -=1;
         if (m_numberOfRemainingNPCs<=0 && (*currentLevel) == m_lastLevel){
-            GUI->playSound("qrc:/pics/textures/sounds/win.ogg", 1);
-            ;GUI->getMainWindow()->gameWon();}
+            m_GUI->playSound("qrc:/pics/textures/sounds/win.ogg", 1);
+            ;
+            m_GUI->getMainWindow()->gameWon();
+        }
     }
 
 
