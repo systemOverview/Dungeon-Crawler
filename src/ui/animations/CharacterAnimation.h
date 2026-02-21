@@ -4,43 +4,49 @@
 #include <QAbstractAnimation>
 #include <QObject>
 #include <QPixmap>
+#include <QtCore/qdebug.h>
 #include <QtCore/qtimeline.h>
 #include "SpriteManager.h"
-class CharacterItem;
+#include <CharacterItem.h>
 class CharacterAnimation : public QAbstractAnimation
 {
     Q_OBJECT
+
 protected:
     void updateCurrentTime(int currentTime) override;
 
 public:
-    enum class AnimationType { Idle, Walk, Jump, Punch, PAST_END };
 
 private:
     int m_duration = -1; //Infinite loop, the timeline object controls the state of this animation
     CharacterItem* m_character;
-    std::pair<AnimationType, int> m_currentAnimationState = {};
-    QTimeLine* m_timeLine;
-    inline static const std::map<AnimationType, std::pair<int, int>> ANIMATION_FRAMES
-        = {//inclusive range
-           {AnimationType::Idle, {0, 0}},
-           {AnimationType::Walk, {1, 6}},
-           {AnimationType::Jump, {16, 18}},
-           {AnimationType::Punch, {25, 26}}};
-    void setCurrentAnimation(AnimationType animationType);
+    QTimeLine* m_timeline;
+    std::pair<qreal, qreal> m_advancePerFrame = {0, 0};
+    inline static const std::map<CharacterItem::State, std::pair<int, int>> ANIMATION_FRAMES = {
+               //inclusive range
+               {CharacterItem::State::Idle, {0, 0}},
+               {CharacterItem::State::Walk, {1, 6}},
+               {CharacterItem::State::Jump, {16, 18}},
+               {CharacterItem::State::Punch, {25, 26}},
+    };
+
+    void setCurrentAnimation(CharacterItem::State animationType);
+    std::vector<int> getAnimationFramesAsVector(CharacterItem::State state) const;
+
+    int m_loopCount = -1;
 
 public slots:
-    void playFrame(int frameNumber);
+    void playFrame(std::vector<int> frames,
+                   int iterator,
+                   std::pair<qreal, qreal> xyAdvancePerFrame = {0, 0});
+    void updateAnimation(CharacterItem::State characterState);
 
 public:
-    explicit CharacterAnimation(CharacterItem* character,
-                                AnimationType animationType = AnimationType::Idle,
-                                QObject* parent = nullptr);
+    explicit CharacterAnimation(CharacterItem* character, QObject* parent = nullptr);
     int duration() const override;
     void setDuration(int duration);
-    void begin();
+    void loopThroughAll();
 
-    // QAbstractAnimation interface
 protected:
     void updateState(State newState, State oldState) override;
 };
