@@ -37,6 +37,9 @@
         <file>textures/sounds/death.wav</file>
         <file>textures/sounds/gameover.mp3</file>
         <file>textures/sounds/win.ogg</file>
+        <file>gui/buttons/arrow-up.png</file>
+        <file>gui/buttons/arrowbackground.png</file>
+        <file>gui/buttons/arrowpointer.png</file>
     </qresource>
     <qresource prefix="/">
         <file>characters/human/base/0.png</file>
@@ -54,6 +57,11 @@
         <file>characters/human/outfit/1.png</file>
         <file>characters/human/outfit/2.png</file>
         <file>characters/human/outfit/3.png</file>
+        <file>gui/buttons/start.png</file>
+        <file>gui/buttons/arrow-up.png</file>
+        <file>gui/buttons/arrowbackground.png</file>
+        <file>gui/buttons/arrowpointer.png</file>
+        <file>characters/goblin/base/0.png</file>
     </qresource>
     <qresource prefix="/fonts">
         <file>emulogic-font</file>

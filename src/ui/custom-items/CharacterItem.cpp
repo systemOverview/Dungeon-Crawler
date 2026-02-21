@@ -10,91 +10,69 @@
 #include <QtGui/qbitmap.h>
 #include <QtGui/qpainter.h>
 #include <QtGui/qpicture.h>
+#include "CharacterAnimation.h"
 #include "SpriteManager.h"
-#include "animations/CharacterAnimation.h"
-CharacterItem::CharacterItem() {
+#include "TileItem.h"
+
+CharacterItem::CharacterItem(CharacterItem::CharacterType characterType)
+    : m_characterType{characterType}
+    , GameItem(QPixmap(), -1) {
     setDefaultParts();
-    setupStateMachine();
+    m_animation = new CharacterAnimation(this);
+    connect(this, &CharacterItem::stateChanged, m_animation, &CharacterAnimation::updateAnimation);
 }
 
 void CharacterItem::setDefaultParts() {
-    for (int i = 0; i < int(CharacterGraphics::CharacterPart::PAST_END); i++) {
-        m_partsGraphicOptions.insert({CharacterGraphics::CharacterPart(i), 0});
+    for (int i = 0; i < int(CharacterItem::CharacterPart::PAST_END); i++) {
+        m_partsGraphicOptions.insert({CharacterItem::CharacterPart(i), 0});
     }
 }
 
-void CharacterItem::startAnimationLoop() {
-    for (int i = 1; i < int(CharacterAnimation::AnimationType::PAST_END);
-         i++) { // 0 is idle (no animation)
-        CharacterAnimation* animation = new CharacterAnimation(this,
-                                                               CharacterAnimation::AnimationType(i));
-        m_customizationAnimationLoop->addAnimation(animation);
-    }
+void CharacterItem::fixMyPosition() {}
 
-    //I am unable to get animations to trigger automatically on state change for some reason
-    // So for now this loop repeats until the initial state is left (customizingState->playingState).
-    connect(m_customizationAnimationLoop, &QSequentialAnimationGroup::finished, [this]() {
-        if (m_stateMachine->configuration().contains(m_stateMachine->initialState())) {
-            m_customizationAnimationLoop->start();
-        }
-    });
-}
-
-void CharacterItem::setupAnimationMachine() {
-    m_animationMachine = new QStateMachine();
-    for (int i = 1; i < int(CharacterAnimation::AnimationType::PAST_END); i++) {
-        QState* state = new QState(m_animationMachine);
-        if (i == 1) m_animationMachine->setInitialState(state);
-        CharacterAnimation* animation = new CharacterAnimation(this,
-                                                               CharacterAnimation::AnimationType(i));
-        connect(state, &QState::entered, animation, [animation]() { animation->start(); });
-    }
-    m_animationMachine->start();
-};
-
-void CharacterItem::resize(qreal newTileLength) { m_size = newTileLength; }
-
-void CharacterItem::assignPart(CharacterGraphics::CharacterPart partType, int whichGraphicsOption) {
+void CharacterItem::assignPart(CharacterItem::CharacterPart partType, int whichGraphicsOption) {
     m_partsGraphicOptions.insert_or_assign(partType, whichGraphicsOption);
     update();
 }
-
-void CharacterItem::moveTo(QPointF newPos) {}
-
-QRectF CharacterItem::boundingRect() const { return {0, 0, m_size, m_size}; }
 
 void CharacterItem::paint(QPainter* painter,
                           const QStyleOptionGraphicsItem* option,
                           QWidget* widget) {
     for (const auto& [part, partOption] : m_partsGraphicOptions) {
-        QPixmap pixmap = SpriteManager::GetFrameFromSprite(part, partOption, m_currentFrameId);
+        QPixmap pixmap = SpriteManager::GetFrameFromSprite(m_characterType,
+                                                           part,
+                                                           partOption,
+                                                           m_currentFrameId);
         painter->drawPixmap(boundingRect(), pixmap, pixmap.rect());
     }
 }
 
-void CharacterItem::setupStateMachine() {
-    m_stateMachine = new QStateMachine();
-    QState* customizingState = new QState(m_stateMachine);
-    m_customizationAnimationLoop = new QSequentialAnimationGroup;
+int CharacterItem::getCurrentFrameID() const { return m_currentFrameId; }
 
-    QState* playingState = new QState(m_stateMachine);
-    QFinalState* deadState = new QFinalState(m_stateMachine);
-
-    connect(customizingState, &QState::entered, m_customizationAnimationLoop, [this]() {
-        m_customizationAnimationLoop->start();
-    });
-
-    connect(customizingState, &QState::finished, m_customizationAnimationLoop, [this]() {
-        m_customizationAnimationLoop->finished();
-    });
-
-    m_stateMachine->setInitialState(customizingState);
-    m_stateMachine->start();
-
-    startAnimationLoop();
-}
-
-void CharacterItem::setCurrentFrameId(int frameId) {
+void CharacterItem::setCurrentFrameID(int frameId) {
     m_currentFrameId = frameId;
     update();
 }
+
+void CharacterItem::setState(State newState, QPointF newPosition) {
+    if (newState != State::Looping) {
+        setCustomSideLength(-1);    // stop having a custom side length
+        setZValue(1);
+        m_newPosition = pos() + newPosition;
+    }
+
+    m_state = newState;
+    emit stateChanged(newState);
+}
+
+void CharacterItem::setTile(TileItem* tile) { m_tile = tile; }
+
+TileItem* CharacterItem::getTile() const { return m_tile; }
+
+QPointF CharacterItem::getNewPosition() const {
+    return m_newPosition;
+}
+
+void CharacterItem::setNewPosition(QPointF newNewPosition) { m_newPosition = newNewPosition; }
+
+CharacterItem::State CharacterItem::getState() const { return m_state; }

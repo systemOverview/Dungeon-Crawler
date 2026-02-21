@@ -4,44 +4,77 @@
 #include <QGraphicsItem>
 #include <QObject>
 #include <QtCore/qobject.h>
+#include <QtCore/qsequentialanimationgroup.h>
 #include <QtStateMachine/qstatemachine.h>
-#include "CharacterAnimation.h"
-#include "Constants.h"
+#include "ButtonItem.h"
+#include "GameItem.h"
 
-class CharacterItem : public QObject, public QGraphicsItem
+class CharacterAnimation;
+class TileItem;
+class SpriteManager;
+class CharacterItem : public GameItem
 {
     Q_OBJECT
+    Q_PROPERTY(QPointF newPosition READ getNewPosition WRITE setNewPosition)
+
+public:
+    enum class State { Idle, Walk, Jump, Punch, Looping, PAST_END };
+    enum class CharacterType { Human, Goblin };
+    enum class CharacterPart { Base, Head, Outfit, Weapon, PAST_END };
+
+    Q_ENUM(CharacterPart);
+
+private:
     // The character only stores the current frame id (the same for every part)
     // and the user-chosen graphics option for each part. When painting, it requests the images for each part from the
     // sprite manager, which has a cache system in place to avoid re-generating images.
-    int m_currentFrameId = 0;
-    std::map<CharacterGraphics::CharacterPart, int> m_partsGraphicOptions = {};
-    qreal m_size = 300;
 
-    QStateMachine* m_stateMachine = nullptr;
-    QStateMachine* m_animationMachine = nullptr;
+    CharacterItem::CharacterType m_characterType;
+
+    int m_currentFrameId = 0;
+
+    TileItem* m_tile = nullptr;
+    std::map<CharacterItem::CharacterPart, int> m_partsGraphicOptions = {};
 
     QSequentialAnimationGroup* m_customizationAnimationLoop = nullptr;
+    CharacterAnimation* m_animation = nullptr;
+
+    QStateMachine* m_stateAnimationMachine = nullptr;
+    QStateMachine* m_movingAnimationMachine = nullptr;
+
+    State m_state = CharacterItem::State::Looping;
+    bool m_animationLoopingStatus = false;
     void setDefaultParts();
+    void setupMovingStateMachine();
 
-    void setupStateMachine();
-    void setupAnimationMachine();
-
-    void startAnimationLoop();
+    QPointF m_newPosition;
 
 public slots:
-    void resize(qreal newTileLength);
-    void assignPart(CharacterGraphics::CharacterPart partType, int whichGraphicsOption);
-    void moveTo(QPointF newPos);
+    void assignPart(CharacterItem::CharacterPart partType, int whichGraphicsOption);
+    void setState(CharacterItem::State, QPointF newPosition = {0, 0});
+
 signals:
+    void move();
+    void startMovingAnimation();
+    void stateChanged(CharacterItem::State newState);
 
 public:
+    CharacterItem(CharacterItem::CharacterType characterType);
+    void setTile(TileItem* tile);
+    TileItem* getTile() const;
+    void fixMyPosition() override;
     enum { Type = UserType + 2 };
     int type() const override { return Type; }
-    CharacterItem();
-    QRectF boundingRect() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
-    void setCurrentFrameId(int frameId);
+    int getCurrentFrameID() const;
+    void setCurrentFrameID(int frameId);
+    void startAnimationLoop();
+    QPointF getNewPosition() const;
+    void setNewPosition(QPointF newNewPosition);
+    State getState() const;
+    QVariant myColorInterpolator(const std::vector<int>& start,
+                                 const std::vector<int>& end,
+                                 qreal progress);
 };
 
 #endif // CHARACTERITEM_H

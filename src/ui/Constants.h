@@ -1,25 +1,51 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
+#include <QMap>
 #include <QtCore/qobject.h>
+#include "CharacterItem.h"
 #include <sstream>
+namespace GUIPaths {
+const inline static QString StartButton{":/gui/buttons/start.png"};
+const inline static QString ArrowUpButton{":/pics/gui/buttons/arrow-up.png"};
+const inline static QString GoblinBase{":/characters/goblin/base.png"};
 
+const inline static QMap<char, QString>
+    TileCharToPathRegister{{'.', ":/pics/textures/floor/floor1.png"},
+                           {'#', ":/pics/textures/wall/wall1.png"},
+                           {'X', ":/pics/textures/doors/door1.png"},
+                           {'/', ":/pics/textures/doors/door2.png"},
+                           {'?', ":/pics/textures/other tiles/switch.png"},
+                           {'_', ":/pics/textures/other tiles/pit.png"},
+                           {'<', ":/pics/textures/other tiles/ramp.png"},
+                           {'$', ":/pics/textures/extra/levelchanger.png"},
+                           {'!', ":/pics/textures/other tiles/winner.png"}
+
+    };
+} // namespace GUIPaths
 namespace GameSettings {
-constexpr inline static int FPS = 5;
+constexpr inline static int FPS = 2;
 }
-namespace CharacterGraphics {
-enum class CharacterPart { Base, Head, Outfit, Weapon, PAST_END };
-}
+
 namespace CharacterWearables {
 enum WearableType {
     Armor,
 };
 
-inline std::map<CharacterGraphics::CharacterPart, QString> CustomizationButtonsTexts = {
-           {CharacterGraphics::CharacterPart::Base, "Select a base color for your player!"},
-           {CharacterGraphics::CharacterPart::Head, "You can even swap heads.."},
-           {CharacterGraphics::CharacterPart::Outfit, "Pick an outfit for the prom"},
-           {CharacterGraphics::CharacterPart::Weapon, "Lot of evil creatures, chose a weapon"},
+inline std::map<CharacterItem::CharacterPart, QString> CustomizationButtonsTexts = {
+           {CharacterItem::CharacterPart::Base, "Select a base color for your player!"},
+           {CharacterItem::CharacterPart::Head, "You can even swap heads.."},
+           {CharacterItem::CharacterPart::Outfit, "Pick an outfit for the prom"},
+           {CharacterItem::CharacterPart::Weapon, "Lot of evil creatures, chose a weapon"},
 
+};
+inline static std::map<CharacterItem::CharacterPart, QString> HUMAN_SPRITE_PATH_BASE
+    = {{CharacterItem::CharacterPart::Base, ":/characters/human/base/"},
+       {CharacterItem::CharacterPart::Head, ":/characters/human/head/"},
+       {CharacterItem::CharacterPart::Outfit, ":/characters/human/outfit/"},
+       {CharacterItem::CharacterPart::Weapon, ""}};
+
+inline static std::map<CharacterItem::CharacterPart, QString> GOBLIN_SPRITE_PATH_BASE = {
+           {CharacterItem::CharacterPart::Base, "://characters/goblin/base/"},
 };
 extern std::map<WearableType, QString> WEARABLES_CUT_PATH_BASE;
 extern std::map<WearableType, QString> WEARABLES_SPRITE_PATH_BASE;

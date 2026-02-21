@@ -17,10 +17,26 @@ void SpriteManager::TrimTransparent(QImage& image) {
     image = image.copy(opaqueRect);
 }
 
-QImage SpriteManager::GetFrameImageFromSprite(CharacterGraphics::CharacterPart whichPart,
+QString SpriteManager::GetFrameCacheKey(CharacterItem::CharacterType characterType,
+                                        CharacterItem::CharacterPart whichPart,
+                                        int whichGraphicsOption,
+                                        int whichFrameId) {
+    int frameCacheKey = (int(characterType) * 1000) + (int(whichPart) * 100)
+                        + (whichGraphicsOption * 10) + (whichFrameId);
+    return QString::number(frameCacheKey);
+}
+
+// The hierarchy of images in this static class is :
+// Character Type (Human, Goblin, ...) -> CharacterPart(which part do you need a frame for? head, outfit..?) ->
+// -> GraphicsOption (each part has multiple graphics options, for the human its choosable by the user), -> frameId
+// (Animations happen through frames, all parts and graphics have the same frame id for each movement).
+
+QImage SpriteManager::GetFrameImageFromSprite(CharacterItem::CharacterType characterType,
+                                              CharacterItem::CharacterPart whichPart,
                                               int whichGraphicsOption,
                                               int whichFrameId) {
     // no need for caching on this as these frames are only requested once in the mainwindow at start.
+
     if (ID_OF_LAST_FRAME_IN_ROW == 0 || ID_OF_LAST_FRAME_IN_COL == 0) {
         return QImage();
     }
@@ -28,47 +44,64 @@ QImage SpriteManager::GetFrameImageFromSprite(CharacterGraphics::CharacterPart w
     const int row = float(whichFrameId)
                     / ID_OF_LAST_FRAME_IN_ROW; // id = 10, 9 images per row, row = 1 by narrowing.
     const int col = float(whichFrameId) / ID_OF_LAST_FRAME_IN_COL;
-
-    QString path(WEARABLES_SPRITE_PATH_BASE.at(whichPart) + QString::number(whichGraphicsOption)
-                 + ".png");
+    QString spritePath = SPRITE_PATH_BASE.at(characterType).at(whichPart);
+    QString path(spritePath + QString::number(whichGraphicsOption) + ".png");
     QImage sprite(path);
 
     QImage image = sprite.copy({row * IMAGE_WIDTH, col * IMAGE_HEIGHT, IMAGE_WIDTH, IMAGE_HEIGHT});
     return image;
 }
 
-QPixmap SpriteManager::GetFrameFromSprite(CharacterGraphics::CharacterPart whichPart,
+QPixmap SpriteManager::GetFrameFromSprite(CharacterItem::CharacterType characterType,
+                                          CharacterItem::CharacterPart whichPart,
                                           int whichGraphicsOption,
                                           int whichFrameId) {
-    if (FRAMES_CACHE[whichPart].contains({whichGraphicsOption, whichFrameId})) {
-        return FRAMES_CACHE[whichPart][{whichGraphicsOption, whichFrameId}];
-    }
+    QPixmap toReturn;
 
     if (ID_OF_LAST_FRAME_IN_ROW == 0 || ID_OF_LAST_FRAME_IN_COL == 0) {
-        return QPixmap();
+        return toReturn; // sprite sheet is empty, or a mistake with parameters, return empty pixmap
     }
+    QString frameCacheKey = GetFrameCacheKey(characterType,
+                                             whichPart,
+                                             whichGraphicsOption,
+                                             whichFrameId);
+
+    if (QPixmapCache::find(frameCacheKey, &toReturn)) {
+        return toReturn; // if QPixmapCache finds the key, it modifies toReturn with the cached image, and returns true.
+    }
+    // if the condition above returned false, the pixmap doesnt exist in the cache, its the first time its being requested
+    // if (FRAMES_CACHE[whichPart].contains({whichGraphicsOption, whichFrameId})) {
+    //     return FRAMES_CACHE[whichPart][{whichGraphicsOption, whichFrameId}];
+    // }
 
     const int row = (whichFrameId) % ID_OF_LAST_FRAME_IN_ROW;
     const int col = float(whichFrameId) / ID_OF_LAST_FRAME_IN_COL;
-    QString path(WEARABLES_SPRITE_PATH_BASE.at(whichPart) + QString::number(whichGraphicsOption)
-                 + ".png");
+    QString spritePath;
+    try {
+        spritePath = SPRITE_PATH_BASE.at(characterType).at(whichPart);
+    } catch (std::out_of_range) { // character does not have a sprite for the requested part
+        return QPixmap();
+    }
+    QString path(spritePath + QString::number(whichGraphicsOption) + ".png");
+
     QImage sprite(path);
 
     QImage image = sprite.copy({row * IMAGE_WIDTH, col * IMAGE_HEIGHT, IMAGE_WIDTH, IMAGE_HEIGHT});
     QPixmap pixmap = QPixmap::fromImage(image);
-    FRAMES_CACHE[whichPart].insert({whichGraphicsOption, whichFrameId}, pixmap);
+    QPixmapCache::insert(frameCacheKey, pixmap);
+    // FRAMES_CACHE[whichPart].insert({whichGraphicsOption, whichFrameId}, pixmap);
     return pixmap;
 }
 
-std::vector<QPixmap> SpriteManager::GetIdleFrameVariants(CharacterGraphics::CharacterPart which,
+std::vector<QPixmap> SpriteManager::GetIdleFrameVariants(CharacterItem::CharacterType characterType,
+                                                         CharacterItem::CharacterPart which,
                                                          ImageProcessingMode imageProcessingMode) {
     int counter = 0;
     std::vector<QPixmap> images;
     while (true) {
-        QImage image = GetFrameImageFromSprite(which, counter++, 0);
+        QImage image = GetFrameImageFromSprite(characterType, which, counter++, 0);
         if (image.isNull()) return images;
         ProcessImage(image, imageProcessingMode);
         images.push_back(QPixmap::fromImage(image));
     }
 }
-
