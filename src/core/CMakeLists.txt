@@ -11,8 +11,7 @@ target_sources(DungeonCrawler PRIVATE
     PassiveAktive.h
     fifo.cpp
     fifo.h
-    list.cpp
-    list.h
+    List.tpp
     StationaryController.h StationaryController.cpp
     GuardController.h GuardController.cpp
     LevelGraph.h LevelGraph.cpp
