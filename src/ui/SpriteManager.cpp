@@ -1,4 +1,5 @@
 #include "SpriteManager.h"
+#include <QtCore/qbuffer.h>
 #include <QtCore/qdebug.h>
 #include <QtGui/qbitmap.h>
 
@@ -41,8 +42,8 @@ QImage SpriteManager::GetFrameImageFromSprite(CharacterItem::CharacterType chara
         return QImage();
     }
 
-    const int row = float(whichFrameId)
-                    / ID_OF_LAST_FRAME_IN_ROW; // id = 10, 9 images per row, row = 1 by narrowing.
+    const int row = (whichFrameId)
+                    % ID_OF_LAST_FRAME_IN_ROW; // id = 10, 9 images per row, row = 1 by narrowing.
     const int col = float(whichFrameId) / ID_OF_LAST_FRAME_IN_COL;
     QString spritePath = SPRITE_PATH_BASE.at(characterType).at(whichPart);
     QString path(spritePath + QString::number(whichGraphicsOption) + ".png");
@@ -70,9 +71,6 @@ QPixmap SpriteManager::GetFrameFromSprite(CharacterItem::CharacterType character
         return toReturn; // if QPixmapCache finds the key, it modifies toReturn with the cached image, and returns true.
     }
     // if the condition above returned false, the pixmap doesnt exist in the cache, its the first time its being requested
-    // if (FRAMES_CACHE[whichPart].contains({whichGraphicsOption, whichFrameId})) {
-    //     return FRAMES_CACHE[whichPart][{whichGraphicsOption, whichFrameId}];
-    // }
 
     const int row = (whichFrameId) % ID_OF_LAST_FRAME_IN_ROW;
     const int col = float(whichFrameId) / ID_OF_LAST_FRAME_IN_COL;
@@ -80,17 +78,21 @@ QPixmap SpriteManager::GetFrameFromSprite(CharacterItem::CharacterType character
     try {
         spritePath = SPRITE_PATH_BASE.at(characterType).at(whichPart);
     } catch (std::out_of_range) { // character does not have a sprite for the requested part
-        return QPixmap();
+        return toReturn;
     }
     QString path(spritePath + QString::number(whichGraphicsOption) + ".png");
 
     QImage sprite(path);
 
     QImage image = sprite.copy({row * IMAGE_WIDTH, col * IMAGE_HEIGHT, IMAGE_WIDTH, IMAGE_HEIGHT});
-    QPixmap pixmap = QPixmap::fromImage(image);
-    QPixmapCache::insert(frameCacheKey, pixmap);
-    // FRAMES_CACHE[whichPart].insert({whichGraphicsOption, whichFrameId}, pixmap);
-    return pixmap;
+    if (image.isNull()) {
+        return toReturn;
+    }
+
+    toReturn = QPixmap::fromImage(image);
+
+    QPixmapCache::insert(frameCacheKey, toReturn);
+    return toReturn;
 }
 
 std::vector<QPixmap> SpriteManager::GetIdleFrameVariants(CharacterItem::CharacterType characterType,

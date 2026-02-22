@@ -11,6 +11,11 @@ class SpriteManager
 {
 public:
     enum class ImageProcessingMode { None, TrimTransparent };
+    struct SpriteFrame
+    {
+        QPixmap pixmap;
+        QPointF offset;
+    };
 
 private:
     // Each part has a frame register that caches images that were already requested
@@ -57,13 +62,13 @@ private:
                                           int whichGraphicsOption,
                                           int whichFrameId);
     static void ProcessImage(QImage& image, ImageProcessingMode imageProcessingMode);
-    static void TrimTransparent(QImage& image);
     static QString GetFrameCacheKey(CharacterItem::CharacterType characterType,
                                     CharacterItem::CharacterPart whichPart,
                                     int whichGraphicsOption,
                                     int whichFrameId);
 
 public:
+    static void TrimTransparent(QImage& image);
     static QPixmap GetFrameFromSprite(CharacterItem::CharacterType characterType,
                                       CharacterItem::CharacterPart whichPart,
                                       int whichGraphicsOption,
@@ -76,7 +81,6 @@ public:
         // variants of each to present them to the user.
         CharacterItem::CharacterPart which,
         ImageProcessingMode imageProcessingMode = ImageProcessingMode::None);
-
     SpriteManager();
 };
 
