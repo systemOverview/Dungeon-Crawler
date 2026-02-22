@@ -2,6 +2,7 @@
 #define CHARACTERTILE_UI_PLACEMENTMEDIATOR_H
 
 #include <QtCore/qpoint.h>
+#include "Constants.h"
 #include <map>
 class TileItem;
 class CharacterItem;
@@ -20,8 +21,8 @@ class CharacterTile_UI_PlacementMediator
 
 {
 private:
-    inline static std::map<std::pair<int, int>, TileItem*> m_tiles = {};
-    inline static std::map<std::pair<int, int>, CharacterItem*> m_characters = {};
+    inline static std::map<Coordinates, TileItem*> m_tiles = {};
+    inline static std::map<Coordinates, CharacterItem*> m_characters = {};
     inline static std::map<CharacterItem*, std::pair<TileItem*, int>> CHARACTERS_POSITIONS;
     inline static constexpr int SUBCOLUMNS_PER_TILE = 6;
 

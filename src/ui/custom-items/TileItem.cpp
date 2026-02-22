@@ -7,16 +7,14 @@
 #include <SpriteManager.h>
 
 void TileItem::fixMyPosition() {
-    QGraphicsItem::setPos(m_column * SIDE_LENGTH, m_row * SIDE_LENGTH);
+    QGraphicsItem::setPos(m_coordinates.column * SIDE_LENGTH, m_coordinates.row * SIDE_LENGTH);
 }
 
 TileItem::TileItem(int row, int col, char textureID)
-    : GameItem(QPixmap(GUIPaths::TileCharToPathRegister[textureID]))
-    , m_row(row)
-    , m_column(col) {
+    : m_coordinates{row, col}
+    , GameItem(QPixmap(GUIPaths::TileCharToPathRegister[textureID])) {
     fixMyPosition();
 }
-
 
 void TileItem::mousePressEvent(QGraphicsSceneMouseEvent* event) {
     if (event->button() == Qt::LeftButton) {
@@ -27,7 +25,7 @@ void TileItem::mousePressEvent(QGraphicsSceneMouseEvent* event) {
 
     QMessageBox debugInfo;
     QString text;
-    QDebug{&text} << "cords" << getCordsAsPair();
+    QDebug{&text} << "cords" << m_coordinates;
     QDebug{&text} << "bounding rect" << boundingRect();
     QDebug{&text} << "position" << pos();
 
@@ -44,11 +42,11 @@ void TileItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, 
     painter->drawPixmap(boundingRect(), m_texture, m_texture.rect());
 }
 
-int TileItem::getRow() const { return m_row; }
+int TileItem::getRow() const { return m_coordinates.row; }
 
-int TileItem::getColumn() const { return m_column; }
+int TileItem::getColumn() const { return m_coordinates.column; }
 
-std::pair<int, int> TileItem::TileItem::getCordsAsPair() const { return {m_row, m_column}; }
+Coordinates TileItem::getCoordinates() const { return m_coordinates; }
 
 // debugging
 void TileItem::drawLines(QPainter* painter) {

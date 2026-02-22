@@ -2,7 +2,7 @@
 #include "TileItem.h"
 
 void CharacterTile_UI_PlacementMediator::AddTile(TileItem* tile) {
-    m_tiles.insert_or_assign(tile->getCordsAsPair(), tile);
+    m_tiles.insert_or_assign(tile->getCoordinates(), tile);
 }
 
 void CharacterTile_UI_PlacementMediator::PlaceCharacterOnTile(CharacterItem* character,

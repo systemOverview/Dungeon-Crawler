@@ -3,6 +3,7 @@
 
 #include <QGraphicsItem>
 #include "CharacterItem.h"
+#include "Constants.h"
 #include "GameItem.h"
 
 class TileItem : public GameItem
@@ -12,8 +13,7 @@ private:
     // start debugging :
     void drawLines(QPainter* painter);
     //end debugging:
-    int m_row = -1;
-    int m_column = -1;
+    Coordinates m_coordinates = {-1, -1};
     void fixMyPosition() override;
     QTimer* m_doubleClickTimer;
 
@@ -26,7 +26,7 @@ public:
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
     int getRow() const;
     int getColumn() const;
-    std::pair<int, int> getCordsAsPair() const;
+    Coordinates getCoordinates() const;
 
 public slots:
 signals:
