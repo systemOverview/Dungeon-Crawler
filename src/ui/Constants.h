@@ -16,6 +16,7 @@ struct Coordinates
     bool operator<(const Coordinates& rhs) const {
         return (this->row < rhs.row || this->column < rhs.column);
     }
+    operator QString() const { return QString("Row: %1, Column : %2").arg(row).arg(column); }
 };
 namespace CharactersAttributes {
     struct Attributes
