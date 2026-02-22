@@ -2,21 +2,31 @@
 #define TILEITEM_H
 
 #include <QGraphicsItem>
+#include "CharacterItem.h"
 #include "GameItem.h"
 
 class TileItem : public GameItem
 {
     Q_OBJECT
 private:
-    inline static int counter = 0;
-    QPixmap m_texture;
-    int m_row;
-    int m_col;
+    // start debugging :
+    void drawLines(QPainter* painter);
+    //end debugging:
+    int m_row = -1;
+    int m_column = -1;
     void fixMyPosition() override;
     QTimer* m_doubleClickTimer;
 
+    CharacterItem* m_character = nullptr;
+    int m_characterCell = 1;
+
 public:
     TileItem(int row, int col, char textureID);
+
+    void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
+    int getRow() const;
+    int getColumn() const;
+    std::pair<int, int> getCordsAsPair() const;
 
 public slots:
 signals:
