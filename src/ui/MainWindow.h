@@ -117,6 +117,7 @@ public:
     void gameWon();
     void showTerminal();
     TileItem* addTileToScene(int row, int col, char textureID);
+    void addCharacterToScene(CharacterItem* character) const;
     CharacterItem* getHumanCharachter() const;
     bool eventFilter(QObject* obj, QEvent* event) override;
 };

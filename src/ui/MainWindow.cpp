@@ -60,7 +60,6 @@ void MainWindow::makeStartScreen() {
     startButton->setPos((m_character->boundingRect().width() / 2)
                             - startButton->boundingRect().width() / 2,
                         m_character->boundingRect().height() + 20);
-    qDebug() << m_character->boundingRect() << startButton->pos();
     m_scene->addItem(m_character);
 
     setCentralWidget(central);
@@ -131,7 +130,7 @@ void MainWindow::startGame() {
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent) {
     makeStartScreen();
-    // QTimer::singleShot(10, [this]() { startGame(); });
+    QTimer::singleShot(10, [this]() { startGame(); });
     // startGame(); //TEST TODO , refactor this to work with the state machines
 }
 
@@ -217,6 +216,11 @@ TileItem* MainWindow::addTileToScene(int row, int col, char textureID) {
     m_scene->addItem(tile);
     connect(this, &MainWindow::dimensionsChanged, tile, &GameItem::resize);
     return tile;
+}
+
+void MainWindow::addCharacterToScene(CharacterItem* character) const {
+    connect(this, &MainWindow::dimensionsChanged, character, &GameItem::resize);
+    m_scene->addItem(character);
 }
 
 CharacterItem* MainWindow::getHumanCharachter() const { return m_character; }
