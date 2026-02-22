@@ -4,6 +4,8 @@
 #include <QtCore/qtimer.h>
 #include <QtWidgets/qgraphicsscene.h>
 #include "CharacterItem.h"
+#include "Constants.h"
+#include <CharacterTile_UI_PlacementMediator.h>
 void CharacterAnimation::updateCurrentTime(int currentTime) {}
 
 void CharacterAnimation::updateAnimation(CharacterItem::State characterState) {
@@ -99,11 +101,7 @@ void CharacterAnimation::playFrame(std::vector<int> frames,
                                    int iterator,
                                    std::pair<qreal, qreal> xyAdvancePerFrame) {
     m_character->setCurrentFrameID(frames.at(iterator));
-
-    qreal newXPosition = m_character->pos().x() + xyAdvancePerFrame.first;
-    qreal newYPosition = m_character->pos().y() + xyAdvancePerFrame.second;
-    QGraphicsItem* item = m_character->scene()->itemAt({newXPosition, newYPosition}, QTransform());
-    m_character->setPos(newXPosition, newYPosition);
+    CharacterTile_UI_PlacementMediator::AdvanceCharacter(m_character, 1);
 }
 
 void CharacterAnimation::updateState(State newState, State oldState) {

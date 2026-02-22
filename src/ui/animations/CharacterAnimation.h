@@ -6,7 +6,6 @@
 #include <QPixmap>
 #include <QtCore/qdebug.h>
 #include <QtCore/qtimeline.h>
-#include "SpriteManager.h"
 #include <CharacterItem.h>
 class CharacterAnimation : public QAbstractAnimation
 {

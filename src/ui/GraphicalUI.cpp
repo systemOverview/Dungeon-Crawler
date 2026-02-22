@@ -11,6 +11,7 @@
 #include <QtWidgets/qlabel.h>
 #include <QtWidgets/qmessagebox.h>
 #include <QtWidgets/qpushbutton.h>
+#include "CharacterTile_UI_PlacementMediator.h"
 #include "Constants.h"
 #include "DungeonCrawler.h"
 #include "MainWindow.h"
@@ -40,16 +41,17 @@ void GraphicalUI::createLevelUI(const std::vector<std::vector<Tile*>>& tiles) {
                                                             tile->getTexture());
             connect(tileUI, &TileItem::tilePressed, this, &GraphicalUI::moveCharacter);
             m_graphicalTiles.push_back(tileUI);
+
             if (tile->hasCharacter()) {
-                if (tile->getCharacter()->isHuman() == false) {
-                    CharacterItem* charUI = new CharacterItem(CharacterItem::CharacterType::Goblin);
-                    tileUI->scene()->addItem(charUI);
-                    charUI->setPos(tileUI->pos());
-                    charUI->setTile(tileUI);
+                if (tile->getCharacter()->isHuman()) {
+                    m_human->setZValue(100);
+                    CharacterTile_UI_PlacementMediator::PlaceCharacterOnTile(m_human, tileUI);
                     continue;
                 }
-                m_human->setPos(tileUI->pos());
-                m_human->setTile(tileUI);
+                CharacterItem* charUI = new CharacterItem(CharacterItem::CharacterType::Goblin);
+                charUI->setZValue(100);
+                m_mainWindow->addCharacterToScene(charUI);
+                CharacterTile_UI_PlacementMediator::PlaceCharacterOnTile(charUI, tileUI);
             }
         }
     }
