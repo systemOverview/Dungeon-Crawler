@@ -7,6 +7,7 @@ find_package(Qt6 REQUIRED COMPONENTS Core)
 find_package(nlohmann_json 3.12.0 REQUIRED)
 find_package(Qt6 REQUIRED COMPONENTS StateMachine)
 find_package(Boost REQUIRED)
+find_package(ImageMagick COMPONENTS Magick++)
 
 qt_standard_project_setup()
 
@@ -21,9 +22,12 @@ qt_add_executable(DungeonCrawler WIN32 MACOSX_BUNDLE
     src/ui/animations/CharacterAnimation.h src/ui/animations/CharacterAnimation.cpp
     src/ui/custom-items/TileItem.h src/ui/custom-items/TileItem.cpp
     src/ui/custom-items/GameItem.h src/ui/custom-items/GameItem.cpp
-
-
+    src/ui/CharacterTile_UI_PlacementMediator.h src/ui/CharacterTile_UI_PlacementMediator.cpp
    )
+add_definitions( -DMAGICKCORE_QUANTUM_DEPTH=16 )
+add_definitions( -DMAGICKCORE_HDRI_ENABLE=0 )
+include_directories(${ImageMagick_INCLUDE_DIRS})
+target_link_libraries(DungeonCrawler PUBLIC ${ImageMagick_LIBRARIES})
 
 add_subdirectory(src)
 
