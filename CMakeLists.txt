@@ -23,6 +23,7 @@ qt_add_executable(DungeonCrawler WIN32 MACOSX_BUNDLE
     src/ui/custom-items/TileItem.h src/ui/custom-items/TileItem.cpp
     src/ui/custom-items/GameItem.h src/ui/custom-items/GameItem.cpp
     src/ui/CharacterTile_UI_PlacementMediator.h src/ui/CharacterTile_UI_PlacementMediator.cpp
+    src/core/HumanController.h src/core/HumanController.cpp
    )
 add_definitions( -DMAGICKCORE_QUANTUM_DEPTH=16 )
 add_definitions( -DMAGICKCORE_HDRI_ENABLE=0 )
