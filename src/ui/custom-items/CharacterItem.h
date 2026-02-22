@@ -6,9 +6,8 @@
 #include <QtCore/qobject.h>
 #include <QtCore/qsequentialanimationgroup.h>
 #include <QtStateMachine/qstatemachine.h>
-#include "ButtonItem.h"
 #include "GameItem.h"
-
+class Character;
 class CharacterAnimation;
 class TileItem;
 class SpriteManager;
@@ -16,6 +15,8 @@ class CharacterItem : public GameItem
 {
     Q_OBJECT
     Q_PROPERTY(QPointF newPosition READ getNewPosition WRITE setNewPosition)
+
+    friend TileItem;
 
 public:
     enum class State { Idle, Walk, Jump, Punch, Looping, PAST_END };
@@ -30,7 +31,6 @@ private:
     // sprite manager, which has a cache system in place to avoid re-generating images.
 
     CharacterItem::CharacterType m_characterType;
-
     int m_currentFrameId = 0;
 
     TileItem* m_tile = nullptr;
@@ -46,7 +46,9 @@ private:
     bool m_animationLoopingStatus = false;
     void setDefaultParts();
     void setupMovingStateMachine();
+    QPixmap getPixmap() const;
 
+    int m_healthPercentage = 100;
     QPointF m_newPosition;
 
 public slots:
@@ -75,6 +77,11 @@ public:
     QVariant myColorInterpolator(const std::vector<int>& start,
                                  const std::vector<int>& end,
                                  qreal progress);
+    void advanceOnXAxis();
+    CharacterItem::CharacterType getCharacterType() const;
+
+protected:
+    void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
 };
 
 #endif // CHARACTERITEM_H

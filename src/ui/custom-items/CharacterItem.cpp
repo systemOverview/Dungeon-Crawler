@@ -11,9 +11,10 @@
 #include <QtGui/qpainter.h>
 #include <QtGui/qpicture.h>
 #include "CharacterAnimation.h"
+#include "CharacterTile_UI_PlacementMediator.h"
 #include "SpriteManager.h"
 #include "TileItem.h"
-
+#include <Utilities.h>
 CharacterItem::CharacterItem(CharacterItem::CharacterType characterType)
     : m_characterType{characterType}
     , GameItem(QPixmap(), -1) {
@@ -22,13 +23,42 @@ CharacterItem::CharacterItem(CharacterItem::CharacterType characterType)
     connect(this, &CharacterItem::stateChanged, m_animation, &CharacterAnimation::updateAnimation);
 }
 
+CharacterItem::CharacterType CharacterItem::getCharacterType() const { return m_characterType; }
+
 void CharacterItem::setDefaultParts() {
     for (int i = 0; i < int(CharacterItem::CharacterPart::PAST_END); i++) {
         m_partsGraphicOptions.insert({CharacterItem::CharacterPart(i), 0});
     }
 }
 
-void CharacterItem::fixMyPosition() {}
+QPixmap CharacterItem::getPixmap() const {
+    QPixmap base = QPixmap();
+
+    for (const auto& [part, partOption] : m_partsGraphicOptions) {
+        QPixmap pixmap = SpriteManager::GetFrameFromSprite(m_characterType,
+                                                           part,
+                                                           partOption,
+                                                           m_currentFrameId);
+
+        if (pixmap.isNull()) {
+            continue;
+        } //
+        if (part == CharacterPart::Base) {
+            base = pixmap;
+        }
+        else {
+            QPainter painter = QPainter(&base);
+            painter.drawPixmap(base.rect(), pixmap);
+        }
+    }
+
+    return base;
+}
+
+void CharacterItem::fixMyPosition() {
+    QPointF pos = CharacterTile_UI_PlacementMediator::GetCharacterPosition(this);
+    setPos(pos);
+}
 
 void CharacterItem::assignPart(CharacterItem::CharacterPart partType, int whichGraphicsOption) {
     m_partsGraphicOptions.insert_or_assign(partType, whichGraphicsOption);
@@ -38,13 +68,24 @@ void CharacterItem::assignPart(CharacterItem::CharacterPart partType, int whichG
 void CharacterItem::paint(QPainter* painter,
                           const QStyleOptionGraphicsItem* option,
                           QWidget* widget) {
-    for (const auto& [part, partOption] : m_partsGraphicOptions) {
-        QPixmap pixmap = SpriteManager::GetFrameFromSprite(m_characterType,
-                                                           part,
-                                                           partOption,
-                                                           m_currentFrameId);
-        painter->drawPixmap(boundingRect(), pixmap, pixmap.rect());
+
+    QPixmap pixmap = getPixmap();
+    QImage img = pixmap.toImage();
+
+    SpriteManager::TrimTransparent(img);
+    pixmap = QPixmap::fromImage(img);
+
+    float characterHeight = SIDE_LENGTH * 80 / 100;
+
+    if (m_characterType == CharacterType::Human) {
+        QSize size = pixmap.size();
+        QString fileName = QString::number(size.width()) + "-" + QString::number(size.height());
+        Utilities::SaveToFile(pixmap, fileName);
     }
+    pixmap = pixmap.scaledToHeight(characterHeight);
+    painter->drawPixmap(QRectF{0, SIDE_LENGTH - characterHeight, characterHeight, characterHeight},
+                        pixmap,
+                        pixmap.rect());
 }
 
 int CharacterItem::getCurrentFrameID() const { return m_currentFrameId; }
@@ -76,3 +117,7 @@ QPointF CharacterItem::getNewPosition() const {
 void CharacterItem::setNewPosition(QPointF newNewPosition) { m_newPosition = newNewPosition; }
 
 CharacterItem::State CharacterItem::getState() const { return m_state; }
+
+void CharacterItem::mousePressEvent(QGraphicsSceneMouseEvent* event) {
+    QGraphicsItem::mousePressEvent(event);
+}
