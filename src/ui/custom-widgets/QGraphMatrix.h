@@ -1,6 +1,7 @@
 #ifndef QGRAPHMATRIX_H
 #define QGRAPHMATRIX_H
 #include <QWidget>
+#include "Constants.h"
 class QGraphMatrixElement : public QWidget{
     friend class QGraphMatrix; // so it can access the state (wow you dont need forward declaration for friend classes.)
 
@@ -46,15 +47,18 @@ class QGraphMatrix : public QWidget
 {
     Q_OBJECT;
 private:
-    std::map<std::pair<int,int>, QGraphMatrixElement*> m_elementsRegister;
+    std::map<Coordinates, QGraphMatrixElement*> m_elementsRegister;
+
 public:
     using DjikstraState = QGraphMatrixElement::DjikstraState;
     explicit QGraphMatrix(QWidget* parent = nullptr);
-    void initializeMatrix(std::vector<std::pair<int,int>> reachableTilesCords, std::string textForReachable, int milliSecsWaitBetweenElements = 0 );
-    void setElementText(std::pair<int,int> elementCords, std::string text);
-    void setElementState(std::pair<int,int> elementCords, DjikstraState djikstraState);
-    void visualizeElement(std::pair<int,int> elementCords, int visualizationDurationsMilliseconds);
-    void setMultipleElementsState(std::vector<std::pair<int,int>> labelsCords, DjikstraState djikstraState);
+    void initializeMatrix(std::vector<Coordinates> reachableTilesCords,
+                          std::string textForReachable,
+                          int milliSecsWaitBetweenElements = 0);
+    void setElementText(Coordinates elementCords, std::string text);
+    void setElementState(Coordinates elementCords, DjikstraState djikstraState);
+    void visualizeElement(Coordinates elementCords, int visualizationDurationsMilliseconds);
+    void setMultipleElementsState(std::vector<Coordinates> labelsCords, DjikstraState djikstraState);
     void setTextlessElementsStatusToBlocked();
     void generateMatrixLegends(QWidget* LegendContainer);
     void resetMatrix();

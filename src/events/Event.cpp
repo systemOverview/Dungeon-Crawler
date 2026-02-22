@@ -161,20 +161,22 @@ void VisualizationStatusEvent::notifyListeners(VisualizationStatusEvent* event) 
 
 //Start of DjikstraSearchEvent definitions.
 
+DjikstraSearchEvent::DjikstraSearchEvent(std::vector<Loop> loops,
+                                         std::vector<Coordinates> startingSearchRange,
+                                         Coordinates startingTileCords,
+                                         Coordinates targetTileCords)
+    : m_loops{loops}
+    , m_startingSearchRange{startingSearchRange}
+    , m_startingTileCords{startingTileCords}
+    , m_targetTileCords(targetTileCords) {}
 
-
-DjikstraSearchEvent::DjikstraSearchEvent(std::vector<Loop> loops, std::vector<std::pair<int,int>> startingSearchRange, std::pair<int,int> startingTileCords, std::pair<int,int> targetTileCords)
-    :m_loops{loops}, m_startingSearchRange{startingSearchRange}, m_startingTileCords {startingTileCords}, m_targetTileCords(targetTileCords){}
-
-
-std::vector<std::pair<int,int>> DjikstraSearchEvent::getStartingSearchRange() const
-{
+std::vector<Coordinates> DjikstraSearchEvent::getStartingSearchRange() const {
     return m_startingSearchRange;
 }
 
-std::pair<int, int> DjikstraSearchEvent::getStartingTileCords() const{return m_startingTileCords;}
+Coordinates DjikstraSearchEvent::getStartingTileCords() const { return m_startingTileCords; }
 
-std::pair<int, int> DjikstraSearchEvent::getTargetTileCords() const {return m_targetTileCords; }
+Coordinates DjikstraSearchEvent::getTargetTileCords() const { return m_targetTileCords; }
 
 std::vector<DjikstraSearchEvent::Loop> DjikstraSearchEvent::getLoops() const{return m_loops;}
 
@@ -191,19 +193,34 @@ void DjikstraSearchEvent::notifyListeners(DjikstraSearchEvent *event)
 
 // Start of Loop Definitions
 
-std::pair<int, int> DjikstraSearchEvent::Loop::getExtractedTileCords() const{return m_extractedTileCords;}
+Coordinates DjikstraSearchEvent::Loop::getExtractedTileCords() const {
+    return m_extractedTileCords;
+}
 
-std::map<std::pair<int, int>, std::pair<int, int> > DjikstraSearchEvent::Loop::getPreviousRegister() {return m_previousRegister;}
+std::map<Coordinates, Coordinates> DjikstraSearchEvent::Loop::getPreviousRegister() {
+    return m_previousRegister;
+}
 std::vector<DjikstraSearchEvent::Loop::Neighbour> DjikstraSearchEvent::Loop::getNeighbourTiles() const{return m_neighbourTiles;}
-DjikstraSearchEvent::Loop::Loop(std::pair<int, int> extractedTileCords, std::vector<DjikstraSearchEvent::Loop::Neighbour> neighbourTiles) :
-    m_extractedTileCords{extractedTileCords}, m_neighbourTiles(neighbourTiles){}
-void DjikstraSearchEvent::Loop::setExtractedTile(std::pair<int, int> extractedTileCords) {m_extractedTileCords = extractedTileCords;}
+DjikstraSearchEvent::Loop::Loop(Coordinates extractedTileCords,
+                                std::vector<DjikstraSearchEvent::Loop::Neighbour> neighbourTiles)
+    : m_extractedTileCords{extractedTileCords}
+    , m_neighbourTiles(neighbourTiles) {}
+void DjikstraSearchEvent::Loop::setExtractedTile(Coordinates extractedTileCords) {
+    m_extractedTileCords = extractedTileCords;
+}
 void DjikstraSearchEvent::Loop::addNeighbourTile (Neighbour neighbour) {m_neighbourTiles.push_back(neighbour);}
 
-void DjikstraSearchEvent::Loop::setPreviousRegisterAtLoopEnd(std::map<std::pair<int, int>, std::pair<int, int> > reg) {m_previousRegister = reg;}
+void DjikstraSearchEvent::Loop::setPreviousRegisterAtLoopEnd(std::map<Coordinates, Coordinates> reg) {
+    m_previousRegister = reg;
+}
     // Start of Loop::Neighbour Definitions
-DjikstraSearchEvent::Loop::Neighbour::Neighbour(std::pair<int, int> cords, float djikstraValue, bool wasDjikstraValueUpdated) : m_cords{cords}, m_djikstraValue{djikstraValue}, m_wasDjikstraValueUpdated{wasDjikstraValueUpdated}{};
-std::pair<int, int> DjikstraSearchEvent::Loop::Neighbour::getCords() {return m_cords;}
+DjikstraSearchEvent::Loop::Neighbour::Neighbour(Coordinates cords,
+                                                float djikstraValue,
+                                                bool wasDjikstraValueUpdated)
+    : m_cords{cords}
+    , m_djikstraValue{djikstraValue}
+    , m_wasDjikstraValueUpdated{wasDjikstraValueUpdated} {};
+Coordinates DjikstraSearchEvent::Loop::Neighbour::getCords() { return m_cords; }
 float DjikstraSearchEvent::Loop::Neighbour::getDjikstraValue() {return m_djikstraValue;}
 bool DjikstraSearchEvent::Loop::Neighbour::wasDjikstraValueUpdated(){return m_wasDjikstraValueUpdated;}
 

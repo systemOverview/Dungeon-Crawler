@@ -2,8 +2,8 @@
 
 void QOverlay::setRect(QRect r){rectn = r;setGeometry(r);}
 
-
-QOverlay::QOverlay(QWidget *parent, std::map<std::pair<int,int>, QTile*> QTilesRegister) : QWidget(parent) {
+QOverlay::QOverlay(QWidget* parent, std::map<Coordinates, QTile*> QTilesRegister)
+    : QWidget(parent) {
     setAttribute(Qt::WA_TransparentForMouseEvents);
     setAttribute(Qt::WA_NoSystemBackground);
     m_QTiles = QTilesRegister;
@@ -56,12 +56,14 @@ void QOverlay::drawEdge(QPainter &p, Edge* edge)
 
 }
 
-void QOverlay::setQTilesRegister(std::map<std::pair<int, int>, QTile *> reg)
-{
-    m_QTiles = reg;
-}
+void QOverlay::setQTilesRegister(std::map<Coordinates, QTile*> reg) { m_QTiles = reg; }
 
-void QOverlay::addEdge(std::pair<int,int> from, std::pair<int,int>  to, int groupId, int colorGroupId, Edge::EdgeType edgeType, int pathId){
+void QOverlay::addEdge(Coordinates from,
+                       Coordinates to,
+                       int groupId,
+                       int colorGroupId,
+                       Edge::EdgeType edgeType,
+                       int pathId) {
     if (m_colorGroups.count(colorGroupId)==0){
         m_colorGroups[colorGroupId] = QColor::fromRgb(Utilities::GenerateRandomHexColor());
     }
@@ -84,19 +86,19 @@ void QOverlay::addEdge(std::pair<int,int> from, std::pair<int,int>  to, int grou
     update();
 }
 
-void QOverlay::addArrowPathBetweenMultipleTiles(std::vector<std::pair<int, int> > cordsOfTraversedTiles, bool flag)
-{
+void QOverlay::addArrowPathBetweenMultipleTiles(std::vector<Coordinates> cordsOfTraversedTiles,
+                                                bool flag) {
     int pathId = PATHID++;
     if (cordsOfTraversedTiles.empty()){
         return;
     }
-    std::pair<int,int> targetTileCords = cordsOfTraversedTiles.back();
+    Coordinates targetTileCords = cordsOfTraversedTiles.back();
     m_pathIdRegister[targetTileCords] = pathId;
-    std::pair<int,int> sentinelOutOfRangeValue = {-1,-1};
-    std::pair<int,int> fromWidgetCords = sentinelOutOfRangeValue;
-    std::pair<int,int> toWidgetCords = sentinelOutOfRangeValue;
+    Coordinates sentinelOutOfRangeValue = {-1, -1};
+    Coordinates fromWidgetCords = sentinelOutOfRangeValue;
+    Coordinates toWidgetCords = sentinelOutOfRangeValue;
     int counter = 0;
-    for (std::pair<int,int> cord : cordsOfTraversedTiles ){ // from and to start at {-1,-1}
+    for (Coordinates cord : cordsOfTraversedTiles) { // from and to start at {-1,-1}
         if ((counter++)==0 && flag){continue;}
         if (fromWidgetCords==sentinelOutOfRangeValue){
             fromWidgetCords = cord; // to set the first cord, will never be true again
@@ -113,12 +115,7 @@ void QOverlay::addArrowPathBetweenMultipleTiles(std::vector<std::pair<int, int> 
         // A,B,C widgets, A:from, B:to, then B:from, C:to
     }
 }
-void QOverlay::createPath(std::vector<std::pair<int, int> > cordsOfTraversedTiles)
-{
-
-
-
-}
+void QOverlay::createPath(std::vector<Coordinates> cordsOfTraversedTiles) {}
 
 void QOverlay::removeAllArrows()
 {
@@ -133,10 +130,9 @@ void QOverlay::removeAllArrows()
 
 }
 
-void QOverlay::highlightArrowPathAndRemoveOthers(std::pair<int,int> pathTargetCords, std::pair<int, int> ignorePair)
-{
-
-    try{
+void QOverlay::highlightArrowPathAndRemoveOthers(Coordinates pathTargetCords,
+                                                 Coordinates ignorePair) {
+    try {
         int pathId = m_pathIdRegister[pathTargetCords];
 
         for (auto edgeIterator = m_edges.begin(); edgeIterator!=m_edges.end();){
@@ -158,10 +154,9 @@ void QOverlay::highlightArrowPathAndRemoveOthers(std::pair<int,int> pathTargetCo
         Utilities::QtSleepMilliSeconds(500);
     }
 
-    catch(std::out_of_range){
-     return;
+    catch (std::out_of_range) {
+        return;
     }
-
 }
 
 void QOverlay::removeArrowsByGroupId(int groupId){

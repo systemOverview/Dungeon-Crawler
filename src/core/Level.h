@@ -5,9 +5,7 @@
 #ifndef PRAK_LEVEL_H
 #define PRAK_LEVEL_H
 #include "tile.h"
-#include <iostream>
 #include "LevelGraph.h"
-#include <fstream>
 #include <nlohmann/json.hpp>
 using json = nlohmann::json;
 class Character;

@@ -11,7 +11,8 @@ class StartScreen;
 class DungeonCrawler : public QObject
 {
     Q_OBJECT
-public:
+private:
+    inline static DungeonCrawler* SINGLETON_INSTANCE = nullptr;
     std::vector<Level*>::iterator currentLevel;
     List<Level*> m_levels;
     std::string m_gameString = "##########"
@@ -49,8 +50,11 @@ public:
     StartScreen* m_startScreen = nullptr;
     int m_numberOfRemainingNPCs = 0;
     Level* m_lastLevel = nullptr;
+    bool IsTileInNeighbouringRange(std::pair<int, int> fromCords, std::pair<int, int> toCords);
 public slots:
     void buildGame();
+signals:
+    void move(); // alerts controllers to move their characters
 
 public:
     enum GameSourceOption{
@@ -60,7 +64,6 @@ public:
     DungeonCrawler();
     std::pair<int, int> translateMove(int step) const;
     bool turn();
-    void move();
     void levelUp();
     void moveCharacter(Character* character, Tile* tile, bool giveway = false);
     //an attacker can ask the other NPCs to switch spots if he wants to access a tile controlled by them
@@ -74,6 +77,9 @@ public:
     // attacker is the one that is trying to enter a tile already held by the defender.
     // it deletes the loser and updates the tile and the winner, or keeps things as they were if it ended in a draw.
     void build(GameSourceOption option);
+
+    static void ProcessNewCharacter(Character* character);
+    static bool ValidateMove(Tile* from, Tile* to);
 };
 
 #endif //PRAK_DUNGEONCRAWLER_H

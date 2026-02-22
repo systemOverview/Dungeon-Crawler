@@ -23,7 +23,7 @@ public:
 
 };
 
-class LevelGraph :public EventListener
+class LevelGraph : public EventListener
 {
 public:
     enum PathCoordinateSystem {
@@ -36,7 +36,7 @@ public:
     };
 private:
     // std::vector<Vertex*> m_vertexes;
-    std::map<std::pair<int,int>, Vertex*> m_vertexes; // position : vertex
+    std::map<Coordinates, Vertex*> m_vertexes; // tile position : vertex
 
 public:
     LevelGraph();
@@ -44,14 +44,17 @@ public:
     void setupAlldges();
     void setupEdgesForVertex(Vertex* vertex);
     bool isEdgeBetweenTilesPossible(char firstTileTexture, char SecondTileTexture) const;
-    Vertex* getVertex(std::pair<int,int> cords);
-    std::vector<std::pair<int,int>> getShortestsPathBetweenTwoTiles(Vertex* startingVertex, Vertex* targetVertex, std::string_view algorithmToUse="");
-    std::vector<std::pair<int,int>> getShortestsPathBetweenTwoTilesDjikstra(Vertex* startingVertex, Vertex* targetVertex);
-    std::vector<std::pair<int,int>> generatePathFromPreviousRegister
-        (std::map<std::pair<int,int>, std::pair<int,int>>& previousRegister,
-        std::pair<int,int> itemToLookupPath,PathDirection pathDirection = PathDirection::FromStartingToTarget,
-        PathCoordinateSystem pathCoordinateSystem = PathCoordinateSystem::Relative
-        );
+    Vertex* getVertex(Coordinates cords);
+    std::vector<Coordinates> getShortestsPathBetweenTwoTiles(Vertex* startingVertex,
+                                                             Vertex* targetVertex,
+                                                             std::string_view algorithmToUse = "");
+    std::vector<Coordinates> getShortestsPathBetweenTwoTilesDjikstra(Vertex* startingVertex,
+                                                                     Vertex* targetVertex);
+    std::vector<Coordinates> generatePathFromPreviousRegister(
+        std::map<Coordinates, Coordinates>& previousRegister,
+        Coordinates itemToLookupPath,
+        PathDirection pathDirection = PathDirection::FromStartingToTarget,
+        PathCoordinateSystem pathCoordinateSystem = PathCoordinateSystem::Relative);
 
     bool doesVectorHasElement(std::vector<Vertex*> vector, Vertex* element);
     void onTileChange(TileChangeEvent* event) override;

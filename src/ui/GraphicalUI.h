@@ -6,26 +6,22 @@
 #include <QPainter>
 #include <QTextEdit>
 #include "AbstractUI.h"
-#include "EventBus.h"
 #include "Level.h"
 #include "List.tpp"
 #include "MainWindow.h"
 #include "QGraphMatrix.h"
 #include "QTile.h"
 #include "QTypeWriter.h"
-#include "Utilities.h"
 class DungeonCrawler;
-class GraphicalUI : public QObject,
-                    public AbstractUI,
-                    public AbstractController,
-                    public EventListener
+class GraphicalUI : public QObject, public AbstractUI, public EventListener
 {
     Q_OBJECT
 public:
     enum VisualizationMode { FullVisualization, FullVisualizationWithoutText, OnlyFinalPath, None };
 
 private:
-    bool m_isVisualizeModeOn=true;
+    inline static std::pair<int, int> LAST_TILE_CLICKED_CORDS = {-1, -1};
+    bool m_isVisualizeModeOn = true;
     QDialog* startScreen;
     MainWindow* m_mainWindow = nullptr;
     int currentWindow{0};
@@ -33,10 +29,9 @@ private:
 
     CharacterItem* m_human;
 
-    DungeonCrawler* dc;
     std::pair<int, int> lastMove;
-    std::vector<QWidget *> m_healthBars;
-    std::map<std::pair<int,int>, QTile*> m_Qtiles;
+    std::vector<QWidget*> m_healthBars;
+    std::map<Coordinates, QTile*> m_Qtiles;
     QOverlay* m_overlayWidget = nullptr;
     QGraphMatrix* m_graphMatrix = nullptr;
     QTypeWriter* m_algorithmStepExplainerField = nullptr;
@@ -58,8 +53,10 @@ public slots:
     void moveCharacter(TileItem* toWhichTile);
 signals:
     void gameStarted();
+    void humanMoveRequested();
 
 public:
+    static std::pair<int, int> GetLastTileClickedCords();
     void setVisualizationMode(VisualizationMode mode);
     GraphicalUI();
     QDialog *getStartScreen();
@@ -67,7 +64,7 @@ public:
     void draw(Level *) override;
     void quitVisualizationLoop();
     QWidget* generateHealthBar(int percentage, QWidget *parent);
-    std::pair<int, int> move() override;
+    std::pair<int, int> move();
     void move(std::pair<int, int> xymove);
     std::pair<int, int> translateMove(int step) override;
     void start();

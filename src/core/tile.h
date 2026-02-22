@@ -3,21 +3,22 @@
 //
 #ifndef PRAK_TILE_H
 #define PRAK_TILE_H
-#include "Character.h"
-#include "PassiveAktive.h"
-#include "EventBus.h"
 #include <QtCore/qdebug.h>
+#include "Character.h"
+#include "EventBus.h"
+#include "PassiveAktive.h"
 #include <nlohmann/json.hpp>
 using json = nlohmann::json;
 class Door;
 class Tile
 {
+public:
 protected:
     char m_texture;
-    Character *character{nullptr}; // Character on top of the tile, or nullptr if none.
+    Coordinates m_coordinates;
+
+    Character* character{nullptr}; // Character on top of the tile, or nullptr if none.
     std::string m_texturePath;
-    int m_row{};
-    int m_column{};
     bool m_shouldMove{false}; // Should the player be moved to another tile (true if tile is portal)
     int m_djikstraExtraCost = 0; //
     inline static int AllowedDjikstraValueChanges = 0;
@@ -33,7 +34,7 @@ public:
     void setCharacter(Character *characterToPlace);
     int getRow() const;
     int getColumn() const;
-    std::pair<int,int> getCordsAsPair() const;
+    Coordinates getCoordinates() const;
     virtual bool onLeave(Tile *desTile);
     virtual std::pair<bool, Tile *> onEnter();
     void setTexturePath(std::string texturePath);

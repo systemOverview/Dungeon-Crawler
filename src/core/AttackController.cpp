@@ -9,10 +9,10 @@ AttackController::AttackController(Level *level, LevelGraph *graph): m_level{lev
 
 std::pair<int, int> AttackController::DjikstraMove()
 {
-    std::pair<int,int> move = {0,0};
+    Coordinates move = {0, 0};
     if (!isPath){
-        std::pair<int,int> attackerCords = m_character->getTile()->getCordsAsPair();
-        std::pair<int,int> humanCords = m_level->getPlayableCharacter()->getTile()->getCordsAsPair();
+        Coordinates attackerCords = m_character->getTile()->getCoordinates();
+        Coordinates humanCords = m_level->getPlayableCharacter()->getTile()->getCoordinates();
         Vertex* attackerVertex = m_graph->getVertex(attackerCords);
         Vertex* humanVertex = m_graph->getVertex(humanCords);
         m_path= m_graph->getShortestsPathBetweenTwoTiles(attackerVertex, humanVertex);
@@ -22,7 +22,6 @@ std::pair<int, int> AttackController::DjikstraMove()
         it = m_path.begin();
         move = *it;
         it++;
-        qDebug() << m_path;
 
     }
     else{
@@ -35,7 +34,7 @@ std::pair<int, int> AttackController::DjikstraMove()
         }
     }
     // return {0,0};
-    return move;
+    return std::pair{move.row, move.column};
 }
 
 

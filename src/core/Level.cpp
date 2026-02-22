@@ -3,9 +3,9 @@
 //
 
 #include "Level.h"
-#include "GuardController.h"
-#include "StationaryController.h"
 #include "AttackController.h"
+#include "DungeonCrawler.h"
+#include "StationaryController.h"
 #include <qDebug>
 
 void Level::addCharacter(Character* character)
@@ -26,7 +26,8 @@ Level::Level(std::string gameString) {
 
         if (gameString[i] == 'P' || gameString[i] == 'S' || gameString[i] == 'G'
             || gameString[i] == 'A') {
-            Character* character = Character::GenerateCharacter(gameString[i], -1, tile, this);
+            Character* character = Character::GenerateCharacter(gameString[i], tile, this);
+            DungeonCrawler::ProcessNewCharacter(character);
             tile->setCharacter(character);
         }
     }
@@ -59,8 +60,7 @@ Level::Level(int height, int width, std::string gameString, bool isActive) :
                 addCharacter(HumanCharacter);
                 continue;
             }
-            qDebug() << gameString[i] << tile->getCordsAsPair();
-            Character* character = Character::GenerateCharacter(gameString[i], -1, tile, this, m_graph);
+            Character* character = Character::GenerateCharacter(gameString[i], tile, this, m_graph);
             addCharacter(character);
     }
 
@@ -113,8 +113,7 @@ Level::Level(json levelJson)
                 addCharacter(HumanCharacter);
                 continue;
             }
-            qDebug() << texture << tile->getCordsAsPair();
-            Character* character = Character::GenerateCharacter(texture, HP, tile, this, m_graph);
+            Character* character = Character::GenerateCharacter(texture, tile, this, m_graph);
             addCharacter(character);
     }
 

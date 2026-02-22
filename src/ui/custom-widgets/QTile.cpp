@@ -11,24 +11,22 @@
 // mean that there is a flaw somewhere and even by catching it as an exception there is nothing to do about it, so an assertion
 // made more sense.
 QTile::QTile(QWidget* parent, Tile* tile, QGridLayout* gameBoard) : QWidget(parent), m_tile{tile}, m_gameBoard(gameBoard){
-    assert(QTilesRegister.count(tile->getCordsAsPair())==0 && "QTile being constructed already exists.");
+    assert(QTilesRegister.count(tile->getCoordinates())==0 && "QTile being constructed already exists.");
     EventBus::subscribeToEvent<EventBus::TileChange>(this, tile);
     setMinimumSize(50, 50);
     m_texturePath = QString::fromStdString(m_tile->getTexturePath());
     if (tile->hasCharacter()) {
         setQCharacter( new QCharacter(tile->getCharacter()));
     }
-    QTilesRegister[tile->getCordsAsPair()] = this;
+    QTilesRegister[tile->getCoordinates()] = this;
     if (m_tile->getDjikstraExtraCost()>0){
         markAsVisited();
     }
 }
 
-QTile *QTile::getQTileByCords(std::pair<int, int> cords)
-{
+QTile* QTile::getQTileByCords(Coordinates cords) {
     assert(QTilesRegister.count(cords)!=0 && "QTile being fetched does not exist.");
     return (QTilesRegister[cords]);
-
 }
 
 QCharacter *QTile::getQCharacter()
@@ -50,7 +48,7 @@ void QTile::setQCharacter(QCharacter* QChar)
 }
 void QTile::onTileChange(TileChangeEvent* event)
 {
-    assert("QTile subscribed to wrong tile"&&event->getChangedTile()->getCordsAsPair()==m_tile->getCordsAsPair());
+    assert("QTile subscribed to wrong tile"&&event->getChangedTile()->getCoordinates()==m_tile->getCoordinates());
     switch (event->getChangeType()){
     case TileChangeEvent::TextureChange :{m_texturePath = QString::fromStdString(m_tile->getTexturePath());repaint();break;}
     case TileChangeEvent::DoorStatus : {break;} // QTile doesn't care about the door status, only its texture which is always reset when the door status changes, guaranteeing a TextureChange Event being transmitted.

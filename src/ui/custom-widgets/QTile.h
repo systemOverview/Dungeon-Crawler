@@ -11,7 +11,7 @@ class QTile : public QWidget, public EventListener
     Q_OBJECT
 private:
     inline static int counter = 0;
-    inline static std::map<std::pair<int,int>, QTile*> QTilesRegister = {};
+    inline static std::map<Coordinates, QTile*> QTilesRegister = {};
     Tile* m_tile; // The tile it represents, QTile is a view, and m_tile is the model.
     QString m_texturePath;
     QCharacter* m_QCharacter; // The character on that tile.
@@ -20,7 +20,7 @@ private:
     QGraphicsColorizeEffect* m_appliedEffect;
 public:
     QTile(QWidget* parent, Tile* tile, QGridLayout* gameBoard);
-    static QTile* getQTileByCords(std::pair<int,int> cords);
+    static QTile* getQTileByCords(Coordinates cords);
     QCharacter* getQCharacter();
     void setQCharacter(QCharacter* QChar);
     std::pair<QRect, QRect> getRects();

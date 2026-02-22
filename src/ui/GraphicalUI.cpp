@@ -28,7 +28,10 @@ GraphicalUI::GraphicalUI() {
     m_human = m_mainWindow->getHumanCharachter();
     m_human->setZValue(100);
     setupStateMachine();
-    connect(m_mainWindow, &MainWindow::gameStarted, this, &GraphicalUI::gameStarted);
+    connect(m_mainWindow,
+            &MainWindow::gameStarted,
+            this,
+            &GraphicalUI::gameStarted); // both are signals, routes game started from Main Window to Dungeon Crawler
     setupShortcuts();
 }
 
@@ -39,7 +42,7 @@ void GraphicalUI::createLevelUI(const std::vector<std::vector<Tile*>>& tiles) {
             TileItem* tileUI = m_mainWindow->addTileToScene(tile->getRow(),
                                                             tile->getColumn(),
                                                             tile->getTexture());
-            connect(tileUI, &TileItem::tilePressed, this, &GraphicalUI::moveCharacter);
+            connect(tileUI, &TileItem::tilePressed, this, &GraphicalUI::humanMoveRequested);
             m_graphicalTiles.push_back(tileUI);
 
             if (tile->hasCharacter()) {
@@ -64,6 +67,8 @@ void GraphicalUI::moveCharacter(TileItem* toWhichTile) {
     m_human->setState(CharacterItem::State::Walk, calculateMove(m_human->pos(), toWhichTile->pos()));
     m_human->setTile(toWhichTile);
 }
+
+std::pair<int, int> GraphicalUI::GetLastTileClickedCords() { return LAST_TILE_CLICKED_CORDS; }
 
 void GraphicalUI::setVisualizationMode(VisualizationMode mode) { m_visualizationMode = mode; }
 
@@ -139,7 +144,11 @@ void GraphicalUI::onDjikstraSearch(DjikstraSearchEvent *event)
             LevelGraph graph;
             if (loop.getExtractedTileCords()==event->getTargetTileCords()){
                 auto previousRegister = loop.getPreviousRegister();
-                std::vector<std::pair<int,int>> path = {graph.generatePathFromPreviousRegister(previousRegister, loop.getExtractedTileCords(), LevelGraph::PathDirection::FromStartingToTarget, LevelGraph::PathCoordinateSystem::Absolute)};
+                std::vector<Coordinates> path = {graph.generatePathFromPreviousRegister(
+                    previousRegister,
+                    loop.getExtractedTileCords(),
+                    LevelGraph::PathDirection::FromStartingToTarget,
+                    LevelGraph::PathCoordinateSystem::Absolute)};
                 m_overlayWidget->addArrowPathBetweenMultipleTiles(path, true);
             }
         }
@@ -182,9 +191,9 @@ void GraphicalUI::DjikstaInitialSetup(DjikstraSearchEvent* event)
     m_algorithmStepExplainerField->setText("");
 
      if (m_visualizationMode==FullVisualization) m_algorithmStepExplainerField->setText(QString::fromStdString(DjikstraStrings::InitialSetup.at(DjikstraStrings::SetStartingToZero)));
-    std::pair<int,int> startingTileCords = event->getStartingTileCords();
-    m_graphMatrix->setElementText(startingTileCords, {"0"});
-    m_graphMatrix->setElementState(startingTileCords, QGraphMatrix::DjikstraState::Calculated);
+     Coordinates startingTileCords = event->getStartingTileCords();
+     m_graphMatrix->setElementText(startingTileCords, {"0"});
+     m_graphMatrix->setElementState(startingTileCords, QGraphMatrix::DjikstraState::Calculated);
      if (m_visualizationMode==FullVisualization) m_algorithmStepExplainerField->setText(QString::fromStdString(DjikstraStrings::InitialSetup.at(DjikstraStrings::CreateQueue)));
 
 }
@@ -194,7 +203,11 @@ void GraphicalUI::DjikstraVisualizeLoop(DjikstraSearchEvent* event, DjikstraSear
     LevelGraph graph;
     auto previousRegister = loop.getPreviousRegister();
     m_graphMatrix->setElementState(loop.getExtractedTileCords(), QGraphMatrix::DjikstraState::Calculated);
-    std::vector<std::pair<int,int>> path = {graph.generatePathFromPreviousRegister(previousRegister, loop.getExtractedTileCords(), LevelGraph::PathDirection::FromStartingToTarget, LevelGraph::PathCoordinateSystem::Absolute)};
+    std::vector<Coordinates> path = {
+              graph.generatePathFromPreviousRegister(previousRegister,
+                                                     loop.getExtractedTileCords(),
+                                                     LevelGraph::PathDirection::FromStartingToTarget,
+                                                     LevelGraph::PathCoordinateSystem::Absolute)};
     m_overlayWidget->addArrowPathBetweenMultipleTiles(path);
     Utilities::QtSleepMilliSeconds(100);
     if (loopId==0){
@@ -265,7 +278,7 @@ void GraphicalUI::move(std::pair<int, int> xymove)
 {
     m_mainWindow->findChild<QGraphMatrix*>("tileMatrixContainer")->resetMatrix();
     lastMove = xymove;
-    dc->move();
+    // dc->move();
 }
 
 std::pair<int, int> GraphicalUI::translateMove(int step)

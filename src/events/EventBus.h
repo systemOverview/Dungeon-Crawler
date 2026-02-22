@@ -50,8 +50,12 @@ public:
         DjikstraSearchEvent::notifyListeners(event);
     }
 
-    template <Type eventType>
-    static typename std::enable_if<eventType==Type::DjikstraSearch, void>::type transmitEvent(std::vector<DjikstraSearchEvent::Loop> loops, std::vector<std::pair<int,int>> startingSearchRange, std::pair<int,int> startingTileCords, std::pair<int,int> targetTileCords) {
+    template<Type eventType>
+    static typename std::enable_if<eventType == Type::DjikstraSearch, void>::type transmitEvent(
+        std::vector<DjikstraSearchEvent::Loop> loops,
+        std::vector<Coordinates> startingSearchRange,
+        Coordinates startingTileCords,
+        Coordinates targetTileCords) {
         DjikstraSearchEvent::notifyListeners(new DjikstraSearchEvent(loops, startingSearchRange,startingTileCords,targetTileCords));
     }
 

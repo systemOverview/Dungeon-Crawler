@@ -5,8 +5,11 @@
 #include "tile.h"
 #include <QtCore/qdebug.h>
 
-Tile::Tile(int row, int col, char texture, std::string texturePath, int djikstraExtraCost) :
-    m_row{row}, m_column{col}, m_texture{texture},  m_texturePath{texturePath}, m_djikstraExtraCost{djikstraExtraCost}{}
+Tile::Tile(int row, int col, char texture, std::string texturePath, int djikstraExtraCost)
+    : m_coordinates{row, col}
+    , m_texture{texture}
+    , m_texturePath{texturePath}
+    , m_djikstraExtraCost{djikstraExtraCost} {}
 
 Tile::~Tile() = default;
 
@@ -56,21 +59,11 @@ void Tile::setCharacter(Character *characterToPlace)
     EventBus::transmitEvent<EventBus::TileChange>(this, TileChangeEvent::Character);
 }
 
-int Tile::getRow() const
-{
-    return m_row;
-}
+int Tile::getRow() const { return m_coordinates.row; }
 
-int Tile::getColumn() const
-{
-    return m_column;
-}
+int Tile::getColumn() const { return m_coordinates.column; }
 
-std::pair<int, int> Tile::getCordsAsPair() const
-{
-    return {m_row, m_column};
-}
-
+Coordinates Tile::getCoordinates() const { return m_coordinates; }
 
 bool Tile::onLeave(Tile *desTile)
 {
@@ -184,11 +177,6 @@ bool Tile::setDjikstraExtraCost(int cost)
     }
     return false;
 }
-
-// Tile *Tile::generateTileFromJSONState(TileState &tile)
-// {
-//     return Tile::GenerateTile(tile.texture, tile.row, tile.col);
-// }
 
 void to_json(json &jsonObject, const Tile* tileObject){
     jsonObject = json {

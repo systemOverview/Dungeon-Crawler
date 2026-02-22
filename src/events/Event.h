@@ -1,9 +1,11 @@
+// new type checklist: add onEvent to EventListener, define notifyListener to use notifyListenersAccordingToRegister if you have a pref register
+
 #ifndef EVENT_H
 #define EVENT_H
 #include <QtCore/qdebug.h>
 #include <QtCore/qlogging.h>
+#include "Constants.h"
 #include <map>
-// new type checklist: add onEvent to EventListener, define notifyListener to use notifyListenersAccordingToRegister if you have a pref register
 class Tile;
 class Character;
 class QCharacter;
@@ -228,47 +230,55 @@ public:
     struct Loop{
         struct Neighbour{
         private:
-            std::pair<int,int> m_cords;
+            Coordinates m_cords;
             float m_djikstraValue;
             bool m_wasDjikstraValueUpdated;
         public :
-            Neighbour(std::pair<int,int> cords, float djikstraValue, bool wasDjikstraValueUpdated);
-            std::pair<int,int>  getCords();
+            Neighbour(Coordinates cords, float djikstraValue, bool wasDjikstraValueUpdated);
+            Coordinates getCords();
             float getDjikstraValue();
             bool wasDjikstraValueUpdated();
 
         };
     private:
-        std::pair<int,int> m_extractedTileCords = {}; // The (strictly one) tile that was extracted from the queue
+        Coordinates m_extractedTileCords
+            = {}; // The (strictly one) tile that was extracted from the queue
         //ie the one with the shortest djikstra value in the queue.
 
         std::vector<Neighbour> m_neighbourTiles = {};
-        std::map<std::pair<int,int>, std::pair<int,int>> m_previousRegister= {}; // stores the previous register state at loop end.
+        std::map<Coordinates, Coordinates> m_previousRegister
+            = {}; // stores the previous register state at loop end.
     public:
-        Loop(std::pair<int,int> extractedTileCords = {}, std::vector<Neighbour> = {});;
-        void setExtractedTile(std::pair<int,int> extractedTileCords);
+        Loop(Coordinates extractedTileCords = {}, std::vector<Neighbour> = {});
+        ;
+        void setExtractedTile(Coordinates extractedTileCords);
         void addNeighbourTile(Neighbour neighbour);
-        void setPreviousRegisterAtLoopEnd(std::map<std::pair<int,int>, std::pair<int,int>> reg);
+        void setPreviousRegisterAtLoopEnd(std::map<Coordinates, Coordinates> reg);
 
-        std::pair<int, int> getExtractedTileCords() const;
+        Coordinates getExtractedTileCords() const;
         std::vector<Neighbour> getNeighbourTiles() const;
-        std::map<std::pair<int,int>, std::pair<int,int>> getPreviousRegister();
+        std::map<Coordinates, Coordinates> getPreviousRegister();
     };
 
 
 
 private:
     std::vector<Loop> m_loops;
-    std::vector<std::pair<int,int>> m_startingSearchRange = {}; //the cords of tiles that were added to the queue of Djikstra at the start. So the GUI can animate setting up the matrix for example.
-    std::pair<int,int> m_startingTileCords;
-    std::pair<int,int> m_targetTileCords;
-public:
-    DjikstraSearchEvent(std::vector<Loop> loops, std::vector<std::pair<int,int>> startingSearchRange, std::pair<int,int> startingTileCords, std::pair<int,int> targetTileCords);
+    std::vector<Coordinates> m_startingSearchRange
+        = {}; //the cords of tiles that were added to the queue of Djikstra at the start. So the GUI can animate setting up the matrix for example.
+    Coordinates m_startingTileCords;
+    Coordinates m_targetTileCords;
 
-    std::vector<std::pair<int,int>> getStartingSearchRange() const;
+public:
+    DjikstraSearchEvent(std::vector<Loop> loops,
+                        std::vector<Coordinates> startingSearchRange,
+                        Coordinates startingTileCords,
+                        Coordinates targetTileCords);
+
+    std::vector<Coordinates> getStartingSearchRange() const;
     std::vector<Loop> getLoops() const;
-    std::pair<int,int> getStartingTileCords() const;
-    std::pair<int,int> getTargetTileCords() const;
+    Coordinates getStartingTileCords() const;
+    Coordinates getTargetTileCords() const;
     static void notifyListeners(DjikstraSearchEvent* event);
     using Event::registerListener;
 };

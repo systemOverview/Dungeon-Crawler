@@ -7,13 +7,19 @@
 #include "QCharacter.h"
 #include <qDebug>
 
-Character* Character::GenerateCharacter(char texture, int hitPoints,  Tile* tile, Level* level , LevelGraph* levelGraph)
-{
-    switch (texture){
-    case 'P' : return new Character(texture, 20, 20, tile, hitPoints);
-    case 'S' : return new Zombie(texture, tile, hitPoints);
-    case 'G' : return new Zombie(texture,tile, hitPoints);
-    case 'A' : return new Attacker(texture,  level, levelGraph,tile, hitPoints);
+Character* Character::GenerateCharacter(char texture,
+                                        Tile* tile,
+                                        Level* level,
+                                        LevelGraph* levelGraph) {
+    switch (texture) {
+    case 'P':
+        return new Human(texture, tile);
+    case 'S':
+        return new Zombie(texture, tile);
+    case 'G':
+        return new Zombie(texture, tile);
+    case 'A':
+        return new Attacker(texture, level, levelGraph, tile);
     default : throw std::logic_error("Character type not handled at Character factory.");
     }
 }
@@ -53,38 +59,28 @@ void Character::setTile(Tile *newTile)
     currentTile = newTile;
 }
 
-std::pair<int, int> Character::move()
-{
-    return m_controller->move();
-}
+bool Character::moveToTile(Tile* tile) { return true; }
 
-int Character::getMaxHP() const
-{
-    return (20 + m_stamina * 5);
-}
+std::pair<int, int> Character::move() { return m_controller->move(); }
 
-int Character::getCurrentHP() const
-{
-    return m_hitPoints;
-}
+int Character::getMaxHP() const { return m_attributes.stamina; }
 
-int Character::getStrength() const {return m_strength;}
+int Character::getCurrentHP() const { return m_healthPoints; }
 
-bool Character::isAlive() const
-{
-    return m_hitPoints > 0;
-}
+int Character::getStrength() const { return m_attributes.strength; }
+
+bool Character::isAlive() const { return m_healthPoints > 0; }
 
 void Character::decrementFromHP(int amountToDecrement)
 {
-    m_hitPoints -= amountToDecrement;
+    m_healthPoints -= amountToDecrement;
     EventBus::transmitEvent<EventBus::CharacterHealthChange>(this);
 
 }
 
 void Character::attackPlayer(Character *characterToAttack)
 {
-    characterToAttack->decrementFromHP(m_strength);
+    characterToAttack->decrementFromHP(m_attributes.strength);
     qDebug() << characterToAttack->getTexture() << " was hit and his new HP is "
              << characterToAttack->getCurrentHP();
 }
@@ -100,7 +96,7 @@ QCharacter* Character::getQChatacter()
 
 Character::~Character()
 {
-
+    delete m_controller;
     // EventBus::transmitEvent<EventBus::CharacterHealthChange>(this);
 }
 

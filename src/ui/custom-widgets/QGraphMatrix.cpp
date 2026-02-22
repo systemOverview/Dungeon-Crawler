@@ -1,9 +1,10 @@
 #include "QGraphMatrix.h"
+#include <QThread>
 #include <QtGui/qpainter.h>
 #include <QtWidgets/qapplication.h>
 #include <QtWidgets/qgridlayout.h>
 #include <QtWidgets/qlabel.h>
-#include <QThread>
+#include "Constants.h"
 #include "Utilities.h"
 
 QGraphMatrix::QGraphMatrix(QWidget* parent)
@@ -38,14 +39,15 @@ QGraphMatrix::QGraphMatrix(QWidget* parent)
     assert(m_elementsRegister.size()==100 && "Elements register does not map 10*10 matrix.");
 }
 
-void QGraphMatrix::initializeMatrix(std::vector<std::pair<int, int> > reachableTilesCords, std::string textForReachable, int milliSecsWaitBetweenElements)
-{
+void QGraphMatrix::initializeMatrix(std::vector<Coordinates> reachableTilesCords,
+                                    std::string textForReachable,
+                                    int milliSecsWaitBetweenElements) {
     assert(m_elementsRegister.size()==100 && "Elements register does not map 10*10 matrix.");
     assert(this->layout()!=nullptr && "QGraphMatrix does not have a layout.");
     for (int i = 0; i<10; i++){
         for (int j=0; j<10; j++){
-            std::pair<int,int> cords = {i,j};
-            QGraphMatrixElement* element = m_elementsRegister[{cords.first, cords.second}];
+            Coordinates cords = {i, j};
+            QGraphMatrixElement* element = m_elementsRegister[{cords.row, cords.column}];
             assert(element!=nullptr && "widget in matrix is nullptr");
             if(std::find(reachableTilesCords.begin(), reachableTilesCords.end(),cords ) != reachableTilesCords.end()) {
                 element->setText(QString::fromStdString(textForReachable));
@@ -61,30 +63,24 @@ void QGraphMatrix::initializeMatrix(std::vector<std::pair<int, int> > reachableT
     }
     for (auto cord : reachableTilesCords){
     }
-
 }
 
-void QGraphMatrix::setElementText(std::pair<int, int> elementCords, std::string text)
-{
+void QGraphMatrix::setElementText(Coordinates elementCords, std::string text) {
     assert(m_elementsRegister.count(elementCords)>0 && "QGraphMatrixElement is out of range.");
     QGraphMatrixElement* element = m_elementsRegister.at(elementCords);
     assert( element!=nullptr && "QGraphMatrixElement is nullptr.");
     element->setText(QString::fromStdString(text));
-
-
 }
 
-void QGraphMatrix::setElementState(std::pair<int, int> elementCords, DjikstraState djikstraState)
-{
+void QGraphMatrix::setElementState(Coordinates elementCords, DjikstraState djikstraState) {
     assert(m_elementsRegister.count(elementCords)>0 && "QGraphMatrixElement is out of range.");
     QGraphMatrixElement* element = m_elementsRegister.at(elementCords);
     assert( element!=nullptr && "QGraphMatrixElement is nullptr.");
     element->setDjikstraState(djikstraState);
-
 }
 
-void QGraphMatrix::visualizeElement(std::pair<int, int> elementCords, int visualizationDurationsMilliseconds)
-{
+void QGraphMatrix::visualizeElement(Coordinates elementCords,
+                                    int visualizationDurationsMilliseconds) {
     assert(m_elementsRegister.count(elementCords)>0 && "QGraphMatrixElement is out of range.");
     QGraphMatrixElement* element = m_elementsRegister.at(elementCords);
     assert( element!=nullptr && "QGraphMatrixElement is nullptr.");
@@ -93,10 +89,8 @@ void QGraphMatrix::visualizeElement(std::pair<int, int> elementCords, int visual
     element->UNvisualizeElement();
 }
 
-void QGraphMatrix::setMultipleElementsState(std::vector<std::pair<int, int> > labelsCords, DjikstraState djikstraState)
-{
-
-}
+void QGraphMatrix::setMultipleElementsState(std::vector<Coordinates> labelsCords,
+                                            DjikstraState djikstraState) {}
 
 void QGraphMatrix::setTextlessElementsStatusToBlocked()
 {
