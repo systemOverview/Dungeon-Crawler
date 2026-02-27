@@ -23,21 +23,21 @@ class CharacterTile_UI_PlacementMediator
 private:
     struct CharacterPosition
     {
-        TileItem* whichTile = nullptr;
+        Coordinates CoordinatesOfTile = {0, 0};
         Coordinates positionInsideTile = {0, 0};
         operator QString() const;
     };
     inline static std::map<CharacterItem*, CharacterPosition> CHARACTERS_POSITIONS;
     inline static constexpr int CELLS_PER_AXIS = 6;
 
-    static std::pair<Coordinates, Coordinates> CalculateMove(const Coordinates& tileCoordinates,
-                                                             const Coordinates& innerCoordinates,
-                                                             const Coordinates& xyAdvance,
-                                                             int tilePastEndIndex,
-                                                             int innerPastEndIndex);
+    static CharacterPosition CalculateMove(const Coordinates& tileCoordinates,
+                                           const Coordinates& innerCoordinates,
+                                           const Coordinates& xyAdvance,
+                                           int tilePastEndIndex,
+                                           int innerPastEndIndex);
 
 public:
-    static void PlaceCharacterOnTile(CharacterItem* character, TileItem* tile);
+    static void PlaceCharacterOnTile(CharacterItem* character, Coordinates coordinatesOfTile);
     static void AdvanceCharacter(CharacterItem* character, Coordinates xyAdvance);
 
     static QPointF GetCharacterPosition(CharacterItem* character);

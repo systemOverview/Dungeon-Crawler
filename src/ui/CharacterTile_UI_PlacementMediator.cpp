@@ -5,16 +5,16 @@
 #include "Utilities.h"
 
 void CharacterTile_UI_PlacementMediator::PlaceCharacterOnTile(CharacterItem* character,
-                                                              TileItem* tile) {
-    CHARACTERS_POSITIONS.insert_or_assign(character, CharacterPosition{tile, Coordinates{0, 0}});
-    character->fixMyPosition();
+                                                              Coordinates coordinatesOfTile) {
+    CHARACTERS_POSITIONS.insert_or_assign(character,
+                                          CharacterPosition{coordinatesOfTile, Coordinates{0, 0}});
 }
-std::pair<Coordinates, Coordinates> CharacterTile_UI_PlacementMediator::CalculateMove(
-    const Coordinates& tileCoordinates,
-    const Coordinates& innerCoordinates,
-    const Coordinates& xyAdvance,
-    int tilePastEndIndex,
-    int innerPastEndIndex) {
+CharacterTile_UI_PlacementMediator::CharacterPosition
+CharacterTile_UI_PlacementMediator::CalculateMove(const Coordinates& tileCoordinates,
+                                                  const Coordinates& innerCoordinates,
+                                                  const Coordinates& xyAdvance,
+                                                  int tilePastEndIndex,
+                                                  int innerPastEndIndex) {
     Coordinates newTileCoordinates = tileCoordinates;
     Coordinates newInnerCoordinates = innerCoordinates + xyAdvance;
 
@@ -42,29 +42,27 @@ std::pair<Coordinates, Coordinates> CharacterTile_UI_PlacementMediator::Calculat
         newTileCoordinates.column = Utilities::positiveModulo(newTileCoordinates.column - 1,
                                                               tilePastEndIndex);
     }
-    return std::pair<Coordinates, Coordinates>(newTileCoordinates, newInnerCoordinates);
+    return {newTileCoordinates, newInnerCoordinates};
 }
 void CharacterTile_UI_PlacementMediator::AdvanceCharacter(CharacterItem* character,
                                                           Coordinates xyAdvance) {
     CharacterPosition currentPosition = CHARACTERS_POSITIONS.at(character);
-    std::pair<Coordinates, Coordinates> res
-        = CalculateMove(currentPosition.whichTile->getCoordinates(),
-                        currentPosition.positionInsideTile,
-                        xyAdvance,
-                        GameSettings::TILES_PER_SIDE,
-                        CELLS_PER_AXIS);
+    CharacterPosition newPosition = CalculateMove(currentPosition.CoordinatesOfTile,
+                                                  currentPosition.positionInsideTile,
+                                                  xyAdvance,
+                                                  GameSettings::TILES_PER_SIDE,
+                                                  CELLS_PER_AXIS);
 
-    currentPosition.whichTile = GraphicalUI::GetGraphicalTile(res.first);
-    currentPosition.positionInsideTile = res.second;
-
-    CHARACTERS_POSITIONS.insert_or_assign(character, currentPosition);
+    CHARACTERS_POSITIONS.insert_or_assign(character, newPosition);
 
     character->fixMyPosition();
 }
 
 QPointF CharacterTile_UI_PlacementMediator::GetCharacterPosition(CharacterItem* character) {
     CharacterPosition currentRelativePosition = CHARACTERS_POSITIONS.at(character);
-    auto [tile, positionWithinTile] = currentRelativePosition;
+    auto [CoordinatesOfTile, positionWithinTile] = currentRelativePosition;
+
+    TileItem* tile = GraphicalUI::GetGraphicalTile(CoordinatesOfTile);
 
     float CellWidth = (tile->boundingRect().width() / CELLS_PER_AXIS);
 
@@ -77,7 +75,6 @@ QPointF CharacterTile_UI_PlacementMediator::GetCharacterPosition(CharacterItem* 
 
 CharacterTile_UI_PlacementMediator::CharacterPosition::operator QString() const {
     QString info;
-    info += " is at " + whichTile->getCoordinates() + " with inner coordinates of "
-            + positionInsideTile;
+    info += " is at " + CoordinatesOfTile + " with inner coordinates of " + positionInsideTile;
     return info;
 }
