@@ -22,12 +22,11 @@ Level::Level(std::string gameString) {
         int row = i / 10;
         int column = i % 10;
         Tile* tile = Tile::GenerateTile(gameString[i], row, column);
-        (tiles)[row][column] = tile;
+        (TILES)[row][column] = tile;
 
         if (gameString[i] == 'P' || gameString[i] == 'S' || gameString[i] == 'G'
             || gameString[i] == 'A') {
             Character* character = Character::GenerateCharacter(gameString[i], tile, this);
-            DungeonCrawler::ProcessNewCharacter(character);
             tile->setCharacter(character);
         }
     }
@@ -46,7 +45,7 @@ Level::Level(int height, int width, std::string gameString, bool isActive) :
         int column = i % 10;
 
         Tile* tile = Tile::GenerateTile(gameString[i], row, column);
-        (tiles)[row][column] = tile;
+        (TILES)[row][column] = tile;
         if (dynamic_cast<Door*>(tile)!=nullptr){
             doors.push_back(dynamic_cast<Door*>(tile));
         }
@@ -86,7 +85,7 @@ Level::Level(json levelJson)
         // std::cout << tileJson.at("row").get<int>() ;
         char texture = tileJson.at("texture").get<char>();
         Tile* tile = Tile::GenerateTile(texture, tileJson.at("row"), tileJson.at("column"), tileJson.at("Djikstra Extra Cost"));
-        (tiles)[tileJson.at("row")][tileJson.at("column")] = tile;
+        (TILES)[tileJson.at("row")][tileJson.at("column")] = tile;
 
         if (dynamic_cast<Door*>(tile)!=nullptr){
             doors.push_back(dynamic_cast<Door*>(tile));
@@ -104,10 +103,10 @@ Level::Level(json levelJson)
         int col = characterJson.at("column").get<int>();
         int HP = characterJson.at("HP").get<int>();
         std::cout <<"char"<<  texture;
-        Tile* tile = tiles[row][col];
-            if (texture=='P'){
-                m_initialHumanCharacterTile = tile;
-                if (HP!=-100){ // sentinel value, explained in jsonobjects.cpp
+        Tile* tile = TILES[row][col];
+        if (texture == 'P') {
+            m_initialHumanCharacterTile = tile;
+            if (HP != -100) { // sentinel value, explained in jsonobjects.cpp
                 HumanCharacter->decrementFromHP(HumanCharacter->getMaxHP() - HP);
                 }
                 addCharacter(HumanCharacter);
@@ -126,17 +125,16 @@ Level::Level(json levelJson)
     qDebug() << "generated";
 }
 
-
-
-
-
-Tile *Level::getTile(int row, int col)
-{
-    Tile *tileToReturn = tiles[row][col];
+Tile* Level::GetTile(int row, int col) {
+    Tile* tileToReturn = TILES[row][col];
     return tileToReturn;
 }
 
-const std::vector<std::vector<Tile*> > Level::getTiles() const { return tiles; }
+Tile* Level::GetTile(Coordinates coordinates) {
+    return GetTile(coordinates.row, coordinates.column);
+}
+
+const std::vector<std::vector<Tile*> > Level::getTiles() const { return TILES; }
 
 int Level::getHeight() const
 {
@@ -163,9 +161,9 @@ void Level::setDefaultTiles()
 {
     for (int i = 0; i < m_gameHeight; i++) {
         std::vector<Tile *> row;
-        tiles.push_back(row);
+        TILES.push_back(row);
         for (int j = 0; j < m_gameWidth; j++) {
-            tiles[i].push_back(nullptr);
+            TILES[i].push_back(nullptr);
         }
     }
 }
@@ -227,14 +225,14 @@ void Level::removeCharacter(Character *character)
 
 Level::~Level()
 {
-    for (std::vector<Tile*> row : tiles){
+    for (std::vector<Tile*> row : TILES) {
         for (Tile* tile : row){
             delete tile;
             tile = nullptr;
         }
         row.clear();
     }
-    tiles.clear();
+    TILES.clear();
     for (Character* NPC : nonPlayableCharacters){
         delete NPC;
         NPC = nullptr;
