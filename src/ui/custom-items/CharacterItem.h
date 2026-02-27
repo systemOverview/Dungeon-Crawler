@@ -6,11 +6,13 @@
 #include <QtCore/qobject.h>
 #include <QtCore/qsequentialanimationgroup.h>
 #include <QtStateMachine/qstatemachine.h>
+// #include "Constants.h"
 #include "GameItem.h"
 class Character;
 class CharacterAnimation;
 class TileItem;
 class SpriteManager;
+struct Coordinates;
 class CharacterItem : public GameItem
 {
     Q_OBJECT
@@ -24,12 +26,19 @@ public:
     enum class CharacterPart { Base, Head, Outfit, Weapon, PAST_END };
 
     Q_ENUM(CharacterPart);
+    Q_ENUM(CharacterType);
+
+    struct LastMove
+    {
+        TileItem* WasAt = nullptr;
+        TileItem* WentTo = nullptr;
+    };
 
 private:
     // The character only stores the current frame id (the same for every part)
     // and the user-chosen graphics option for each part. When painting, it requests the images for each part from the
     // sprite manager, which has a cache system in place to avoid re-generating images.
-
+    LastMove m_lastMove;
     CharacterItem::CharacterType m_characterType;
     int m_currentFrameId = 0;
 
@@ -42,7 +51,7 @@ private:
     QStateMachine* m_stateAnimationMachine = nullptr;
     QStateMachine* m_movingAnimationMachine = nullptr;
 
-    State m_state = CharacterItem::State::Looping;
+    State m_state = CharacterItem::State::Walk;
     bool m_animationLoopingStatus = false;
     void setDefaultParts();
     void setupMovingStateMachine();
@@ -54,10 +63,9 @@ private:
 public slots:
     void assignPart(CharacterItem::CharacterPart partType, int whichGraphicsOption);
     void setState(CharacterItem::State, QPointF newPosition = {0, 0});
+    void AnimateMove(Coordinates fromTileCoords, Coordinates ToTileCoords);
 
 signals:
-    void move();
-    void startMovingAnimation();
     void stateChanged(CharacterItem::State newState);
 
 public:
@@ -79,6 +87,8 @@ public:
                                  qreal progress);
     void advanceOnXAxis();
     CharacterItem::CharacterType getCharacterType() const;
+
+    operator QString() const;
 
 protected:
     void mousePressEvent(QGraphicsSceneMouseEvent* event) override;

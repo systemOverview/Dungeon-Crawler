@@ -77,15 +77,24 @@ void CharacterItem::paint(QPainter* painter,
 
     float characterHeight = SIDE_LENGTH * 80 / 100;
 
-    if (m_characterType == CharacterType::Human) {
-        QSize size = pixmap.size();
-        QString fileName = QString::number(size.width()) + "-" + QString::number(size.height());
-        Utilities::SaveToFile(pixmap, fileName);
-    }
-    pixmap = pixmap.scaledToHeight(characterHeight);
-    painter->drawPixmap(QRectF{0, SIDE_LENGTH - characterHeight, characterHeight, characterHeight},
+    // pixmap = pixmap.scaledToHeight(characterHeight);
+
+    painter->drawPixmap(QRectF{0,
+                               SIDE_LENGTH - characterHeight,
+                               boundingRect().width(),
+                               characterHeight},
                         pixmap,
                         pixmap.rect());
+
+    QPixmap healthBarBackground(GUIPaths::HealthBarBackground);
+    QPixmap healthBarInner(GUIPaths::HealthBarInner);
+
+    QPainter healthPainter(&healthBarBackground);
+    healthPainter.drawPixmap(healthBarBackground.rect(), healthBarInner);
+
+    painter->drawPixmap(QRectF(0, 0, boundingRect().width(), SIDE_LENGTH - characterHeight),
+                        healthBarBackground,
+                        healthBarBackground.rect());
 }
 
 int CharacterItem::getCurrentFrameID() const { return m_currentFrameId; }
@@ -96,14 +105,12 @@ void CharacterItem::setCurrentFrameID(int frameId) {
 }
 
 void CharacterItem::setState(State newState, QPointF newPosition) {
-    if (newState != State::Looping) {
-        setCustomSideLength(-1);    // stop having a custom side length
-        setZValue(1);
-        m_newPosition = pos() + newPosition;
-    }
-
     m_state = newState;
-    emit stateChanged(newState);
+    // emit stateChanged(newState);
+}
+
+void CharacterItem::AnimateMove(Coordinates fromTileCoords, Coordinates ToTileCoords) {
+    m_animation->animateMove(fromTileCoords, ToTileCoords);
 }
 
 void CharacterItem::setTile(TileItem* tile) { m_tile = tile; }
@@ -120,4 +127,11 @@ CharacterItem::State CharacterItem::getState() const { return m_state; }
 
 void CharacterItem::mousePressEvent(QGraphicsSceneMouseEvent* event) {
     QGraphicsItem::mousePressEvent(event);
+}
+
+CharacterItem::operator QString() const {
+    const auto types = QMetaEnum::fromType<CharacterType>();
+    QString type;
+    type = types.key(int(m_characterType));
+    return type;
 }
