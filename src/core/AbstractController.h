@@ -16,6 +16,7 @@ public slots:
 
 public:
     AbstractController(Character* controlledCharacter);
+    static AbstractController* CreateCharacterController(Character* character);
 };
 
 #endif // ABSTRACTCONTROLLER_H

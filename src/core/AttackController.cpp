@@ -2,11 +2,8 @@
 #include "LevelGraph.h"
 #include "Level.h"
 
-
-AttackController::AttackController(Character* controlledCharacter, Level* level, LevelGraph* graph)
-    : AbstractController(controlledCharacter)
-    , m_level{level}
-    , m_graph{graph} {}
+AttackController::AttackController(Character* controlledCharacter)
+    : AbstractController(controlledCharacter) {}
 
 void AttackController::moveCharacter() {
     Coordinates newCords

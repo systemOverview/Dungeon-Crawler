@@ -14,8 +14,7 @@ public slots:
     void moveCharacter() override;
 
 public:
-    AttackController(Character* controlledCharacter, Level* level, LevelGraph* graph);
-
+    AttackController(Character* controlledCharacter);
 };
 
 #endif // ATTACKCONTROLLER_H
