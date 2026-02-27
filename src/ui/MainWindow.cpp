@@ -37,7 +37,7 @@ void MainWindow::makeStartScreen() {
 
     mainLayout->addWidget(m_sidebar);
 
-    m_character = new CharacterItem(CharacterItem::CharacterType::Human);
+    m_character = new CharacterItem(Character::CharacterType::Human);
 
     createCharacterCustomizationOptions();
     m_sidebarToolBox->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
@@ -68,7 +68,7 @@ void MainWindow::createCharacterCustomizationOptions() {
 
         QButtonGroup* optionsButtonGroup = new QButtonGroup();
         std::vector<QPixmap> variants = SpriteManager::GetIdleFrameVariants(
-            CharacterItem::CharacterType::Human,
+            Character::CharacterType::Human,
             characterPart,
             SpriteManager::ImageProcessingMode::TrimTransparent);
         int counter = 0;
@@ -92,9 +92,7 @@ void MainWindow::createCharacterCustomizationOptions() {
             QLabel l;
             counter++;
         }
-        m_sidebarToolBox->addItem(options,
-                                  CharacterWearables::CustomizationButtonsTexts.at(
-                                      CharacterItem::CharacterPart(i)));
+        m_sidebarToolBox->addItem(options, "Choose");
     }
 }
 
@@ -103,18 +101,19 @@ qreal MainWindow::calculateTextureDimension() {
     return std::min(m_view->rect().width() / 10, m_view->rect().height() / 10);
 }
 
+std::map<CharacterItem::CharacterPart, int> MainWindow::getHumanPartsGraphics() const {
+    return m_humanPartsGraphics;
+}
+
 void MainWindow::characterCustomizationClicked(CharacterItem::CharacterPart characterPart,
                                                int whichOption) {
     m_character->assignPart(characterPart, whichOption);
 }
 
 void MainWindow::startGame() {
+    m_humanPartsGraphics = m_character->getPartsGraphicsOptions();
     centralWidget()->layout()->removeWidget(m_sidebarToolBox);
-    for (QGraphicsItem* item : m_scene->items()) {
-        if (item != m_character) {
-            m_scene->removeItem(item);
-        }
-    }
+    m_scene->clear();
     m_sidebarToolBox->hide();
     emit gameStarted();
     return;
@@ -126,22 +125,6 @@ MainWindow::MainWindow(QWidget* parent)
     QTimer::singleShot(10, [this]() { startGame(); });
     // startGame(); //TEST TODO , refactor this to work with the state machines
 }
-
-
-
-TileItem* MainWindow::addTileToScene(int row, int col, char textureID) {
-    TileItem* tile = new TileItem(row, col, textureID);
-    m_scene->addItem(tile);
-    connect(this, &MainWindow::dimensionsChanged, tile, &GameItem::resize);
-    return tile;
-}
-
-void MainWindow::addCharacterToScene(CharacterItem* character) const {
-    connect(this, &MainWindow::dimensionsChanged, character, &GameItem::resize);
-    m_scene->addItem(character);
-}
-
-CharacterItem* MainWindow::getHumanCharachter() const { return m_character; }
 
 bool MainWindow::eventFilter(QObject* obj, QEvent* event) {
     if (event->type() == QEvent::Resize) {
@@ -157,3 +140,8 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* event) {
 }
 
 MainWindow::~MainWindow() {}
+
+void MainWindow::addGameItemToScene(GameItem* gameItem) const {
+    connect(this, &MainWindow::dimensionsChanged, gameItem, &GameItem::resize);
+    m_scene->addItem(gameItem);
+}

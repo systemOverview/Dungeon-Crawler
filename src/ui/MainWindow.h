@@ -61,6 +61,8 @@ private:
     QWidget* m_arrowField;
     GraphicalUI* GUI;
 
+    std::map<CharacterItem::CharacterPart, int> m_humanPartsGraphics;
+
 public slots:
     void characterCustomizationClicked(CharacterItem::CharacterPart characterPart, int whichOption);
     void startGame();
@@ -73,10 +75,10 @@ public:
 
     ~MainWindow();
 
-    TileItem* addTileToScene(int row, int col, char textureID);
-    void addCharacterToScene(CharacterItem* character) const;
-    CharacterItem* getHumanCharachter() const;
+    void addGameItemToScene(GameItem* gameItem) const;
+
     bool eventFilter(QObject* obj, QEvent* event) override;
+    std::map<CharacterItem::CharacterPart, int> getHumanPartsGraphics() const;
 };
 
 #endif // MAINWINDOW_H
