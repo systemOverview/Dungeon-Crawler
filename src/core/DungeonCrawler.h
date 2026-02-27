@@ -50,7 +50,7 @@ private:
     StartScreen* m_startScreen = nullptr;
     int m_numberOfRemainingNPCs = 0;
     Level* m_lastLevel = nullptr;
-    bool IsTileInNeighbouringRange(std::pair<int, int> fromCords, std::pair<int, int> toCords);
+    static bool IsTileInNeighbouringRange(Tile* from, Tile* to);
 public slots:
     void buildGame();
 signals:
@@ -61,7 +61,11 @@ public:
         FromStrings,
         FromFile
     };
+
     DungeonCrawler();
+    static void ConnectGeneratedCharacter(Character* characterModel, CharacterItem* characterView);
+    static bool ValidateMove(Tile* from, Tile* to);
+    //old:
     std::pair<int, int> translateMove(int step) const;
     bool turn();
     void levelUp();
@@ -78,8 +82,6 @@ public:
     // it deletes the loser and updates the tile and the winner, or keeps things as they were if it ended in a draw.
     void build(GameSourceOption option);
 
-    static void ProcessNewCharacter(Character* character);
-    static bool ValidateMove(Tile* from, Tile* to);
 };
 
 #endif //PRAK_DUNGEONCRAWLER_H

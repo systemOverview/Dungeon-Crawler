@@ -11,11 +11,26 @@
 #include "startscreen.h"
 #include <fstream>
 
+// This class is follows the singleton pattern.
+// It communicates mainly with the GUI:
+//      (GUI alerts DC of game start -> DC builds the game -> DC gives game info to GUI)
+//      (GUI alerts DC of user click on Tile -> DC alerts controllers to initiate their moves)
+// It also keeps track of the game participants to avoid exposing them to the view or to each other as much as possible:
+//      (ConnectGeneratedCharacter() connects DungeonCrawler::move to character.controller::moveCharacter)
+//      (ConnectGeneratedCharacter() also connects the model character moving signals to its view,
+//       with neither knowing about the other).
+
+// It holds the game rules and validates them.
+// Characters communicate through a static interface, they do not get ahold of the instance.
+// The static methods call the instance when necessary (ie: signals/slots connections : ConnectGeneratedCharacter())
+
 DungeonCrawler::DungeonCrawler() {
     assert(SINGLETON_INSTANCE == nullptr && "Multiple instanced of DC are being created");
     m_GUI = new GraphicalUI();
     SINGLETON_INSTANCE = this;
+
     connect(m_GUI, &GraphicalUI::gameStarted, this, &DungeonCrawler::buildGame);
+    connect(m_GUI, &GraphicalUI::humanHasInitiatedMove, this, &DungeonCrawler::move);
 }
 
 void DungeonCrawler::buildGame() {
@@ -24,27 +39,35 @@ void DungeonCrawler::buildGame() {
     m_GUI->createLevelUI(level->getTiles());
 }
 
-void DungeonCrawler::ProcessNewCharacter(Character* character) {
-    AbstractController* controller = character->getController();
+void DungeonCrawler::ConnectGeneratedCharacter(Character* characterModel,
+                                               CharacterItem* characterView) {
+    // model to controller connection
+    AbstractController* controller = characterModel->getController();
     connect(SINGLETON_INSTANCE,
             &DungeonCrawler::move,
             controller,
-            &AbstractController::initiateMove);
+            &AbstractController::moveCharacter);
+
+    // model to view connection
+    connect(characterModel, &Character::moved, characterView, &CharacterItem::AnimateMove);
 }
 
 bool DungeonCrawler::ValidateMove(Tile* from, Tile* to) {
-    Coordinates fromCords = from->getCoordinates();
-    Coordinates toCords = to->getCoordinates();
+    if (!IsTileInNeighbouringRange(from, to)) return false;
+    return true;
 }
 
 // ValidateMove helpers
 
-bool DungeonCrawler::IsTileInNeighbouringRange(std::pair<int, int> fromCords,
-                                               std::pair<int, int> toCords) {
-    // if (fromCords.) }
-
-    // old
+bool DungeonCrawler::IsTileInNeighbouringRange(Tile* from, Tile* to) {
+    if (std::abs(from->getCoordinates().column - to->getCoordinates().column) > 1) return false;
+    if (std::abs(from->getCoordinates().row - to->getCoordinates().row) > 1) return false;
+    return true;
 }
+
+// End of ValidateMove helpers
+
+//old
 
 void DungeonCrawler::build(GameSourceOption option) {
     if (option == GameSourceOption::FromStrings) {

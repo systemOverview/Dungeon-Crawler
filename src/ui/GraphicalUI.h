@@ -20,7 +20,7 @@ public:
     enum VisualizationMode { FullVisualization, FullVisualizationWithoutText, OnlyFinalPath, None };
 
 private:
-    inline static std::pair<int, int> LAST_TILE_CLICKED_CORDS = {-1, -1};
+    inline static Coordinates LAST_TILE_CLICKED_CORDS = {-1, -1};
     bool m_isVisualizeModeOn = true;
     QDialog* startScreen;
     MainWindow* m_mainWindow = nullptr;
@@ -41,7 +41,7 @@ private:
     QStateMachine* m_animationMachine = nullptr;
 
     QSequentialAnimationGroup* m_customizationAnimationLoop = nullptr;
-    List<TileItem*> m_graphicalTiles;
+    inline static std::map<Coordinates, TileItem*> GRAPHICAL_TILES = {};
 
     void startAnimationLoop();
     void setupStateMachine();
@@ -51,12 +51,14 @@ private:
 public slots:
     void createLevelUI(const std::vector<std::vector<Tile*> >&);
     void moveCharacter(TileItem* toWhichTile);
+    void tileClicked(TileItem* whichTile);
 signals:
     void gameStarted();
-    void humanMoveRequested();
+    void humanHasInitiatedMove();
 
 public:
-    static std::pair<int, int> GetLastTileClickedCords();
+    static Coordinates GetLastTileClickedCords();
+    static TileItem* GetGraphicalTile(Coordinates tileCoordinates);
     void setVisualizationMode(VisualizationMode mode);
     GraphicalUI();
     QDialog *getStartScreen();
