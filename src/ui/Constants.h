@@ -6,17 +6,34 @@
 #include <sstream>
 struct Coordinates
 {
+public:
+    struct OverflowFlags
+    {
+        bool rowOverFlow = false;
+        bool columnOverFlow = false;
+
+        OverflowFlags() {};
+    };
+
+private:
+    friend Coordinates operator+(const Coordinates& lhs, const Coordinates& rhs);
+    inline static OverflowFlags
+        DefaultOverFlow; // just to use as a default argument for CoordinatesSumClamped
+
+public:
     int row = 0;
     int column = 0;
 
-    bool operator==(const Coordinates& rhs) const {
-        return (this->row == rhs.row && this->column == rhs.column);
-    }
-    bool operator!=(const Coordinates& rhs) const { return ((*this) == rhs) == false; }
-    bool operator<(const Coordinates& rhs) const {
-        return (this->row < rhs.row || this->column < rhs.column);
-    }
-    operator QString() const { return QString("Row: %1, Column : %2").arg(row).arg(column); }
+    bool operator==(const Coordinates& rhs) const;
+    bool operator!=(const Coordinates& rhs) const;
+    bool operator<(const Coordinates& rhs) const;
+    operator QString() const;
+    static Coordinates CoordinatesSumClamped(const Coordinates& lhs,
+                                             const Coordinates& rhs,
+                                             int maxRow,
+                                             int maxColumn,
+                                             OverflowFlags& overflowFlags = DefaultOverFlow);
+    friend Coordinates operator+(const Coordinates& lhs, const Coordinates::OverflowFlags& rhs);
 };
 namespace CharactersAttributes {
     struct Attributes
@@ -54,9 +71,14 @@ namespace GUIPaths {
                                {'!', ":/pics/textures/other tiles/winner.png"}
 
         };
+
+    const inline static QString HealthBarBackground(":/characters/healthbar/background.png");
+    const inline static QString HealthBarInner(":/characters/healthbar/bar.png");
+
 } // namespace GUIPaths
 namespace GameSettings {
-    constexpr inline static int FPS = 2;
+    constexpr inline static int FPS = 5;
+    constexpr inline static int TILES_PER_SIDE = 10;
 }
 
 namespace CharacterWearables {
