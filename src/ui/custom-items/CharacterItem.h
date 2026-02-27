@@ -6,9 +6,8 @@
 #include <QtCore/qobject.h>
 #include <QtCore/qsequentialanimationgroup.h>
 #include <QtStateMachine/qstatemachine.h>
-// #include "Constants.h"
+#include "Character.h"
 #include "GameItem.h"
-class Character;
 class CharacterAnimation;
 class TileItem;
 class SpriteManager;
@@ -22,11 +21,9 @@ class CharacterItem : public GameItem
 
 public:
     enum class State { Idle, Walk, Jump, Punch, Looping, PAST_END };
-    enum class CharacterType { Human, Goblin };
     enum class CharacterPart { Base, Head, Outfit, Weapon, PAST_END };
 
     Q_ENUM(CharacterPart);
-    Q_ENUM(CharacterType);
 
     struct LastMove
     {
@@ -39,7 +36,7 @@ private:
     // and the user-chosen graphics option for each part. When painting, it requests the images for each part from the
     // sprite manager, which has a cache system in place to avoid re-generating images.
     LastMove m_lastMove;
-    CharacterItem::CharacterType m_characterType;
+    Character::CharacterType m_characterType;
     int m_currentFrameId = 0;
 
     TileItem* m_tile = nullptr;
@@ -69,7 +66,7 @@ signals:
     void stateChanged(CharacterItem::State newState);
 
 public:
-    CharacterItem(CharacterItem::CharacterType characterType);
+    CharacterItem(Character::CharacterType characterType);
     void setTile(TileItem* tile);
     TileItem* getTile() const;
     void fixMyPosition() override;
@@ -86,9 +83,10 @@ public:
                                  const std::vector<int>& end,
                                  qreal progress);
     void advanceOnXAxis();
-    CharacterItem::CharacterType getCharacterType() const;
+    Character::CharacterType getCharacterType() const;
 
-    operator QString() const;
+    std::map<CharacterItem::CharacterPart, int> getPartsGraphicsOptions() const;
+    void setPartsGraphics(std::map<CharacterItem::CharacterPart, int> partsGraphicsOptions);
 
 protected:
     void mousePressEvent(QGraphicsSceneMouseEvent* event) override;

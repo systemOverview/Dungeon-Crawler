@@ -15,20 +15,29 @@
 #include "SpriteManager.h"
 #include "TileItem.h"
 #include <Utilities.h>
-CharacterItem::CharacterItem(CharacterItem::CharacterType characterType)
+CharacterItem::CharacterItem(Character::CharacterType characterType)
     : m_characterType{characterType}
-    , GameItem(QPixmap(), -1) {
-    setDefaultParts();
+    , GameItem(QPixmap()) {
     m_animation = new CharacterAnimation(this);
+    setDefaultParts();
     connect(this, &CharacterItem::stateChanged, m_animation, &CharacterAnimation::updateAnimation);
 }
-
-CharacterItem::CharacterType CharacterItem::getCharacterType() const { return m_characterType; }
 
 void CharacterItem::setDefaultParts() {
     for (int i = 0; i < int(CharacterItem::CharacterPart::PAST_END); i++) {
         m_partsGraphicOptions.insert({CharacterItem::CharacterPart(i), 0});
     }
+}
+
+Character::CharacterType CharacterItem::getCharacterType() const { return m_characterType; }
+
+std::map<CharacterItem::CharacterPart, int> CharacterItem::getPartsGraphicsOptions() const {
+    return m_partsGraphicOptions;
+}
+
+void CharacterItem::setPartsGraphics(
+    std::map<CharacterItem::CharacterPart, int> partsGraphicsOptions) {
+    m_partsGraphicOptions = partsGraphicsOptions;
 }
 
 QPixmap CharacterItem::getPixmap() const {
@@ -39,10 +48,9 @@ QPixmap CharacterItem::getPixmap() const {
                                                            part,
                                                            partOption,
                                                            m_currentFrameId);
-
         if (pixmap.isNull()) {
             continue;
-        } //
+        }
         if (part == CharacterPart::Base) {
             base = pixmap;
         }
@@ -51,13 +59,14 @@ QPixmap CharacterItem::getPixmap() const {
             painter.drawPixmap(base.rect(), pixmap);
         }
     }
-
     return base;
 }
 
 void CharacterItem::fixMyPosition() {
-    QPointF pos = CharacterTile_UI_PlacementMediator::GetCharacterPosition(this);
-    setPos(pos);
+    if (scene()) {
+        QPointF pos = CharacterTile_UI_PlacementMediator::GetCharacterPosition(this);
+        setPos(pos);
+    }
 }
 
 void CharacterItem::assignPart(CharacterItem::CharacterPart partType, int whichGraphicsOption) {
@@ -71,13 +80,10 @@ void CharacterItem::paint(QPainter* painter,
 
     QPixmap pixmap = getPixmap();
     QImage img = pixmap.toImage();
-
     SpriteManager::TrimTransparent(img);
     pixmap = QPixmap::fromImage(img);
 
     float characterHeight = SIDE_LENGTH * 80 / 100;
-
-    // pixmap = pixmap.scaledToHeight(characterHeight);
 
     painter->drawPixmap(QRectF{0,
                                SIDE_LENGTH - characterHeight,
@@ -128,9 +134,3 @@ void CharacterItem::mousePressEvent(QGraphicsSceneMouseEvent* event) {
     QGraphicsItem::mousePressEvent(event);
 }
 
-CharacterItem::operator QString() const {
-    const auto types = QMetaEnum::fromType<CharacterType>();
-    QString type;
-    type = types.key(int(m_characterType));
-    return type;
-}
