@@ -1,5 +1,11 @@
 #include "HumanController.h"
 #include "GraphicalUI.h"
-HumanController::HumanController() {}
+void HumanController::moveCharacter() {
+    Coordinates newTileCoordinates = GraphicalUI::GetLastTileClickedCords();
+    m_controlledCharacter->setTile(Level::GetTile(newTileCoordinates));
+}
+
+HumanController::HumanController(Character* controlledCharacter)
+    : AbstractController(controlledCharacter) {}
 
 std::pair<int, int> HumanController::move() {}

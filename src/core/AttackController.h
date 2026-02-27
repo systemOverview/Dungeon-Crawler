@@ -6,11 +6,15 @@
 class LevelGraph;
 class AttackController : public AbstractController
 {
+    Q_OBJECT
 private:
     Level* m_level;
     LevelGraph* m_graph;
+public slots:
+    void moveCharacter() override;
+
 public:
-    AttackController(Level *level, LevelGraph *graph);
+    AttackController(Character* controlledCharacter, Level* level, LevelGraph* graph);
     std::vector<Coordinates> m_path;
     bool isPath = false;
     std::vector<Coordinates>::iterator it;

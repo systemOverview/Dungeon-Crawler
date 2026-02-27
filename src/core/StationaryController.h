@@ -1,11 +1,14 @@
 #ifndef STATIONARYCONTROLLER_H
 #define STATIONARYCONTROLLER_H
-#include "AbstractUI.h"
+#include "AbstractController.h"
 class Character;
 class StationaryController : public AbstractController
 {
+public slots:
+    void moveCharacter() override;
+
 public:
-    StationaryController();
+    StationaryController(Character* controlledCharacter);
 
     std::pair<int, int> move() override;
 };

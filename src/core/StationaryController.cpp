@@ -1,5 +1,8 @@
 #include "StationaryController.h"
-StationaryController::StationaryController() {}
+void StationaryController::moveCharacter() {}
+
+StationaryController::StationaryController(Character* controlledCharacter)
+    : AbstractController(controlledCharacter) {}
 
 std::pair<int, int> StationaryController::move()
 {

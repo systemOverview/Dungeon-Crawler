@@ -1,6 +1,8 @@
 #include "GuardController.h"
-GuardController::GuardController()
-{
+void GuardController::moveCharacter() {}
+
+GuardController::GuardController(Character* controlledCharacter)
+    : AbstractController(controlledCharacter) {
     m_movementPathIterator = m_movementPath.begin();
 }
 

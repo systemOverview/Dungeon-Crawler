@@ -2,16 +2,25 @@
 #include "LevelGraph.h"
 #include "Level.h"
 
-AttackController::AttackController(Level *level, LevelGraph *graph): m_level{level}, m_graph{graph}
-{
-
+void AttackController::moveCharacter() {
+    Coordinates newCords
+        = Coordinates::CoordinatesSumClamped(m_controlledCharacter->getTile()->getCoordinates(),
+                                             {0, 1},
+                                             9,
+                                             9);
+    m_controlledCharacter->setTile(Level::GetTile(newCords));
 }
+
+AttackController::AttackController(Character* controlledCharacter, Level* level, LevelGraph* graph)
+    : AbstractController(controlledCharacter)
+    , m_level{level}
+    , m_graph{graph} {}
 
 std::pair<int, int> AttackController::DjikstraMove()
 {
     Coordinates move = {0, 0};
     if (!isPath){
-        Coordinates attackerCords = m_character->getTile()->getCoordinates();
+        Coordinates attackerCords = m_controlledCharacter->getTile()->getCoordinates();
         Coordinates humanCords = m_level->getPlayableCharacter()->getTile()->getCoordinates();
         Vertex* attackerVertex = m_graph->getVertex(attackerCords);
         Vertex* humanVertex = m_graph->getVertex(humanCords);

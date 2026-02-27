@@ -7,8 +7,11 @@
 class HumanController : public AbstractController
 {
     Q_OBJECT
+public slots:
+    void moveCharacter() override;
+
 public:
-    HumanController();
+    HumanController(Character* controlledCharacter);
     std::pair<int, int> move() override;
 };
 
