@@ -1,8 +1,8 @@
 #ifndef ATTACKCONTROLLER_H
 #define ATTACKCONTROLLER_H
 #include <QtCore/qdebug.h>
-#include "AbstractUI.h"
-#include "Constants.h"
+#include "AbstractController.h"
+class Level;
 class LevelGraph;
 class AttackController : public AbstractController
 {
@@ -15,12 +15,6 @@ public slots:
 
 public:
     AttackController(Character* controlledCharacter, Level* level, LevelGraph* graph);
-    std::vector<Coordinates> m_path;
-    bool isPath = false;
-    std::vector<Coordinates>::iterator it;
-    std::pair<int, int> DjikstraMove();
-    std::pair<int, int> move() override;
-    std::pair<int,int> move(std::pair<int,int> startingTileCords);
 
 };
 

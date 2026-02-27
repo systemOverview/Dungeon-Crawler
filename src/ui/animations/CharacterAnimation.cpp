@@ -56,6 +56,8 @@ void CharacterAnimation::animateMove(Coordinates fromTileCoords, Coordinates ToT
     m_timeline->start();
 }
 
+void CharacterAnimation::animateFight() {}
+
 std::vector<int> CharacterAnimation::getAnimationFramesAsVector(CharacterItem::State state) const {
     std::vector<int> frames;
     if (state == CharacterItem::State::Looping) { // all animations

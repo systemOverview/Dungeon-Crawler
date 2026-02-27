@@ -16,7 +16,6 @@ public:
 protected:
     char m_texture;
     Coordinates m_coordinates;
-
     Character* character{nullptr}; // Character on top of the tile, or nullptr if none.
     std::string m_texturePath;
     bool m_shouldMove{false}; // Should the player be moved to another tile (true if tile is portal)

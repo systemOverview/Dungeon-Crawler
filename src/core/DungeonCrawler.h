@@ -46,6 +46,7 @@ signals:
 public:
     DungeonCrawler();
     static void ConnectGeneratedCharacter(Character* characterModel, CharacterItem* characterView);
+    static bool RequestMove(Character* character, Tile* tile);
 };
 
 #endif //PRAK_DUNGEONCRAWLER_H

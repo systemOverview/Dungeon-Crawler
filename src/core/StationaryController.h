@@ -9,8 +9,6 @@ public slots:
 
 public:
     StationaryController(Character* controlledCharacter);
-
-    std::pair<int, int> move() override;
 };
 
 #endif // STATIONARYCONTROLLER_H

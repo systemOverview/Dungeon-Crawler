@@ -12,7 +12,6 @@ public slots:
 
 public:
     HumanController(Character* controlledCharacter);
-    std::pair<int, int> move() override;
 };
 
 #endif // HUMANCONTROLLER_H

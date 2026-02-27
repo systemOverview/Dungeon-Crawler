@@ -49,6 +49,12 @@ void DungeonCrawler::ConnectGeneratedCharacter(Character* characterModel,
     connect(characterModel, &Character::moved, characterView, &CharacterItem::AnimateMove);
 }
 
+bool DungeonCrawler::RequestMove(Character* character, Tile* tile) {
+    if (tile->hasCharacter()) {
+    }
+    return true;
+}
+
 bool DungeonCrawler::ValidateMove(Tile* from, Tile* to) {
     if (!IsTileInNeighbouringRange(from, to)) return false;
     return true;
@@ -64,4 +70,4 @@ bool DungeonCrawler::IsTileInNeighbouringRange(Tile* from, Tile* to) {
 
 // End of ValidateMove helpers
 
-
+//

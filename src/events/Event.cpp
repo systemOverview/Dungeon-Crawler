@@ -1,7 +1,6 @@
 #include "Event.h"
 #include "EventBus.h"
 
-#include "QCharacter.h"
 #include "tile.h"
 EventListener::~EventListener()
 {

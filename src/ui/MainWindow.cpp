@@ -1,5 +1,4 @@
 #include "MainWindow.h"
-#include <QGraphMatrix.h>
 #include <QKeyEvent>
 #include <QLineEdit>
 #include <QPushButton>
@@ -13,15 +12,9 @@
 #include <QtWidgets/qtoolbar.h>
 #include <QtWidgets/qtoolbutton.h>
 #include "ButtonItem.h"
-#include "DungeonCrawler.h"
 #include "GraphicalUI.h"
-#include "QGameField.h"
-#include "QGameOver.h"
-#include "QGameWon.h"
-#include "QTerminal.h"
-#include "ui_MainWindow.h"
+#include "SpriteManager.h"
 #include <TileItem.h>
-#include <sstream>
 
 void MainWindow::makeStartScreen() {
     QWidget* central = new QWidget();
@@ -134,82 +127,7 @@ MainWindow::MainWindow(QWidget* parent)
     // startGame(); //TEST TODO , refactor this to work with the state machines
 }
 
-MainWindow::~MainWindow()
-{
-    delete ui;
-}
 
-void MainWindow::move(std::pair<int, int> move) { GUI->move(move); }
-
-QGridLayout* MainWindow::getGameBoard() const { return m_gameBoard; }
-QGameField* MainWindow::getGameField() const { return m_gameField; }
-
-QWidget* MainWindow::getArrowField() const { return m_arrowField; }
-
-void MainWindow::prepareRightSideForVisualization() { m_arrowField->hide(); }
-
-void MainWindow::generateVisualizationWidgets(QWidget* containingWidget) {
-    QVBoxLayout* containingWidgetMainLayout = new QVBoxLayout(containingWidget);
-    QWidget* buttonsContainer = new QWidget();
-    QWidget* explainerContainer = new QWidget();
-    QGraphMatrix* tileMatrixContainer = new QGraphMatrix();
-    tileMatrixContainer->setObjectName("tileMatrixContainer");
-
-    StaticQCharacter* explainerCharacter = new StaticQCharacter(
-        ":/pics/textures/zombie/attacker.png");
-    QTypeWriter* CharacterSpeech = new QTypeWriter();
-    CharacterSpeech->setObjectName("algorithmStepExplainerField");
-    CharacterSpeech->setReadOnly(true);
-
-    QHBoxLayout* explainerContainerLayout = new QHBoxLayout(explainerContainer);
-    explainerContainerLayout->addWidget(CharacterSpeech);
-    explainerContainerLayout->addWidget(explainerCharacter);
-
-    QPushButton* previousStepButton = new QPushButton(QIcon::fromTheme(QIcon::ThemeIcon::GoPrevious),
-                                                      "Previous");
-    QPushButton* pauseButton = new QPushButton(QIcon::fromTheme(
-                                                   QIcon::ThemeIcon::MediaPlaybackPause),
-                                               "Pause");
-    QPushButton* nextStepButton = new QPushButton(QIcon::fromTheme(QIcon::ThemeIcon::GoNext),
-                                                  "Next");
-
-    QHBoxLayout* buttonsLayout = new QHBoxLayout(buttonsContainer);
-
-    buttonsLayout->addWidget(previousStepButton);
-    buttonsLayout->addWidget(pauseButton);
-    buttonsLayout->addWidget(nextStepButton);
-
-    containingWidgetMainLayout->addWidget(explainerContainer);
-    containingWidgetMainLayout->addWidget(tileMatrixContainer);
-    containingWidgetMainLayout->addWidget(buttonsContainer);
-}
-
-void MainWindow::gameOver() {
-    auto currentRect = centralWidget()->rect();
-    QGameOver* gameOverWidget = new QGameOver();
-    gameOverWidget->setGeometry(currentRect);
-    delete centralWidget();
-    setCentralWidget(gameOverWidget);
-    gameOverWidget->enable();
-}
-
-void MainWindow::gameWon() {
-    auto currentRect = centralWidget()->rect();
-    QGameWon* gameWonWidget = new QGameWon();
-    gameWonWidget->setGeometry(currentRect);
-    delete centralWidget();
-    setCentralWidget(gameWonWidget);
-    gameWonWidget->enable();
-}
-
-void MainWindow::showTerminal() {
-    auto currentRect = centralWidget()->rect();
-    QTerminal* terminal = new QTerminal();
-    terminal->setGeometry(currentRect);
-    delete centralWidget();
-    setCentralWidget(terminal);
-    terminal->enable();
-}
 
 TileItem* MainWindow::addTileToScene(int row, int col, char textureID) {
     TileItem* tile = new TileItem(row, col, textureID);
@@ -237,3 +155,5 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* event) {
     }
     return false;
 }
+
+MainWindow::~MainWindow() {}

@@ -42,8 +42,9 @@ public:
     int duration() const override;
     void setDuration(int duration);
     void loopThroughAll();
-    void animateMove(Coordinates fromTileCoords, Coordinates ToTileCoords);
 
+    void animateMove(Coordinates fromTileCoords, Coordinates ToTileCoords);
+    void animateFight();
 };
 
 #endif // CHARACTERANIMATION_H

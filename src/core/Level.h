@@ -33,8 +33,6 @@ public: //static functions
 
 public:
     Level(std::string gameBoard);
-    Level(int height, int width, std::string gameBoard, bool isActive = false);
-    Level(json levelJson);
     const std::vector<std::vector<Tile*>> getTiles() const;
     int getHeight() const;
     int getWidth() const;

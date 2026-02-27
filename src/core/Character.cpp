@@ -4,7 +4,6 @@
 
 #include "Character.h"
 #include "Level.h"
-#include "QCharacter.h"
 #include <qDebug>
 
 Character* Character::GenerateCharacter(char texture,
@@ -34,11 +33,6 @@ char Character::getTexture() const
     return m_texture;
 }
 
-std::string Character::getTexturePath() const
-{
-    return m_texturePath;
-}
-
 bool Character::isHuman() const
 {
     return m_texture=='P';
@@ -58,7 +52,6 @@ void Character::setTile(Tile *newTile)
     emit moved(preMoveTileCoords, newTile->getCoordinates());
 }
 
-std::pair<int, int> Character::move() { return m_controller->move(); }
 
 int Character::getMaxHP() const { return m_attributes.stamina; }
 
@@ -67,29 +60,6 @@ int Character::getCurrentHP() const { return m_healthPoints; }
 int Character::getStrength() const { return m_attributes.strength; }
 
 bool Character::isAlive() const { return m_healthPoints > 0; }
-
-void Character::decrementFromHP(int amountToDecrement)
-{
-    m_healthPoints -= amountToDecrement;
-    EventBus::transmitEvent<EventBus::CharacterHealthChange>(this);
-
-}
-
-void Character::attackPlayer(Character *characterToAttack)
-{
-    characterToAttack->decrementFromHP(m_attributes.strength);
-    qDebug() << characterToAttack->getTexture() << " was hit and his new HP is "
-             << characterToAttack->getCurrentHP();
-}
-
-void Character::setQCharacter(QCharacter* QCharacter){
-    m_QCharacter = QCharacter;
-}
-
-QCharacter* Character::getQChatacter()
-{
-    return m_QCharacter;
-}
 
 Character::~Character()
 {

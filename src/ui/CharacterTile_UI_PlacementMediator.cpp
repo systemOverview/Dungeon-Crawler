@@ -2,6 +2,7 @@
 #include "TileItem.h"
 
 #include "GraphicalUI.h"
+#include "Utilities.h"
 
 void CharacterTile_UI_PlacementMediator::PlaceCharacterOnTile(CharacterItem* character,
                                                               TileItem* tile) {

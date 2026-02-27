@@ -106,7 +106,6 @@ void CharacterItem::setCurrentFrameID(int frameId) {
 
 void CharacterItem::setState(State newState, QPointF newPosition) {
     m_state = newState;
-    // emit stateChanged(newState);
 }
 
 void CharacterItem::AnimateMove(Coordinates fromTileCoords, Coordinates ToTileCoords) {

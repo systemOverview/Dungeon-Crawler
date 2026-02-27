@@ -5,19 +5,13 @@
 #include <QObject>
 #include <QPainter>
 #include <QTextEdit>
-#include "AbstractUI.h"
 #include "Level.h"
-#include "List.tpp"
 #include "MainWindow.h"
-#include "QGraphMatrix.h"
-#include "QTile.h"
-#include "QTypeWriter.h"
 class DungeonCrawler;
-class GraphicalUI : public QObject, public AbstractUI, public EventListener
+class GraphicalUI : public QObject
 {
     Q_OBJECT
 public:
-    enum VisualizationMode { FullVisualization, FullVisualizationWithoutText, OnlyFinalPath, None };
 
 private:
     inline static Coordinates LAST_TILE_CLICKED_CORDS = {-1, -1};
@@ -30,11 +24,6 @@ private:
 
     std::pair<int, int> lastMove;
     std::vector<QWidget*> m_healthBars;
-    std::map<Coordinates, QTile*> m_Qtiles;
-    QOverlay* m_overlayWidget = nullptr;
-    QGraphMatrix* m_graphMatrix = nullptr;
-    QTypeWriter* m_algorithmStepExplainerField = nullptr;
-    VisualizationMode m_visualizationMode = FullVisualization;
 
     QStateMachine* m_stateMachine = nullptr;
     QStateMachine* m_animationMachine = nullptr;
@@ -58,28 +47,18 @@ signals:
 public:
     static Coordinates GetLastTileClickedCords();
     static TileItem* GetGraphicalTile(Coordinates tileCoordinates);
-    void setVisualizationMode(VisualizationMode mode);
     GraphicalUI();
     MainWindow *getMainWindow();
-    void draw(Level *) override;
     void quitVisualizationLoop();
     QWidget* generateHealthBar(int percentage, QWidget *parent);
     std::pair<int, int> move();
     void move(std::pair<int, int> xymove);
-    std::pair<int, int> translateMove(int step) override;
     void start();
     std::pair<int, int> getLastMove();
     void addHealthBar(QWidget *healthBar);
     void removeHealthBars();
     ~GraphicalUI();
-    void playSound(QString soundLink, float volume);
     void switchWindow();
-    // Event Functions
-    void onDjikstraSearch(DjikstraSearchEvent* event) override;
-    void onCharacterHealthChange(CharacterHealthChangeEvent* event) override;
-    // Djikstra Visualization functions.
-    void DjikstaInitialSetup(DjikstraSearchEvent* event);
-    void DjikstraVisualizeLoop(DjikstraSearchEvent* event, DjikstraSearchEvent::Loop loop, int loopId);
     void saveGame();
 };
 
