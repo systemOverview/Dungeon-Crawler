@@ -8,6 +8,7 @@
 #include <QStandardPaths>
 #include <QWindow>
 #include <QtCore/qtimer.h>
+#include "AbstractController.h"
 
 // This class is follows the singleton pattern.
 // It communicates mainly with the GUI:
@@ -24,28 +25,46 @@
 
 DungeonCrawler::DungeonCrawler() {
     assert(SINGLETON_INSTANCE == nullptr && "Multiple instanced of DC are being created");
-    GUI = new GraphicalUI();
     SINGLETON_INSTANCE = this;
+
+    GUI = new GraphicalUI();
 
     connect(GUI, &GraphicalUI::gameStarted, this, &DungeonCrawler::buildGame);
     connect(GUI, &GraphicalUI::humanHasInitiatedMove, this, &DungeonCrawler::move);
 }
 
 void DungeonCrawler::buildGame() {
+    // First, level is created, it creates all the tiles, and calls DC::CreateCharacter for characters creations
+    // CreateCharacter creates the character and the controller too, connects the DC move signal to the controller move slot
+    // It also asks GUI to create a view for the character.
     Level* level = new Level(GameStrings[0]);
+
+    // Once that finishes, DC asks GUI to create the tiles UI items, and also add the previously created character to the scene.
+    // GUI only adds the characters to the scene after tiles are created because characterItem::fixMyPosition requires the tile item
+    // position.
     GUI->createLevelUI(level->getTiles());
 }
 
-void DungeonCrawler::ConnectGeneratedCharacter(Character* characterModel,
-                                               CharacterItem* characterView) {
-    // model to controller connection
-    AbstractController* controller = characterModel->getController();
-    connect(SINGLETON_INSTANCE,
-            &DungeonCrawler::move,
-            controller,
-            &AbstractController::moveCharacter);
+void DungeonCrawler::CreateCharacter(char characterIdentifier, Tile* characterTile) {
+    Character::CharacterType characterType = CHAR_TO_TYPE_DICTIONARY.at(characterIdentifier);
 
-    // model to view connection
+    Character* characterModel = new Character(characterType, characterTile);
+    characterTile->setCharacter(characterModel);
+
+    AbstractController* characterController = AbstractController::CreateCharacterController(
+        characterModel);
+
+    if (characterModel->getCharacterType() == Character::CharacterType::Human) {
+        CHARACTERS_CONTROLLERS.insert(CHARACTERS_CONTROLLERS.begin(), characterController);
+    }
+    else {
+        CHARACTERS_CONTROLLERS.push_back(characterController);
+    }
+
+    qDebug() << characterIdentifier << int(characterModel->getCharacterType());
+
+    CharacterItem* characterView = GUI->createCharacterUI(characterModel->getCharacterType(),
+                                                          characterTile->getCoordinates());
     connect(characterModel, &Character::moved, characterView, &CharacterItem::AnimateMove);
 }
 

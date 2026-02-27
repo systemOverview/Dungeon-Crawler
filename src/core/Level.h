@@ -25,7 +25,6 @@ class Level
     int m_gameWidth = 10;
     LevelGraph* m_graph = new LevelGraph();
     void addCharacter(Character* character);
-    bool m_isActivated = false;
 
 public: //static functions
     static Tile* GetTile(int row, int col);
@@ -36,14 +35,7 @@ public:
     const std::vector<std::vector<Tile*>> getTiles() const;
     int getHeight() const;
     int getWidth() const;
-    Character *getPlayableCharacter();
-    std::vector<Character *> getNonPlayableCharacters();
     void setDefaultTiles();
-    LevelGraph* getGraph();
-    void activateLevel();
-    Tile* getInitialHumanCharacterTile() const;
-    bool isActivated() const;
-    void removeCharacter(Character* vharacter);
     ~Level();
 
 };

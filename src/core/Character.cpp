@@ -6,42 +6,28 @@
 #include "Level.h"
 #include <qDebug>
 
-Character* Character::GenerateCharacter(char texture,
-                                        Tile* tile,
-                                        Level* level,
-                                        LevelGraph* levelGraph) {
+Character::Character(CharacterType characterType, Tile* tile)
+    : m_characterType(characterType)
+    , m_currentTile(tile)
+
+{}
+
+Character* Character::GenerateCharacter(char texture, Tile* tile) {
     switch (texture) {
     case 'P':
-        return new Human(texture, tile);
+        return new Human(CharacterType::Human, tile);
     case 'S':
-        return new Zombie(texture, tile);
+        return new Zombie(CharacterType::StationaryZombie, tile);
     case 'G':
-        return new Zombie(texture, tile);
+        return new Zombie(CharacterType::GuardZombie, tile);
     case 'A':
-        return new Attacker(texture, level, levelGraph, tile);
-    default : throw std::logic_error("Character type not handled at Character factory.");
+        return new Attacker(CharacterType::Attacker, tile);
+    default:
+        assert(false && "Character type not handled at Character factory.");
     }
 }
 
-void Character::setController(AbstractController *controller)
-{
-    m_controller = controller;
-}
 
-char Character::getTexture() const
-{
-    return m_texture;
-}
-
-bool Character::isHuman() const
-{
-    return m_texture=='P';
-}
-
-AbstractController *Character::getController() const
-{
-    return m_controller;
-}
 
 Tile* Character::getTile() const { return m_currentTile; }
 
@@ -52,28 +38,20 @@ void Character::setTile(Tile *newTile)
     emit moved(preMoveTileCoords, newTile->getCoordinates());
 }
 
-
-int Character::getMaxHP() const { return m_attributes.stamina; }
-
-int Character::getCurrentHP() const { return m_healthPoints; }
+int Character::getCurrentHP() const { return m_attributes.healthPoints; }
 
 int Character::getStrength() const { return m_attributes.strength; }
 
-bool Character::isAlive() const { return m_healthPoints > 0; }
+bool Character::isAlive() const { return m_attributes.healthPoints > 0; }
 
-Character::~Character()
-{
-    delete m_controller;
-    // EventBus::transmitEvent<EventBus::CharacterHealthChange>(this);
-}
-
-
+Character::CharacterType Character::getCharacterType() const { return m_characterType; }
 
 void to_json(json &jsonObject, const Character *characterObject){
     jsonObject = json {
-             {"texture",  characterObject->getTexture() },
              {"row", characterObject->getTile()->getRow()},
              {"column", characterObject->getTile()->getColumn()},
              {"HP", characterObject->getCurrentHP()}
     };
 }
+
+Character::~Character() {}

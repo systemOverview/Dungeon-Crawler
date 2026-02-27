@@ -6,6 +6,7 @@
 #define PRAK_DUNGEONCRAWLER_H
 #include "GraphicalUI.h"
 #include "Level.h"
+class AbstractController;
 class DungeonCrawler : public QObject
 {
     Q_OBJECT
@@ -20,7 +21,7 @@ private:
                                                             "#G.......#"
                                                             "#######.##"
                                                             "#.....A..#"
-                                                            "#.P......#"
+                                                            "#.H......#"
                                                             "##########",
                                                             "##########"
                                                             "#....!...#"
@@ -30,13 +31,23 @@ private:
                                                             "#........#"
                                                             "#######X##"
                                                             "#.G.?..1.#"
-                                                            "#P.0...S.#"
+                                                            "#H.0...S.#"
                                                             "##########"};
+
+    inline static std::unordered_map<char, Character::CharacterType> CHAR_TO_TYPE_DICTIONARY
+        = {{'H', Character::CharacterType::Human},
+           {'A', Character::CharacterType::Attacker},
+           {'G', Character::CharacterType::GuardZombie},
+           {'S', Character::CharacterType::StationaryZombie}};
+
     inline static GraphicalUI* GUI = nullptr;
+
+    inline static std::vector<AbstractController*> CHARACTERS_CONTROLLERS = {};
 
     // Move validation functions.
     static bool ValidateMove(Tile* from, Tile* to);
     static bool IsTileInNeighbouringRange(Tile* from, Tile* to);
+    static AbstractController* CreateCharacterController(Character* character);
 
 public slots:
     void buildGame();
@@ -46,6 +57,7 @@ signals:
 public:
     DungeonCrawler();
     static void ConnectGeneratedCharacter(Character* characterModel, CharacterItem* characterView);
+    static void CreateCharacter(char characterIdentifier, Tile* characterTile);
     static bool RequestMove(Character* character, Tile* tile);
 };
 
