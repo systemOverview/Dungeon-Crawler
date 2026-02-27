@@ -1,8 +1,8 @@
 #ifndef QTYPEWRITER_H
 #define QTYPEWRITER_H
 #include <QTextEdit>
-#include "Utilities.h"
 #include "Constants.h"
+#include "Utilities.h"
 class QTypeWriter : public QTextEdit
 {
     Q_OBJECT
