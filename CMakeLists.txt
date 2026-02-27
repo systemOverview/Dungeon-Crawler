@@ -4,13 +4,13 @@ find_package(Qt6 6.5 REQUIRED COMPONENTS Core Widgets)
 find_package(Qt6 REQUIRED COMPONENTS Multimedia)
 find_package(Qt6 REQUIRED COMPONENTS Widgets)
 find_package(nlohmann_json 3.12.0 REQUIRED)
-find_package(Boost REQUIRED)
 
 qt_standard_project_setup()
 
 set(CMAKE_AUTORCC ON)
 
 qt_add_executable(DungeonCrawler WIN32 MACOSX_BUNDLE
+    src/ui/AbstractUI.h src/ui/AbstractUI.cpp
    )
 
 add_subdirectory(src)
