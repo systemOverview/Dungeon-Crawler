@@ -2,7 +2,6 @@
 #define CONSTANTS_H
 #include <QMap>
 #include <QtCore/qobject.h>
-#include "CharacterItem.h"
 #include <sstream>
 struct Coordinates
 {
@@ -40,11 +39,11 @@ namespace CharactersAttributes {
     {
         int strength = 0;
         int stamina = 0;
-        int initialHealthPoints = 0;
+        int healthPoints = 0;
         Attributes(int strengthValue, int staminaValue)
             : strength{strengthValue}
             , stamina{staminaValue} {
-            initialHealthPoints = 20 + (stamina * 5);
+            healthPoints = 20 + (stamina * 5);
         }
         Attributes() {};
     };
@@ -54,10 +53,10 @@ namespace CharactersAttributes {
     const inline Attributes AttackerAttributes{10, 5};
 
 } // namespace CharactersAttributes
+// namespace CharactersAttributes
 namespace GUIPaths {
     const inline static QString StartButton{":/gui/buttons/start.png"};
     const inline static QString ArrowUpButton{":/pics/gui/buttons/arrow-up.png"};
-    const inline static QString GoblinBase{":/characters/goblin/base.png"};
 
     const inline static QMap<char, QString>
         TileCharToPathRegister{{'.', ":/pics/textures/floor/floor1.png"},
@@ -80,31 +79,6 @@ namespace GameSettings {
     constexpr inline static int FPS = 5;
     constexpr inline static int TILES_PER_SIDE = 10;
 }
-
-namespace CharacterWearables {
-    enum WearableType {
-        Armor,
-    };
-
-    inline std::map<CharacterItem::CharacterPart, QString> CustomizationButtonsTexts = {
-              {CharacterItem::CharacterPart::Base, "Select a base color for your player!"},
-              {CharacterItem::CharacterPart::Head, "You can even swap heads.."},
-              {CharacterItem::CharacterPart::Outfit, "Pick an outfit for the prom"},
-              {CharacterItem::CharacterPart::Weapon, "Lot of evil creatures, chose a weapon"},
-
-    };
-    inline static std::map<CharacterItem::CharacterPart, QString> HUMAN_SPRITE_PATH_BASE
-        = {{CharacterItem::CharacterPart::Base, ":/characters/human/base/"},
-           {CharacterItem::CharacterPart::Head, ":/characters/human/head/"},
-           {CharacterItem::CharacterPart::Outfit, ":/characters/human/outfit/"},
-           {CharacterItem::CharacterPart::Weapon, ""}};
-
-    inline static std::map<CharacterItem::CharacterPart, QString> GOBLIN_SPRITE_PATH_BASE = {
-              {CharacterItem::CharacterPart::Base, "://characters/goblin/base/"},
-    };
-    extern std::map<WearableType, QString> WEARABLES_CUT_PATH_BASE;
-    extern std::map<WearableType, QString> WEARABLES_SPRITE_PATH_BASE;
-} // namespace CharacterWearables
 
 namespace DjikstraStrings {
     enum DjikstraStringID {
