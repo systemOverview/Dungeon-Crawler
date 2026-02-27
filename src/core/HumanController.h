@@ -7,8 +7,8 @@
 class HumanController : public AbstractController
 {
     Q_OBJECT
-public slots:
-    void moveCharacter() override;
+private:
+    Coordinates getNextMove() override;
 
 public:
     HumanController(Character* controlledCharacter);

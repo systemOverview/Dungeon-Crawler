@@ -1,5 +1,7 @@
 #include "StationaryController.h"
-void StationaryController::moveCharacter() {}
+#include "Constants.h"
 
 StationaryController::StationaryController(Character* controlledCharacter)
     : AbstractController(controlledCharacter) {}
+
+Coordinates StationaryController::getNextMove() { return {0, 0}; }

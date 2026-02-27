@@ -43,11 +43,14 @@ private:
     inline static GraphicalUI* GUI = nullptr;
 
     inline static std::vector<AbstractController*> CHARACTERS_CONTROLLERS = {};
+    inline static std::vector<Character*> CHARACTERS;
+    inline static std::map<Coordinates, Character*> CHARACTERS_TILES = {};
 
     // Move validation functions.
     static bool ValidateMove(Tile* from, Tile* to);
     static bool IsTileInNeighbouringRange(Tile* from, Tile* to);
-    static AbstractController* CreateCharacterController(Character* character);
+    static bool AreCharactersEnemies(Character* firstCharacter, Character* secondCharacter);
+    static Character* WhoIsOccupyingTile(Tile* tile);
 
 public slots:
     void buildGame();

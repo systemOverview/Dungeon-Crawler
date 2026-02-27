@@ -1,10 +1,21 @@
 #include "AbstractController.h"
 #include "AttackController.h"
+#include "Character.h"
+#include "DungeonCrawler.h"
 #include "GuardController.h"
 #include "HumanController.h"
 #include "StationaryController.h"
 
-#include "Character.h"
+#include <Level.h>
+
+void AbstractController::moveCharacter() {
+    Coordinates newTileCoordinates = getNextMove();
+    Tile* newTile = Level::GetTile(newTileCoordinates);
+
+    if (DungeonCrawler::RequestMove(m_controlledCharacter, newTile)) {
+        m_controlledCharacter->setTile(newTile);
+    };
+}
 
 AbstractController::AbstractController(Character* controlledCharacter)
     : m_controlledCharacter(controlledCharacter) {}

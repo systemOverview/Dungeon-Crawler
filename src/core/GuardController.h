@@ -6,8 +6,7 @@ class GuardController : public AbstractController
 {
     Q_OBJECT
 private:
-public slots:
-    void moveCharacter() override;
+    Coordinates getNextMove() override;
 
 public:
     GuardController(Character* controlledCharacter);

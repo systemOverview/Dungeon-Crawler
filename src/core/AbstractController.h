@@ -2,7 +2,10 @@
 #define ABSTRACTCONTROLLER_H
 
 #include <QObject>
+
+struct Coordinates;
 class Character;
+
 class AbstractController : public QObject
 
 {
@@ -10,9 +13,10 @@ class AbstractController : public QObject
 
 protected:
     Character* m_controlledCharacter;
+    virtual Coordinates getNextMove() = 0;
 
 public slots:
-    virtual void moveCharacter() = 0;
+    virtual void moveCharacter();
 
 public:
     AbstractController(Character* controlledCharacter);

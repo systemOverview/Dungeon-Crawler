@@ -49,7 +49,6 @@ void DungeonCrawler::CreateCharacter(char characterIdentifier, Tile* characterTi
     Character::CharacterType characterType = CHAR_TO_TYPE_DICTIONARY.at(characterIdentifier);
 
     Character* characterModel = new Character(characterType, characterTile);
-    characterTile->setCharacter(characterModel);
 
     AbstractController* characterController = AbstractController::CreateCharacterController(
         characterModel);
@@ -61,7 +60,11 @@ void DungeonCrawler::CreateCharacter(char characterIdentifier, Tile* characterTi
         CHARACTERS_CONTROLLERS.push_back(characterController);
     }
 
-    qDebug() << characterIdentifier << int(characterModel->getCharacterType());
+    connect(SINGLETON_INSTANCE,
+            &DungeonCrawler::move,
+            characterController,
+            &AbstractController::moveCharacter);
+    CHARACTERS.push_back(characterModel);
 
     CharacterItem* characterView = GUI->createCharacterUI(characterModel->getCharacterType(),
                                                           characterTile->getCoordinates());
@@ -69,13 +72,12 @@ void DungeonCrawler::CreateCharacter(char characterIdentifier, Tile* characterTi
 }
 
 bool DungeonCrawler::RequestMove(Character* character, Tile* tile) {
-    if (tile->getCharacter()) {
-    }
-    return true;
+    return ValidateMove(character->getTile(), tile);
 }
 
 bool DungeonCrawler::ValidateMove(Tile* from, Tile* to) {
     if (!IsTileInNeighbouringRange(from, to)) return false;
+    if (WhoIsOccupyingTile(to)) return false;
     return true;
 }
 
@@ -87,6 +89,18 @@ bool DungeonCrawler::IsTileInNeighbouringRange(Tile* from, Tile* to) {
     return true;
 }
 
-// End of ValidateMove helpers
+bool DungeonCrawler::AreCharactersEnemies(Character* firstCharacter, Character* secondCharacter) {
+    return ((firstCharacter->getCharacterType() == Character::CharacterType::Human)
+            != (secondCharacter->getCharacterType() == Character::CharacterType::Human));
+}
 
-//
+Character* DungeonCrawler::WhoIsOccupyingTile(Tile* tile) {
+    for (Character* character : CHARACTERS) {
+        if (character->getTile() == tile) {
+            return character;
+        }
+    }
+    return nullptr;
+}
+
+// End of ValidateMove helpers

@@ -4,8 +4,8 @@
 class Character;
 class StationaryController : public AbstractController
 {
-public slots:
-    void moveCharacter() override;
+private:
+    Coordinates getNextMove() override;
 
 public:
     StationaryController(Character* controlledCharacter);

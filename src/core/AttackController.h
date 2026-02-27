@@ -10,8 +10,7 @@ class AttackController : public AbstractController
 private:
     Level* m_level;
     LevelGraph* m_graph;
-public slots:
-    void moveCharacter() override;
+    Coordinates getNextMove() override;
 
 public:
     AttackController(Character* controlledCharacter);
