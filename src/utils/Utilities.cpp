@@ -41,6 +41,8 @@ int Utilities::GenerateRandomNumber(int startRange, int endRange) {
     return dist(rng);
 }
 
+int Utilities::positiveModulo(int i, int n) { return (i % n + n) % n; }
+
 std::string Utilities::FloatToString(float number, int precision)
 {
     std::stringstream formattedNumber;

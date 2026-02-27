@@ -11,6 +11,7 @@ public:
     static std::string GenerateRandomHexColorAsString();
     static void QtSleepMilliSeconds(int millisecondsWait);
     static int GenerateRandomNumber(int startRange = 0, int endRange = 100);
+    static int positiveModulo(int i, int n);
 
     //debug
 
