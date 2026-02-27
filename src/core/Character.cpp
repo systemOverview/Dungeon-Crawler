@@ -49,17 +49,14 @@ AbstractController *Character::getController() const
     return m_controller;
 }
 
-Tile *Character::getTile() const
-{
-    return currentTile;
-}
+Tile* Character::getTile() const { return m_currentTile; }
 
 void Character::setTile(Tile *newTile)
 {
-    currentTile = newTile;
+    Coordinates preMoveTileCoords = m_currentTile->getCoordinates();
+    m_currentTile = newTile;
+    emit moved(preMoveTileCoords, newTile->getCoordinates());
 }
-
-bool Character::moveToTile(Tile* tile) { return true; }
 
 std::pair<int, int> Character::move() { return m_controller->move(); }
 

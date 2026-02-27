@@ -27,7 +27,7 @@ class Character : public QObject
 protected:
     char m_texture;
     std::string m_texturePath = "/pics/textures/char/front/char_front_1.png";
-    Tile *currentTile; // The tile the player is at
+    Tile* m_currentTile; // The tile the player is at
     AbstractController* m_controller;
     QCharacter* m_QCharacter; // its QT widget.
 
@@ -36,15 +36,15 @@ protected:
     int m_healthPoints = 0;
 
 public slots:
-    bool moveToTile(Tile* tile);
+    void setTile(Tile* newTile);
     virtual std::pair<int, int> move();
 signals:
-    void moved();
+    void moved(Coordinates fromTileCoords, Coordinates ToTileCoords);
 
 public:
     Character(char texture, CharactersAttributes::Attributes attributes, Tile* tile = nullptr)
         : m_texture(texture)
-        , currentTile(tile)
+        , m_currentTile(tile)
 
     {
         m_attributes = attributes;
@@ -64,7 +64,6 @@ public:
     bool isHuman() const;
     virtual AbstractController* getController() const;
     Tile* getTile() const;
-    void setTile(Tile *newTile);
     int getMaxHP() const;
     int getCurrentHP() const;
     int getStrength() const;
@@ -82,7 +81,7 @@ class Human : public Character
 public:
     Human(char texture, Tile* tile = nullptr)
         : Character(texture, CharactersAttributes::HumanAttributes, tile) {
-        m_controller = new HumanController();
+        m_controller = new HumanController(this);
     };
 };
 
@@ -94,16 +93,15 @@ public:
         : Character(texture, CharactersAttributes::ZombieAttributes, tile) {
         switch (texture) {
         case 'S':
-            m_controller = new StationaryController();
+            m_controller = new StationaryController(this);
             m_texturePath = "/pics/textures/zombie/zombie_right.png";
             break;
         case 'G':
-            m_controller = new GuardController();
+            m_controller = new GuardController(this);
             m_texturePath = "/pics/greenzombie";
             break;
         default : throw std::logic_error("Zombie type does not have an assigned controller. ");
         }
-        if (m_controller){m_controller->attachCharacter(this);}
     };
 };
 
@@ -113,8 +111,7 @@ public:
     Attacker(char texture, Level* level, LevelGraph* levelGraph, Tile* tile = nullptr)
         : Character(texture, CharactersAttributes::AttackerAttributes, tile) {
         m_texturePath = "/pics/textures/zombie/attacker.png";
-        m_controller = new AttackController(level, levelGraph);
-        m_controller->attachCharacter(this);
+        m_controller = new AttackController(this, level, levelGraph);
     };
 };
 
