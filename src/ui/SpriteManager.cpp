@@ -18,7 +18,7 @@ void SpriteManager::TrimTransparent(QImage& image) {
     image = image.copy(opaqueRect);
 }
 
-QString SpriteManager::GetFrameCacheKey(CharacterItem::CharacterType characterType,
+QString SpriteManager::GetFrameCacheKey(Character::CharacterType characterType,
                                         CharacterItem::CharacterPart whichPart,
                                         int whichGraphicsOption,
                                         int whichFrameId) {
@@ -32,7 +32,7 @@ QString SpriteManager::GetFrameCacheKey(CharacterItem::CharacterType characterTy
 // -> GraphicsOption (each part has multiple graphics options, for the human its choosable by the user), -> frameId
 // (Animations happen through frames, all parts and graphics have the same frame id for each movement).
 
-QImage SpriteManager::GetFrameImageFromSprite(CharacterItem::CharacterType characterType,
+QImage SpriteManager::GetFrameImageFromSprite(Character::CharacterType characterType,
                                               CharacterItem::CharacterPart whichPart,
                                               int whichGraphicsOption,
                                               int whichFrameId) {
@@ -53,7 +53,7 @@ QImage SpriteManager::GetFrameImageFromSprite(CharacterItem::CharacterType chara
     return image;
 }
 
-QPixmap SpriteManager::GetFrameFromSprite(CharacterItem::CharacterType characterType,
+QPixmap SpriteManager::GetFrameFromSprite(Character::CharacterType characterType,
                                           CharacterItem::CharacterPart whichPart,
                                           int whichGraphicsOption,
                                           int whichFrameId) {
@@ -95,7 +95,7 @@ QPixmap SpriteManager::GetFrameFromSprite(CharacterItem::CharacterType character
     return toReturn;
 }
 
-std::vector<QPixmap> SpriteManager::GetIdleFrameVariants(CharacterItem::CharacterType characterType,
+std::vector<QPixmap> SpriteManager::GetIdleFrameVariants(Character::CharacterType characterType,
                                                          CharacterItem::CharacterPart which,
                                                          ImageProcessingMode imageProcessingMode) {
     int counter = 0;
