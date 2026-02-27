@@ -6,12 +6,14 @@
 #include <QPixmap>
 #include <QtCore/qdebug.h>
 #include <QtCore/qtimeline.h>
+#include "Constants.h"
 #include <CharacterItem.h>
 class CharacterAnimation : public QAbstractAnimation
 {
     Q_OBJECT
 
 protected:
+    bool debug = false; //TEST
     void updateCurrentTime(int currentTime) override;
 
 public:
@@ -31,13 +33,11 @@ private:
 
     void setCurrentAnimation(CharacterItem::State animationType);
     std::vector<int> getAnimationFramesAsVector(CharacterItem::State state) const;
-
+    Coordinates calculateXYadvancePerFrame(Coordinates fromTileCoords, Coordinates ToTileCoords);
     int m_loopCount = -1;
 
 public slots:
-    void playFrame(std::vector<int> frames,
-                   int iterator,
-                   std::pair<qreal, qreal> xyAdvancePerFrame = {0, 0});
+    void playFrame(std::vector<int> frames, int iterator, Coordinates xyAdvancePerFrame = {0, 0});
     void updateAnimation(CharacterItem::State characterState);
 
 public:
@@ -45,6 +45,7 @@ public:
     int duration() const override;
     void setDuration(int duration);
     void loopThroughAll();
+    void animateMove(Coordinates fromTileCoords, Coordinates ToTileCoords);
 
 protected:
     void updateState(State newState, State oldState) override;

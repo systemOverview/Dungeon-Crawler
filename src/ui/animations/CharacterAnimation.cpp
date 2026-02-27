@@ -16,6 +16,7 @@ void CharacterAnimation::updateAnimation(CharacterItem::State characterState) {
     }
     else {
         setLoopCount(1); // no longer looping forever.
+
         setCurrentAnimation(characterState);
     }
     start();
@@ -40,9 +41,7 @@ void CharacterAnimation::setCurrentAnimation(CharacterItem::State animationType)
 
     float durationInSeconds = frameCount / float(GameSettings::FPS);
 
-    std::pair<qreal, qreal> xyAdvance
-        = {(m_character->getNewPosition().x() - m_character->pos().x()) / frameCount,
-           (m_character->getNewPosition().y() - m_character->pos().y()) / frameCount};
+    Coordinates xyAdvance;
     m_timeline->setDuration(durationInSeconds * 1000);
     if ((durationInSeconds < (0.1))) {
         m_timeline->setDuration(1000);
@@ -53,6 +52,37 @@ void CharacterAnimation::setCurrentAnimation(CharacterItem::State animationType)
 
     connect(m_timeline, &QTimeLine::frameChanged, [this, frames, xyAdvance]() {
         playFrame(frames, m_timeline->currentFrame(), xyAdvance);
+    });
+    // m_timeline->start();
+}
+
+void CharacterAnimation::animateMove(Coordinates fromTileCoords, Coordinates ToTileCoords) {
+    if (m_character->getCurrentFrameID() != 0) {
+        m_character->setCurrentFrameID(0);
+    }
+    std::vector<int> frames = getAnimationFramesAsVector(CharacterItem::State::Walk);
+    m_timeline->setFrameRange(0, frames.size() - 1);
+    int frameCount = (m_timeline->endFrame() - m_timeline->startFrame() + 1);
+    if (m_character->getCharacterType() == CharacterItem::CharacterType::Human
+        && ToTileCoords == Coordinates{8, 4}) {
+        debug = true;
+        qDebug() << "trace " << fromTileCoords << ToTileCoords << frameCount;
+    }
+
+    float durationInSeconds = frameCount / float(GameSettings::FPS);
+
+    Coordinates xyAdvancePerFrame = {ToTileCoords.row - fromTileCoords.row,
+                                     ToTileCoords.column - fromTileCoords.column};
+    m_timeline->setDuration(durationInSeconds * 1000);
+    if ((durationInSeconds < (0.1))) {
+        m_timeline->setDuration(1000);
+    }
+    m_timeline->setCurrentTime(
+        m_timeline
+            ->duration()); // Workaround for a known unfixed bug https://qt-project.atlassian.net/browse/QTBUG-41610
+
+    connect(m_timeline, &QTimeLine::frameChanged, [this, frames, xyAdvancePerFrame]() {
+        playFrame(frames, m_timeline->currentFrame(), xyAdvancePerFrame);
     });
     m_timeline->start();
 }
@@ -97,11 +127,16 @@ void CharacterAnimation::loopThroughAll() {
 
     m_timeline->start();
 }
+
 void CharacterAnimation::playFrame(std::vector<int> frames,
                                    int iterator,
-                                   std::pair<qreal, qreal> xyAdvancePerFrame) {
+                                   Coordinates xyAdvancePerFrame) {
     m_character->setCurrentFrameID(frames.at(iterator));
-    CharacterTile_UI_PlacementMediator::AdvanceCharacter(m_character, 1);
+    CharacterTile_UI_PlacementMediator::AdvanceCharacter(m_character, xyAdvancePerFrame);
+    if (iterator == m_timeline->endFrame()) {
+        delete m_timeline;
+        m_timeline = new QTimeLine();
+    }
 }
 
 void CharacterAnimation::updateState(State newState, State oldState) {
