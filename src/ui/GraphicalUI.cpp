@@ -16,7 +16,6 @@
 #include "DungeonCrawler.h"
 #include "MainWindow.h"
 #include "TileItem.h"
-#include "startscreen.h"
 
 GraphicalUI::GraphicalUI() {
     m_mainWindow = new MainWindow();
@@ -87,27 +86,8 @@ void GraphicalUI::setVisualizationMode(VisualizationMode mode) { m_visualization
 
 GraphicalUI::~GraphicalUI()
 {
-    delete startScreen;
     delete m_mainWindow;
 }
-
-void GraphicalUI::switchWindow()
-{
-    if (currentWindow == 0) {
-        startScreen->hide();
-        m_mainWindow->show();
-        currentWindow = 1;
-    } else {
-        m_mainWindow->hide();
-        startScreen->show();
-        startScreen->exec();
-        currentWindow = 0;
-    }
-}
-
-
-
-
 
 void GraphicalUI::playSound(QString soundLink, float volume)
 {
@@ -353,9 +333,5 @@ void GraphicalUI::removeHealthBars()
 }
 
 
-QDialog *GraphicalUI::getStartScreen()
-{
-    return startScreen;
-}
 
 MainWindow* GraphicalUI::getMainWindow() { return m_mainWindow; }

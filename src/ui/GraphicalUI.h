@@ -22,7 +22,6 @@ public:
 private:
     inline static Coordinates LAST_TILE_CLICKED_CORDS = {-1, -1};
     bool m_isVisualizeModeOn = true;
-    QDialog* startScreen;
     MainWindow* m_mainWindow = nullptr;
     int currentWindow{0};
     Level* level;
@@ -61,7 +60,6 @@ public:
     static TileItem* GetGraphicalTile(Coordinates tileCoordinates);
     void setVisualizationMode(VisualizationMode mode);
     GraphicalUI();
-    QDialog *getStartScreen();
     MainWindow *getMainWindow();
     void draw(Level *) override;
     void quitVisualizationLoop();
