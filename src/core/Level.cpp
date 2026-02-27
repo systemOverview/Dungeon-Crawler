@@ -94,7 +94,6 @@ void Level::activateLevel()
 
     }
     m_isActivated = true;
-    Tile::SetAllowedDjikstraValueChanges(3);
 }
 
 Tile *Level::getInitialHumanCharacterTile() const

@@ -50,7 +50,7 @@ void DungeonCrawler::ConnectGeneratedCharacter(Character* characterModel,
 }
 
 bool DungeonCrawler::RequestMove(Character* character, Tile* tile) {
-    if (tile->hasCharacter()) {
+    if (tile->getCharacter()) {
     }
     return true;
 }

@@ -45,7 +45,7 @@ void GraphicalUI::createLevelUI(const std::vector<std::vector<Tile*>>& tiles) {
             GRAPHICAL_TILES.insert({graphicalTile->getCoordinates(), graphicalTile});
             connect(graphicalTile, &TileItem::tilePressed, this, &GraphicalUI::tileClicked);
 
-            if (tile->hasCharacter()) {
+            if (tile->getCharacter()) {
                 if (tile->getCharacter()->isHuman()) {
                     m_human->setZValue(100);
                     CharacterTile_UI_PlacementMediator::PlaceCharacterOnTile(m_human, graphicalTile);

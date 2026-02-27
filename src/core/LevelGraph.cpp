@@ -178,8 +178,7 @@ std::vector<Coordinates> LevelGraph::getShortestsPathBetweenTwoTilesDjikstra(Ver
         for (auto vertex : queue) {
             if (minimumVertex->isNeighbour(vertex)) {
                 float newDjikstraValue = distanceRegister[minimumVertex]
-                                         + minimumVertex->getNeighbourWeight(vertex)
-                                         + vertex->getTile()->getDjikstraExtraCost();
+                                         + minimumVertex->getNeighbourWeight(vertex);
                 if (newDjikstraValue < distanceRegister[vertex]) {
                     distanceRegister[vertex] = newDjikstraValue;
                     loop.addNeighbourTile({vertex->getTile()->getCoordinates(),
