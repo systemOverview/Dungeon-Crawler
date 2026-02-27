@@ -13,15 +13,14 @@ class CharacterAnimation : public QAbstractAnimation
     Q_OBJECT
 
 protected:
-    bool debug = false; //TEST
     void updateCurrentTime(int currentTime) override;
 
 public:
 
 private:
     int m_duration = -1; //Infinite loop, the timeline object controls the state of this animation
-    CharacterItem* m_character;
-    QTimeLine* m_timeline;
+    CharacterItem* m_character = nullptr;
+    QTimeLine* m_timeline = nullptr;
     std::pair<qreal, qreal> m_advancePerFrame = {0, 0};
     inline static const std::map<CharacterItem::State, std::pair<int, int>> ANIMATION_FRAMES = {
                //inclusive range
@@ -31,9 +30,7 @@ private:
                {CharacterItem::State::Punch, {25, 26}},
     };
 
-    void setCurrentAnimation(CharacterItem::State animationType);
     std::vector<int> getAnimationFramesAsVector(CharacterItem::State state) const;
-    Coordinates calculateXYadvancePerFrame(Coordinates fromTileCoords, Coordinates ToTileCoords);
     int m_loopCount = -1;
 
 public slots:
@@ -47,8 +44,6 @@ public:
     void loopThroughAll();
     void animateMove(Coordinates fromTileCoords, Coordinates ToTileCoords);
 
-protected:
-    void updateState(State newState, State oldState) override;
 };
 
 #endif // CHARACTERANIMATION_H

@@ -16,8 +16,6 @@ void CharacterAnimation::updateAnimation(CharacterItem::State characterState) {
     }
     else {
         setLoopCount(1); // no longer looping forever.
-
-        setCurrentAnimation(characterState);
     }
     start();
 }
@@ -31,30 +29,6 @@ CharacterAnimation::CharacterAnimation(CharacterItem* character,
 
 }
 
-void CharacterAnimation::setCurrentAnimation(CharacterItem::State animationType) {
-    if (m_character->getCurrentFrameID() != 0) {
-        m_character->setCurrentFrameID(0);
-    }
-    std::vector<int> frames = getAnimationFramesAsVector(animationType);
-    m_timeline->setFrameRange(0, frames.size() - 1);
-    int frameCount = (m_timeline->endFrame() - m_timeline->startFrame() + 1);
-
-    float durationInSeconds = frameCount / float(GameSettings::FPS);
-
-    Coordinates xyAdvance;
-    m_timeline->setDuration(durationInSeconds * 1000);
-    if ((durationInSeconds < (0.1))) {
-        m_timeline->setDuration(1000);
-    }
-    m_timeline->setCurrentTime(
-        m_timeline
-            ->duration()); // Workaround for a known unfixed bug https://qt-project.atlassian.net/browse/QTBUG-41610
-
-    connect(m_timeline, &QTimeLine::frameChanged, [this, frames, xyAdvance]() {
-        playFrame(frames, m_timeline->currentFrame(), xyAdvance);
-    });
-    // m_timeline->start();
-}
 
 void CharacterAnimation::animateMove(Coordinates fromTileCoords, Coordinates ToTileCoords) {
     if (m_character->getCurrentFrameID() != 0) {
@@ -63,11 +37,6 @@ void CharacterAnimation::animateMove(Coordinates fromTileCoords, Coordinates ToT
     std::vector<int> frames = getAnimationFramesAsVector(CharacterItem::State::Walk);
     m_timeline->setFrameRange(0, frames.size() - 1);
     int frameCount = (m_timeline->endFrame() - m_timeline->startFrame() + 1);
-    if (m_character->getCharacterType() == CharacterItem::CharacterType::Human
-        && ToTileCoords == Coordinates{8, 4}) {
-        debug = true;
-        qDebug() << "trace " << fromTileCoords << ToTileCoords << frameCount;
-    }
 
     float durationInSeconds = frameCount / float(GameSettings::FPS);
 
@@ -137,7 +106,4 @@ void CharacterAnimation::playFrame(std::vector<int> frames,
         delete m_timeline;
         m_timeline = new QTimeLine();
     }
-}
-
-void CharacterAnimation::updateState(State newState, State oldState) {
 }
