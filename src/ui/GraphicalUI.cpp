@@ -37,6 +37,8 @@ void GraphicalUI::createLevelView(const std::vector<std::vector<Tile*>>& tiles) 
     for (const std::vector<Tile*>& row : tiles) {
         for (Tile* tile : row) {
             TileItem* tileView = new TileItem(tile->getRow(), tile->getColumn(), tile->getTexture());
+            connect(tile, &Tile::textureChanged, tileView, &TileItem::tileTextureChanged);
+
             m_mainWindow->addGameItemToScene(tileView);
 
             GRAPHICAL_TILES.insert({tileView->getCoordinates(), tileView});
