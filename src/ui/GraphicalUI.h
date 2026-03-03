@@ -7,7 +7,10 @@
 #include <QTextEdit>
 #include "Level.h"
 #include "MainWindow.h"
+
 class DungeonCrawler;
+class FightEvent;
+class FightRound;
 class GraphicalUI : public QObject
 {
     Q_OBJECT
@@ -22,15 +25,20 @@ private:
     QStateMachine* m_animationMachine = nullptr;
 
     inline static std::map<Coordinates, TileItem*> GRAPHICAL_TILES = {};
-    std::vector<CharacterItem*> graphicalCharacters = {};
+    inline static std::map<int, CharacterItem*> GRAPHICAL_CHARACTERS = {};
 
     void startAnimationLoop();
     void setupStateMachine();
     void setupShortcuts();
 
+    void customEvent(QEvent* event) override;
+    void animateFight(FightEvent* fightEvent);
+    void animateFightRound(FightRound fightRound);
+
 public slots:
-    void createLevelUI(const std::vector<std::vector<Tile*> >&);
+    void createLevelView(const std::vector<std::vector<Tile*> >&);
     void tileClicked(TileItem* whichTile);
+    void moveCharacterView(int characterID, Coordinates from, Coordinates to);
 signals:
     void gameStarted();
     void humanHasInitiatedMove();
@@ -43,8 +51,8 @@ public:
     static Coordinates GetLastTileClickedCords();
     static TileItem* GetGraphicalTile(Coordinates tileCoordinates);
     CharacterItem* createCharacterUI(Character::CharacterType characterType,
-                                     Coordinates tileCoordinates);
+                                     Coordinates tileCoordinates,
+                                     int characterID);
     ~GraphicalUI();
 };
-
 #endif // GRAPHICALUI_H

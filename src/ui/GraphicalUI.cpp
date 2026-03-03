@@ -13,8 +13,11 @@
 #include <QtWidgets/qpushbutton.h>
 #include "CharacterTile_UI_PlacementMediator.h"
 #include "Constants.h"
+#include "FightAnimation.h"
+#include "FightEvent.h"
 #include "MainWindow.h"
 #include "TileItem.h"
+#include <MoveAnimation.h>
 
 GraphicalUI::GraphicalUI() {
     m_mainWindow = new MainWindow();
@@ -30,7 +33,7 @@ GraphicalUI::GraphicalUI() {
     setupShortcuts();
 }
 
-void GraphicalUI::createLevelUI(const std::vector<std::vector<Tile*>>& tiles) {
+void GraphicalUI::createLevelView(const std::vector<std::vector<Tile*>>& tiles) {
     for (const std::vector<Tile*>& row : tiles) {
         for (Tile* tile : row) {
             TileItem* tileView = new TileItem(tile->getRow(), tile->getColumn(), tile->getTexture());
@@ -41,7 +44,7 @@ void GraphicalUI::createLevelUI(const std::vector<std::vector<Tile*>>& tiles) {
             connect(tileView, &TileItem::tilePressed, this, &GraphicalUI::tileClicked);
         }
     }
-    for (CharacterItem* characterView : graphicalCharacters) {
+    for (auto [characterID, characterView] : GRAPHICAL_CHARACTERS) {
         m_mainWindow->addGameItemToScene(characterView);
         characterView->setZValue(100);
         characterView->fixMyPosition();
@@ -53,6 +56,11 @@ void GraphicalUI::tileClicked(TileItem* whichTile) {
     emit humanHasInitiatedMove(); //connected to &DungeonCrawler::move;
 }
 
+void GraphicalUI::moveCharacterView(int characterID, Coordinates from, Coordinates to) {
+    CharacterItem* characterView = GRAPHICAL_CHARACTERS.at(characterID);
+    characterView->addAnimationToQueue(new MoveAnimation(characterView, from, to));
+}
+
 Coordinates GraphicalUI::GetLastTileClickedCords() { return LAST_TILE_CLICKED_CORDS; }
 
 TileItem* GraphicalUI::GetGraphicalTile(Coordinates tileCoordinates) {
@@ -60,15 +68,16 @@ TileItem* GraphicalUI::GetGraphicalTile(Coordinates tileCoordinates) {
 }
 
 CharacterItem* GraphicalUI::createCharacterUI(Character::CharacterType characterType,
-                                              Coordinates tileCoordinates) {
-    CharacterItem* character = new CharacterItem(characterType);
-
+                                              Coordinates tileCoordinates,
+                                              int characterID) {
+    CharacterItem* character = new CharacterItem(characterType, characterID);
+    GRAPHICAL_CHARACTERS.insert({characterID, character});
     if (characterType == Character::CharacterType::Human) {
         character->setPartsGraphics(m_mainWindow->getHumanPartsGraphics());
     }
 
     CharacterTile_UI_PlacementMediator::PlaceCharacterOnTile(character, tileCoordinates);
-    graphicalCharacters.push_back(character);
+
     return character;
 }
 
@@ -86,9 +95,6 @@ void GraphicalUI::setupStateMachine() {
     QState* playingState = new QState(m_stateMachine);
     QFinalState* deadState = new QFinalState(m_stateMachine);
 
-    // connect(customizingState, &QState::entered, [this]() {
-    //     m_mainWindow->getHumanCharachter()->setState(CharacterItem::State::Looping);
-    // });
     customizingState->addTransition(this, &GraphicalUI::gameStarted, playingState);
 
     m_stateMachine->setInitialState(customizingState);
@@ -97,6 +103,45 @@ void GraphicalUI::setupStateMachine() {
 
 void GraphicalUI::setupShortcuts() {
     QShortcut* shortcut = new QShortcut(QKeySequence(Qt::Key_Right), m_mainWindow);
+}
+
+void GraphicalUI::customEvent(QEvent* event) {
+    if (event->type() == FightEvent::type()) {
+        FightEvent* fightEvent = static_cast<FightEvent*>(event);
+        animateFight(fightEvent);
+    }
+}
+
+void GraphicalUI::animateFight(FightEvent* fightEvent) {
+    for (FightRound fightRound : fightEvent->getFightRounds()) {
+        animateFightRound(fightRound);
+    }
+}
+
+void GraphicalUI::animateFightRound(FightRound fightRound) {
+    CharacterItem* attackerView = GRAPHICAL_CHARACTERS.at(
+        fightRound.getAttackingCharacterInfo().getCharacterID());
+    FightAttackingAnimation* attackerAnimation = new FightAttackingAnimation(attackerView);
+
+    CharacterItem* defenderView = GRAPHICAL_CHARACTERS.at(
+        fightRound.getDefendingCharacterInfo().getCharacterID());
+    FightDefendingAnimation* defenderAnimation
+        = new FightDefendingAnimation(defenderView,
+                                      fightRound.getDefendingCharacterInfo().getHealthPostRound());
+
+    connect(attackerAnimation,
+            &FightAttackingAnimation::iPunchedDefender,
+            defenderAnimation,
+            &FightDefendingAnimation::attackerPunchedMe);
+
+    if (fightRound.getFightRoundOutcome() == FightRound::FightRoundOutcome::DefenderKilled) {
+        connect(defenderAnimation, &FightDefendingAnimation::finished, [defenderView]() mutable {
+            delete defenderView;
+            defenderView = nullptr;
+        });
+    }
+    defenderView->addAnimationToQueue(defenderAnimation);
+    attackerView->addAnimationToQueue(attackerAnimation);
 }
 
 void GraphicalUI::start() { m_mainWindow->show(); }
