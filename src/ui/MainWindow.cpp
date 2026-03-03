@@ -2,6 +2,7 @@
 #include <QKeyEvent>
 #include <QLineEdit>
 #include <QPushButton>
+#include <QRadioButton>
 #include <QSlider>
 #include <QTextEdit>
 #include <Qlabel>
@@ -13,6 +14,7 @@
 #include <QtWidgets/qtoolbutton.h>
 #include "ButtonItem.h"
 #include "GraphicalUI.h"
+#include "LoopingAnimation.h"
 #include "SpriteManager.h"
 #include <TileItem.h>
 
@@ -37,7 +39,8 @@ void MainWindow::makeStartScreen() {
 
     mainLayout->addWidget(m_sidebar);
 
-    m_character = new CharacterItem(Character::CharacterType::Human);
+    m_character = new CharacterItem(Character::CharacterType::Human, -1);
+    m_character->setAnimation(new LoopingAnimation(m_character));
 
     createCharacterCustomizationOptions();
     m_sidebarToolBox->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
@@ -105,6 +108,14 @@ std::map<CharacterItem::CharacterPart, int> MainWindow::getHumanPartsGraphics() 
     return m_humanPartsGraphics;
 }
 
+void MainWindow::createDebugSidebar() {
+    QWidget* debugSidebar = new QWidget();
+    centralWidget()->layout()->addWidget(debugSidebar);
+    debugSidebar->setMinimumWidth(200);
+
+    QRadioButton* flipCharacter = new QRadioButton("Flip characters", debugSidebar);
+}
+
 void MainWindow::characterCustomizationClicked(CharacterItem::CharacterPart characterPart,
                                                int whichOption) {
     m_character->assignPart(characterPart, whichOption);
@@ -122,7 +133,10 @@ void MainWindow::startGame() {
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent) {
     makeStartScreen();
-    QTimer::singleShot(10, [this]() { startGame(); });
+    QTimer::singleShot(10, [this]() {
+        createDebugSidebar();
+        startGame();
+    });
     // startGame(); //TEST TODO , refactor this to work with the state machines
 }
 

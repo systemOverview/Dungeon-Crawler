@@ -79,6 +79,7 @@ public:
 
     bool eventFilter(QObject* obj, QEvent* event) override;
     std::map<CharacterItem::CharacterPart, int> getHumanPartsGraphics() const;
+    void createDebugSidebar();
 };
 
 #endif // MAINWINDOW_H
