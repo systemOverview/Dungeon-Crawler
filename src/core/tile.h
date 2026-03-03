@@ -19,16 +19,14 @@ protected:
     Tile(int row, int col, char texture);
 
 public:
-    virtual ~Tile();
     static Tile* GenerateTile(char texture, int row, int column);
     char getTexture() const;
     Character *getCharacter() const;
-    void setCharacter(Character *characterToPlace);
+    void setCharacter(Character* characterToPlace);
     int getRow() const;
     int getColumn() const;
     Coordinates getCoordinates() const;
-
-
+    virtual ~Tile();
 };
 
 class Floor : public Tile
