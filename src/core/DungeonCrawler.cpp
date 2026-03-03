@@ -42,23 +42,20 @@ void DungeonCrawler::buildGame() {
     // Once that finishes, DC asks GUI to create the tiles UI items, and also add the previously created character to the scene.
     // GUI only adds the characters to the scene after tiles are created because characterItem::fixMyPosition requires the tile item
     // position.
-    GUI->createLevelUI(level->getTiles());
+    GUI->createLevelView(level->getTiles());
 }
 
-void DungeonCrawler::CreateCharacter(char characterIdentifier, Tile* characterTile) {
-    Character::CharacterType characterType = CHAR_TO_TYPE_DICTIONARY.at(characterIdentifier);
+void DungeonCrawler::CreateCharacter(char letterRepresentingCharacterType, Tile* characterTile) {
+    Character::CharacterType characterType = CHAR_TO_TYPE_DICTIONARY.at(
+        letterRepresentingCharacterType);
 
-    Character* characterModel = new Character(characterType, characterTile);
+    Character* characterModel = Character::GenerateCharacter(letterRepresentingCharacterType,
+                                                             characterTile);
 
     AbstractController* characterController = AbstractController::CreateCharacterController(
         characterModel);
 
-    if (characterModel->getCharacterType() == Character::CharacterType::Human) {
-        CHARACTERS_CONTROLLERS.insert(CHARACTERS_CONTROLLERS.begin(), characterController);
-    }
-    else {
-        CHARACTERS_CONTROLLERS.push_back(characterController);
-    }
+    CHARACTERS_CONTROLLERS.insert({characterModel, characterController});
 
     connect(SINGLETON_INSTANCE,
             &DungeonCrawler::move,
@@ -67,21 +64,25 @@ void DungeonCrawler::CreateCharacter(char characterIdentifier, Tile* characterTi
     CHARACTERS.push_back(characterModel);
 
     CharacterItem* characterView = GUI->createCharacterUI(characterModel->getCharacterType(),
-                                                          characterTile->getCoordinates());
-    connect(characterModel, &Character::moved, characterView, &CharacterItem::AnimateMove);
+                                                          characterTile->getCoordinates(),
+                                                          characterModel->getCharacterID());
+
+    connect(characterModel, &Character::characterMoved, GUI, &GraphicalUI::moveCharacterView);
 }
 
-bool DungeonCrawler::RequestMove(Character* character, Tile* tile) {
-    return ValidateMove(character->getTile(), tile);
-}
+bool DungeonCrawler::RequestMove(Character* character, Tile* wantedTile) {
+    if (!IsTileInNeighbouringRange(character->getTile(), wantedTile)) return false;
 
-bool DungeonCrawler::ValidateMove(Tile* from, Tile* to) {
-    if (!IsTileInNeighbouringRange(from, to)) return false;
-    if (WhoIsOccupyingTile(to)) return false;
+    Character* characterAtWantedTile = WhoIsOccupyingTile(wantedTile);
+
+    if (characterAtWantedTile != nullptr && AreCharactersEnemies(character, characterAtWantedTile)) {
+        return AttemptForcedTileTakeover(character, characterAtWantedTile);
+    }
+
     return true;
 }
 
-// ValidateMove helpers
+// RequestMove helpers
 
 bool DungeonCrawler::IsTileInNeighbouringRange(Tile* from, Tile* to) {
     if (std::abs(from->getCoordinates().column - to->getCoordinates().column) > 1) return false;
@@ -101,6 +102,54 @@ Character* DungeonCrawler::WhoIsOccupyingTile(Tile* tile) {
         }
     }
     return nullptr;
+}
+
+bool DungeonCrawler::AttemptForcedTileTakeover(Character* attacker, Character* defender) {
+    bool didAttackerWin = true;
+
+    FightEvent* fightEvent = new FightEvent();
+
+    FightRound firstRound = HoldFightRound(attacker, defender);
+    fightEvent->addFightRound(firstRound);
+
+    if (firstRound.getFightRoundOutcome() != FightRound::FightRoundOutcome::DefenderKilled) {
+        FightRound secondRound = HoldFightRound(defender, attacker); // inversed now
+        fightEvent->addFightRound(secondRound);
+        didAttackerWin = false;
+    }
+
+    QCoreApplication::postEvent(GUI, fightEvent);
+
+    return didAttackerWin;
+}
+
+FightRound DungeonCrawler::HoldFightRound(Character* attacker, Character* defender) {
+    defender->decrementFromHealthPoints(attacker->getStrength());
+
+    const FightRound::CharacterInfo attackerPostRoundInfo = {attacker->getCharacterID(),
+                                                             attacker->getCurrentHealthPoints()};
+
+    const FightRound::CharacterInfo defenderPostRoundInfo
+        = {defender->getCharacterID(),
+           defender->getCurrentHealthPoints()}; // save these info because the defender might get deleted next.
+
+    FightRound::FightRoundOutcome fightRoundOutcome{FightRound::FightRoundOutcome::Draw};
+
+    if (defender->isAlive() == false) {
+        fightRoundOutcome = FightRound::FightRoundOutcome::DefenderKilled;
+
+        AbstractController* defenderController = CHARACTERS_CONTROLLERS.at(defender);
+        CHARACTERS_CONTROLLERS.erase(defender);
+        delete defenderController;
+        defenderController = nullptr;
+
+        delete defender;
+        defender = nullptr;
+    }
+
+    FightRound fightRound{attackerPostRoundInfo, defenderPostRoundInfo, fightRoundOutcome};
+
+    return fightRound;
 }
 
 // End of ValidateMove helpers

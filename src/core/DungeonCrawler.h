@@ -4,9 +4,12 @@
 
 #ifndef PRAK_DUNGEONCRAWLER_H
 #define PRAK_DUNGEONCRAWLER_H
+#include "FightEvent.h"
 #include "GraphicalUI.h"
 #include "Level.h"
+
 class AbstractController;
+class FightRound;
 class DungeonCrawler : public QObject
 {
     Q_OBJECT
@@ -42,15 +45,17 @@ private:
 
     inline static GraphicalUI* GUI = nullptr;
 
-    inline static std::vector<AbstractController*> CHARACTERS_CONTROLLERS = {};
+    inline static std::map<Character*, AbstractController*> CHARACTERS_CONTROLLERS = {};
     inline static std::vector<Character*> CHARACTERS;
     inline static std::map<Coordinates, Character*> CHARACTERS_TILES = {};
 
     // Move validation functions.
-    static bool ValidateMove(Tile* from, Tile* to);
     static bool IsTileInNeighbouringRange(Tile* from, Tile* to);
     static bool AreCharactersEnemies(Character* firstCharacter, Character* secondCharacter);
     static Character* WhoIsOccupyingTile(Tile* tile);
+    // Fighting functions.
+    [[nodiscard]] static bool AttemptForcedTileTakeover(Character* attacker, Character* defender);
+    static FightRound HoldFightRound(Character* attacker, Character* defender);
 
 public slots:
     void buildGame();
@@ -60,8 +65,8 @@ signals:
 public:
     DungeonCrawler();
     static void ConnectGeneratedCharacter(Character* characterModel, CharacterItem* characterView);
-    static void CreateCharacter(char characterIdentifier, Tile* characterTile);
-    static bool RequestMove(Character* character, Tile* tile);
+    static void CreateCharacter(char letterRepresentingCharacterType, Tile* characterTile);
+    static bool RequestMove(Character* character, Tile* wantedTile);
 };
 
 #endif //PRAK_DUNGEONCRAWLER_H
