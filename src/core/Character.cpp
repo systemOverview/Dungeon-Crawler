@@ -8,10 +8,13 @@
 #include <qapplication.h>
 
 void Character::setTile(Tile* newTile) {
-    Coordinates preMoveTileCoords = m_currentTile->getCoordinates();
-    m_currentTile = newTile;
+    Tile* preMoveTile = m_currentTile;
 
-    emit characterMoved(m_characterID, preMoveTileCoords, m_currentTile->getCoordinates());
+    m_currentTile = newTile;
+    newTile->alertOfAccess();
+    emit characterMoved(m_characterID,
+                        preMoveTile->getCoordinates(),
+                        m_currentTile->getCoordinates());
 }
 
 Character::Character(CharacterType characterType,
@@ -52,6 +55,11 @@ void Character::decrementFromHealthPoints(int howMuch) { m_attributes.healthPoin
 int Character::getCurrentHealthPoints() const { return m_attributes.healthPoints; }
 
 bool Character::isAlive() const { return m_attributes.healthPoints > 0; }
+
+void Character::setTileWithoutEmittingSignal(Tile* newTile) {
+    m_currentTile = newTile;
+    newTile->alertOfAccess();
+}
 
 void to_json(json &jsonObject, const Character *characterObject){
     jsonObject = json{{"row", characterObject->getTile()->getRow()},

@@ -47,6 +47,7 @@ public:
     void decrementFromHealthPoints(int howMuch);
 
     bool isAlive() const;
+    void setTileWithoutEmittingSignal(Tile* newTile);
 
     virtual ~Character();
 };
