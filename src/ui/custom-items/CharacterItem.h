@@ -13,83 +13,81 @@ class TileItem;
 class SpriteManager;
 struct Coordinates;
 class CharacterItem : public GameItem
+
 {
     Q_OBJECT
-    Q_PROPERTY(QPointF newPosition READ getNewPosition WRITE setNewPosition)
 
     friend TileItem;
 
 public:
-    enum class State { Idle, Walk, Jump, Punch, Looping, PAST_END };
     enum class CharacterPart { Base, Head, Outfit, Weapon, PAST_END };
-
     Q_ENUM(CharacterPart);
 
-    struct LastMove
-    {
-        TileItem* WasAt = nullptr;
-        TileItem* WentTo = nullptr;
-    };
-
 private:
-    // The character only stores the current frame id (the same for every part)
-    // and the user-chosen graphics option for each part. When painting, it requests the images for each part from the
-    // sprite manager, which has a cache system in place to avoid re-generating images.
-    LastMove m_lastMove;
-    Character::CharacterType m_characterType;
-    int m_currentFrameId = 0;
+    std::vector<CharacterAnimation*> m_animationsQueue = {};
+    void playNextAnimation();
+    struct CharacterOrientation
+    {
+        int horizontalFlip = 1;
+        qreal verticalRotation = 0;
 
-    TileItem* m_tile = nullptr;
+        void reset() {
+            horizontalFlip = 1;
+            verticalRotation = 0;
+        }
+    };
+    CharacterOrientation m_characterOrientation;
+    void updateOrientation(QPointF oldPos, QPointF newPos);
+
+    inline static constexpr int STANDING_FRAME = 10;
+    int m_currentFrameId{STANDING_FRAME};
+
+    Character::CharacterType m_characterType;
+    int m_characterID{};
+
+    float m_healthPercentage = 100;
+
     std::map<CharacterItem::CharacterPart, int> m_partsGraphicOptions = {};
 
-    QSequentialAnimationGroup* m_customizationAnimationLoop = nullptr;
-    CharacterAnimation* m_animation = nullptr;
+    TileItem* m_tile = nullptr;
 
-    QStateMachine* m_stateAnimationMachine = nullptr;
-    QStateMachine* m_movingAnimationMachine = nullptr;
-
-    State m_state = CharacterItem::State::Walk;
-    bool m_animationLoopingStatus = false;
     void setDefaultParts();
-    void setupMovingStateMachine();
     QPixmap getPixmap() const;
-
-    int m_healthPercentage = 100;
-    QPointF m_newPosition;
+    CharacterAnimation* m_currentAnimation = nullptr;
 
 public slots:
     void assignPart(CharacterItem::CharacterPart partType, int whichGraphicsOption);
-    void setState(CharacterItem::State, QPointF newPosition = {0, 0});
-    void AnimateMove(Coordinates fromTileCoords, Coordinates ToTileCoords);
+    void addAnimationToQueue(CharacterAnimation* animation);
 
 signals:
-    void stateChanged(CharacterItem::State newState);
 
 public:
-    CharacterItem(Character::CharacterType characterType);
-    void setTile(TileItem* tile);
-    TileItem* getTile() const;
-    void fixMyPosition() override;
-    enum { Type = UserType + 2 };
-    int type() const override { return Type; }
-    void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
-    int getCurrentFrameID() const;
-    void setCurrentFrameID(int frameId);
-    void startAnimationLoop();
-    QPointF getNewPosition() const;
-    void setNewPosition(QPointF newNewPosition);
-    State getState() const;
-    QVariant myColorInterpolator(const std::vector<int>& start,
-                                 const std::vector<int>& end,
-                                 qreal progress);
-    void advanceOnXAxis();
+    CharacterItem(Character::CharacterType characterType, int characterID);
     Character::CharacterType getCharacterType() const;
 
+    TileItem* getTile() const;
+    void setTile(TileItem* tile);
+
+    void fixMyPosition() override;
+
+    void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
     std::map<CharacterItem::CharacterPart, int> getPartsGraphicsOptions() const;
     void setPartsGraphics(std::map<CharacterItem::CharacterPart, int> partsGraphicsOptions);
 
+    int getCurrentFrameID() const;
+    void setCurrentFrameID(int frameId);
+    void setHealthPercentage(float newHealthPercentage);
+
+    ~CharacterItem();
+
+//DEBUGGING INTERFACE TEST
 protected:
-    void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
+    void contextMenuEvent(QGraphicsSceneContextMenuEvent* event) override;
+
+public:
+    bool d_flip = true;
+    QMenu* d_contextMenu;
+    void d_createMenu();
 };
 
 #endif // CHARACTERITEM_H
