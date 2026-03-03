@@ -76,7 +76,7 @@ namespace GUIPaths {
 
 } // namespace GUIPaths
 namespace GameSettings {
-    constexpr inline static int FPS = 5;
+    constexpr inline static int FRAMES_PER_SECOND = 10;
     constexpr inline static int TILES_PER_SIDE = 10;
 }
 
