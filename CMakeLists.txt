@@ -25,6 +25,7 @@ qt_add_executable(DungeonCrawler WIN32 MACOSX_BUNDLE
     src/ui/CharacterTile_UI_PlacementMediator.h src/ui/CharacterTile_UI_PlacementMediator.cpp
     src/core/HumanController.h src/core/HumanController.cpp
     src/events/FightEvent.h src/events/FightEvent.cpp
+    src/ui/custom-items/PortalsConnector.h src/ui/custom-items/PortalsConnector.cpp
 
    )
 add_definitions( -DMAGICKCORE_QUANTUM_DEPTH=16 )
