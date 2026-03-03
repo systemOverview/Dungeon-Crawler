@@ -8,38 +8,46 @@
 #include "Constants.h"
 #include <nlohmann/json.hpp>
 using json = nlohmann::json;
-
 class Tile;
 class Character : public QObject
 {
     Q_OBJECT
 public:
     enum class CharacterType { Human, StationaryZombie, GuardZombie, Attacker };
+    enum class State { Customizing, Idle, Walking, Defending, Attacking };
 
 protected:
-    CharacterType m_characterType;
+    inline static int LAST_ASSIGNED_CHARACTER_ID = 0;
 
-    CharactersAttributes::Attributes m_attributes;
+    Character(CharacterType characterType,
+              CharactersAttributes::Attributes attributes,
+              Tile* tile = nullptr);
+
+    int m_characterID{};
+    CharacterType m_characterType{};
+    CharactersAttributes::Attributes m_attributes{};
     Tile* m_currentTile = nullptr;
 
 public slots:
     void setTile(Tile* newTile);
 signals:
-    void moved(Coordinates fromTileCoords, Coordinates ToTileCoords);
+    void characterMoved(int characterID, Coordinates from, Coordinates to);
 
 public:
-    Character(CharacterType characterType, Tile* tile = nullptr);
     static Character* GenerateCharacter(char texture, Tile* tile = nullptr);
+
+    int getCharacterID() const;
+    CharacterType getCharacterType() const;
 
     Tile* getTile() const;
 
-    int getMaxHP() const;
-    int getCurrentHP() const;
     int getStrength() const;
-    bool isAlive() const;
-    bool isHuman() const;
 
-    CharacterType getCharacterType() const;
+    int getCurrentHealthPoints() const;
+    void decrementFromHealthPoints(int howMuch);
+
+    bool isAlive() const;
+
     virtual ~Character();
 };
 
@@ -48,7 +56,7 @@ class Human : public Character
 {
 public:
     Human(CharacterType characterType, Tile* tile = nullptr)
-        : Character(characterType, tile) {};
+        : Character(characterType, CharactersAttributes::HumanAttributes, tile) {};
 };
 
 class Zombie : public Character
@@ -56,14 +64,14 @@ class Zombie : public Character
 
 public:
     Zombie(Character::CharacterType characterType, Tile* tile = nullptr)
-        : Character(characterType, tile) {};
+        : Character(characterType, CharactersAttributes::ZombieAttributes, tile) {};
 };
 
 class Attacker : public Character
 {
 public:
     Attacker(CharacterType characterType, Tile* tile = nullptr)
-        : Character(characterType, tile) {};
+        : Character(characterType, CharactersAttributes::AttackerAttributes, tile) {};
 };
 
 void to_json(json &jsonObject, const Character* characterObject);
