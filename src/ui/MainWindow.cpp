@@ -40,7 +40,7 @@ void MainWindow::makeStartScreen() {
     mainLayout->addWidget(m_sidebar);
 
     m_character = new CharacterItem(Character::CharacterType::Human, -1);
-    m_character->setAnimation(new LoopingAnimation(m_character));
+    m_character->addAnimationToQueue(new LoopingAnimation(m_character));
 
     createCharacterCustomizationOptions();
     m_sidebarToolBox->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
