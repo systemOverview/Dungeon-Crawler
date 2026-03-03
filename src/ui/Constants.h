@@ -58,18 +58,21 @@ namespace GUIPaths {
     const inline static QString StartButton{":/gui/buttons/start.png"};
     const inline static QString ArrowUpButton{":/pics/gui/buttons/arrow-up.png"};
 
-    const inline static QMap<char, QString>
-        TileCharToPathRegister{{'.', ":/pics/textures/floor/floor1.png"},
-                               {'#', ":/pics/textures/wall/wall1.png"},
-                               {'X', ":/pics/textures/doors/door1.png"},
-                               {'/', ":/pics/textures/doors/door2.png"},
-                               {'?', ":/pics/textures/other tiles/switch.png"},
-                               {'_', ":/pics/textures/other tiles/pit.png"},
-                               {'<', ":/pics/textures/other tiles/ramp.png"},
-                               {'$', ":/pics/textures/extra/levelchanger.png"},
-                               {'!', ":/pics/textures/other tiles/winner.png"}
+    const inline static QMap<char, QString> TileCharToPathRegister{
+             {'.', ":/pics/textures/floor/floor1.png"},
+             {'#', ":/pics/textures/wall/wall1.png"},
+             {'X', ":/pics/textures/doors/door1.png"},
+             {'/', ":/pics/textures/doors/door2.png"},
+             {'?', ":/pics/textures/other tiles/switch.png"},
+             {'_', ":/pics/textures/other tiles/pit.png"},
+             {'<', ":/pics/textures/other tiles/ramp.png"},
+             {'$', ":/pics/textures/extra/levelchanger.png"},
+             {'!', ":/pics/textures/other tiles/winner.png"},
+             {'1', ":/pics/textures/portal/portal1.png"},
+             {'2', ":/pics/textures/portal/portal2.png"},
+             {'3', ":/pics/textures/portal/portal3.png"},
 
-        };
+    };
 
     const inline static QString HealthBarBackground(":/characters/healthbar/background.png");
     const inline static QString HealthBarInner(":/characters/healthbar/bar.png");
