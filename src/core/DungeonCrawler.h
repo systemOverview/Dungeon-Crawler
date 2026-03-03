@@ -19,11 +19,11 @@ private:
     inline static std::array<std::string, 2> GameStrings = {"##########"
                                                             "#....$...#"
                                                             "#.S.<....#"
-                                                            "#..___...#"
+                                                            "#..___.1.#"
                                                             "#.G......#"
                                                             "#G.......#"
-                                                            "#######.##"
-                                                            "#.....A..#"
+                                                            "#######X##"
+                                                            "#..1..A..#"
                                                             "#.H......#"
                                                             "##########",
                                                             "##########"
@@ -51,8 +51,9 @@ private:
 
     // Move validation functions.
     static bool IsTileInNeighbouringRange(Tile* from, Tile* to);
-    static bool AreCharactersEnemies(Character* firstCharacter, Character* secondCharacter);
+    static bool IsTileToTileMovementLegal(Tile* from, Tile* to);
     static Character* WhoIsOccupyingTile(Tile* tile);
+    static bool AreCharactersEnemies(Character* firstCharacter, Character* secondCharacter);
     // Fighting functions.
     [[nodiscard]] static bool AttemptForcedTileTakeover(Character* attacker, Character* defender);
     static FightRound HoldFightRound(Character* attacker, Character* defender);

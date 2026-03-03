@@ -68,10 +68,20 @@ void DungeonCrawler::CreateCharacter(char letterRepresentingCharacterType, Tile*
                                                           characterModel->getCharacterID());
 
     connect(characterModel, &Character::characterMoved, GUI, &GraphicalUI::moveCharacterView);
+    connect(characterModel, &Character::characterMoved, [characterModel]() {
+        Portal* portal = dynamic_cast<Portal*>(characterModel->getTile());
+        if (portal) {
+            characterModel->setTileWithoutEmittingSignal(portal->getSiblingPortal());
+            GUI->moveCharacterView(characterModel->getCharacterID(),
+                                   portal->getCoordinates(),
+                                   portal->getSiblingPortal()->getCoordinates());
+        };
+    });
 }
 
 bool DungeonCrawler::RequestMove(Character* character, Tile* wantedTile) {
     if (!IsTileInNeighbouringRange(character->getTile(), wantedTile)) return false;
+    if (!IsTileToTileMovementLegal(character->getTile(), wantedTile)) return false;
 
     Character* characterAtWantedTile = WhoIsOccupyingTile(wantedTile);
 
@@ -90,6 +100,15 @@ bool DungeonCrawler::IsTileInNeighbouringRange(Tile* from, Tile* to) {
     return true;
 }
 
+bool DungeonCrawler::IsTileToTileMovementLegal(Tile* from, Tile* to) {
+    if (to->getTexture() == '#') return false;
+    if ((from->getTexture() == '_' && (to->getTexture() == '!' || to->getTexture() == '<'))
+        == false) {
+        return false;
+    }
+    return true;
+}
+
 bool DungeonCrawler::AreCharactersEnemies(Character* firstCharacter, Character* secondCharacter) {
     return ((firstCharacter->getCharacterType() == Character::CharacterType::Human)
             != (secondCharacter->getCharacterType() == Character::CharacterType::Human));
@@ -103,6 +122,8 @@ Character* DungeonCrawler::WhoIsOccupyingTile(Tile* tile) {
     }
     return nullptr;
 }
+
+// End of ValidateMove helpers
 
 bool DungeonCrawler::AttemptForcedTileTakeover(Character* attacker, Character* defender) {
     bool didAttackerWin = true;
@@ -152,4 +173,3 @@ FightRound DungeonCrawler::HoldFightRound(Character* attacker, Character* defend
     return fightRound;
 }
 
-// End of ValidateMove helpers
