@@ -1,50 +1,49 @@
 #ifndef CHARACTERANIMATION_H
 #define CHARACTERANIMATION_H
 
-#include <QAbstractAnimation>
 #include <QObject>
-#include <QPixmap>
-#include <QtCore/qdebug.h>
-#include <QtCore/qtimeline.h>
-#include "Constants.h"
-#include <CharacterItem.h>
-class CharacterAnimation : public QAbstractAnimation
+class QTimeLine;
+class CharacterItem;
+
+class CharacterAnimation : public QObject
 {
     Q_OBJECT
+public:
+    enum class AnimationType { Idle, Looping, Walking, Defending, Attacking };
 
 protected:
-    void updateCurrentTime(int currentTime) override;
+    struct Frames
+    {
+    private:
+        std::vector<int> m_frames;
 
-public:
+    public:
+        Frames(int from, int to); // constructor for frames using a range
+        Frames(std::vector<int> frames); // constructor for frames using a vector
+        std::vector<int> getFrames();
+    };
+    std::vector<int> m_animationFrames;
+
+    CharacterItem* m_character = nullptr;
+
+    QTimeLine* m_timeline = nullptr;
 
 private:
-    int m_duration = -1; //Infinite loop, the timeline object controls the state of this animation
-    CharacterItem* m_character = nullptr;
-    QTimeLine* m_timeline = nullptr;
-    std::pair<qreal, qreal> m_advancePerFrame = {0, 0};
-    inline static const std::map<CharacterItem::State, std::pair<int, int>> ANIMATION_FRAMES = {
-               //inclusive range
-               {CharacterItem::State::Idle, {0, 0}},
-               {CharacterItem::State::Walk, {1, 6}},
-               {CharacterItem::State::Jump, {16, 18}},
-               {CharacterItem::State::Punch, {25, 26}},
-    };
+    inline static std::map<AnimationType, Frames> ANIMATION_FRAMES
+        = {{AnimationType::Idle, Frames{0, 0}},
+           {AnimationType::Looping, Frames{0, 49}},
+           {AnimationType::Walking, Frames{1, 6}},
+           {AnimationType::Attacking, Frames{20, 23}},
+           {AnimationType::Defending, Frames(std::vector{29, 11, 13})}
 
-    std::vector<int> getAnimationFramesAsVector(CharacterItem::State state) const;
-    int m_loopCount = -1;
-
-public slots:
-    void playFrame(std::vector<int> frames, int iterator, Coordinates xyAdvancePerFrame = {0, 0});
-    void updateAnimation(CharacterItem::State characterState);
+        };
 
 public:
-    explicit CharacterAnimation(CharacterItem* character, QObject* parent = nullptr);
-    int duration() const override;
-    void setDuration(int duration);
-    void loopThroughAll();
+    CharacterAnimation(CharacterItem* character, AnimationType animationType);
+    virtual void start() = 0;
+    virtual ~CharacterAnimation();
 
-    void animateMove(Coordinates fromTileCoords, Coordinates ToTileCoords);
-    void animateFight();
+signals:
+    void finished();
 };
-
 #endif // CHARACTERANIMATION_H
