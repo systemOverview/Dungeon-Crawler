@@ -6,14 +6,14 @@
 #include "Constants.h"
 #include <SpriteManager.h>
 
-void TileItem::fixMyPosition() {
-    QGraphicsItem::setPos(m_coordinates.column * SIDE_LENGTH, m_coordinates.row * SIDE_LENGTH);
-}
-
 TileItem::TileItem(int row, int col, char textureID)
     : m_coordinates{row, col}
     , GameItem(QPixmap(GUIPaths::TileCharToPathRegister[textureID])) {
     fixMyPosition();
+}
+
+void TileItem::fixMyPosition() {
+    QGraphicsItem::setPos(m_coordinates.column * SIDE_LENGTH, m_coordinates.row * SIDE_LENGTH);
 }
 
 void TileItem::mousePressEvent(QGraphicsSceneMouseEvent* event) {
@@ -23,18 +23,18 @@ void TileItem::mousePressEvent(QGraphicsSceneMouseEvent* event) {
         return;
     }
 
-    QMessageBox debugInfo;
-    QString text;
-    QDebug{&text} << "cords" << m_coordinates;
-    QDebug{&text} << "bounding rect" << boundingRect();
-    QDebug{&text} << "position" << pos();
+    // QMessageBox debugInfo;
+    // QString text;
+    // QDebug{&text} << "cords" << m_coordinates;
+    // QDebug{&text} << "bounding rect" << boundingRect();
+    // QDebug{&text} << "position" << pos();
 
-    for (auto element : collidingItems()) {
-        QDebug{&text} << element;
-    }
+    // for (auto element : collidingItems()) {
+    //     QDebug{&text} << element;
+    // }
 
-    debugInfo.setText(text);
-    debugInfo.exec();
+    // debugInfo.setText(text);
+    // // debugInfo.exec();
     QGraphicsItem::mousePressEvent(event);
 }
 
@@ -47,6 +47,10 @@ int TileItem::getRow() const { return m_coordinates.row; }
 int TileItem::getColumn() const { return m_coordinates.column; }
 
 Coordinates TileItem::getCoordinates() const { return m_coordinates; }
+
+void TileItem::tileTextureChanged(char newTileTexture) {
+    m_texture = QPixmap(GUIPaths::TileCharToPathRegister[newTileTexture]);
+}
 
 // debugging
 void TileItem::drawLines(QPainter* painter) {
