@@ -9,14 +9,18 @@
 #include "PassiveAktive.h"
 #include <nlohmann/json.hpp>
 using json = nlohmann::json;
-class Tile
+class Tile : public QObject
 {
+    Q_OBJECT
 public:
 protected:
     char m_texture;
     Coordinates m_coordinates;
     Character* character{nullptr};
     Tile(int row, int col, char texture);
+
+signals:
+    void textureChanged(char newTexture);
 
 public:
     static Tile* GenerateTile(char texture, int row, int column);
@@ -26,6 +30,7 @@ public:
     int getRow() const;
     int getColumn() const;
     Coordinates getCoordinates() const;
+    virtual void alertOfAccess() {};
     virtual ~Tile();
 };
 
@@ -50,6 +55,8 @@ public:
 
 class Portal : public Tile, public EventListener
 {
+    inline static std::multimap<int, Portal*> PORTALS;
+
     bool shouldMove{true};
     Portal* m_siblingPortal = nullptr;
     int m_portalId;
@@ -63,14 +70,7 @@ public:
     int getPortalId();
     Portal* getSiblingPortal();
     void onPortalCreation(PortalCreationEvent* event) override;
-};
-
-class basePlate : public Tile
-{
-    bool isOpen{false};
-
-public:
-    void switchStatus(bool status);
+    void setSiblingPortal(Portal* newSiblingPortal);
 };
 
 class Switch : public Tile, public Active
@@ -81,20 +81,16 @@ public:
         : Tile(row, column, '?') {}
 };
 
-class Door : public Tile, public Passive
+class Door : public Tile
 {
-
     bool isOpen{false};
     bool state{0};    
     /* state 0 means wall, state 1 means floor*/
 public:
     Door(int row, int column, bool isClosed = true)
         : Tile(row, column, 'X') {
-        if (!isClosed){
-            Door::notify();
-        }
     };
-    void notify();
+    void alertOfAccess() override;
 };
 
 class Pit : public Tile

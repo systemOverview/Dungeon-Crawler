@@ -4,21 +4,22 @@
 
 #include "tile.h"
 #include <QtCore/qdebug.h>
+#include "PortalsConnector.h"
 
 Tile::Tile(int row, int col, char texture)
     : m_coordinates{row, col}
     , m_texture{texture} {}
 
-Tile::~Tile() = default;
 
 Tile* Tile::GenerateTile(char texture, int row, int column) {
-    switch(texture){
+    switch (texture) {
     case '.':
         return new Floor(row, column);
     case '#':
         return new Wall(row, column);
-    case 'X':
+    case 'X': {
         return new Door(row, column, true);
+    }
     case '/':
         return new Door(row, column, false);
     case '?':
@@ -33,12 +34,10 @@ Tile* Tile::GenerateTile(char texture, int row, int column) {
     default :
     {
         if (texture-'0'<10){ // portals are identified by numbers
-            std::cout << "texture" << texture-'0';
             return new Portal(row, column, texture-'0');
         }
         return new Floor(row, column);
     }
-
     }
 }
 
@@ -63,14 +62,16 @@ int Tile::getColumn() const { return m_coordinates.column; }
 
 Coordinates Tile::getCoordinates() const { return m_coordinates; }
 
+void Portal::setSiblingPortal(Portal* newSiblingPortal) { m_siblingPortal = newSiblingPortal; }
+
 Portal::Portal(int row, int column, int portalId)
-    : Tile(row, column, 'O') {
-    setPortalId(portalId);
-}
+    : Tile(row, column, std::to_string(portalId).at(0))
+    , m_portalId{portalId} {
+    PortalsConnector::AddPortal(this);
+};
 
-void Portal::setPortal(Portal *portal) { m_siblingPortal = portal; }
+void Portal::setPortal(Portal* portal) { m_siblingPortal = portal; }
 
-void Portal::setPortalId(int portalId) { m_portalId = portalId; }
 int Portal::getPortalId(){return m_portalId;}
 
 Portal* Portal::getSiblingPortal()
@@ -87,21 +88,17 @@ void Portal::onPortalCreation(PortalCreationEvent *event)
 
 }
 
-
 /*door*/
-void Door::notify()
-{
+void Door::alertOfAccess() {
     state = !state;
     if (state) {
         m_texture = '/';
-
-    } else {
+    }
+    else {
         m_texture = 'X';
     }
-
+    emit textureChanged(m_texture);
 }
-
-
 
 void to_json(json &jsonObject, const Tile* tileObject){
     jsonObject = json {
@@ -110,3 +107,4 @@ void to_json(json &jsonObject, const Tile* tileObject){
              {"column", tileObject->getColumn()},
     };
 }
+Tile::~Tile() = default;
