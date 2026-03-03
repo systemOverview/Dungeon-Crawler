@@ -25,8 +25,8 @@ private:
     using PartFramesCacheRegister = QMap<std::pair<int, int>, QPixmap>;
     // inline static QMap<CharacterItem::CharacterPart, PartFramesCacheRegister> FRAMES_CACHE = {};
     // inline static QMap<Character::CharacterType,QMap<CharacterItem::CharacterPart, PartFramesCacheRegister>> ALL
-    inline static constexpr int IMAGE_WIDTH = 32;
-    inline static constexpr int IMAGE_HEIGHT = 64;
+    inline static constexpr int FRAME_WIDTH = 32;
+    inline static constexpr int FRAME_HEIGHT = 64;
     inline static constexpr int ID_OF_LAST_FRAME_IN_ROW
         = 9; //count from 0 better than having to do math in frame getter functions
     inline static constexpr int ID_OF_LAST_FRAME_IN_COL = 9;

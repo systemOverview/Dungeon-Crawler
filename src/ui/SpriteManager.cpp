@@ -49,7 +49,7 @@ QImage SpriteManager::GetFrameImageFromSprite(Character::CharacterType character
     QString path(spritePath + QString::number(whichGraphicsOption) + ".png");
     QImage sprite(path);
 
-    QImage image = sprite.copy({row * IMAGE_WIDTH, col * IMAGE_HEIGHT, IMAGE_WIDTH, IMAGE_HEIGHT});
+    QImage image = sprite.copy({row * FRAME_WIDTH, col * FRAME_HEIGHT, FRAME_WIDTH, FRAME_HEIGHT});
     return image;
 }
 
@@ -72,8 +72,14 @@ QPixmap SpriteManager::GetFrameFromSprite(Character::CharacterType characterType
     }
     // if the condition above returned false, the pixmap doesnt exist in the cache, its the first time its being requested
 
-    const int row = (whichFrameId) % ID_OF_LAST_FRAME_IN_ROW;
-    const int col = float(whichFrameId) / ID_OF_LAST_FRAME_IN_COL;
+    // A sprite that has 10 rows and 8 columns (10,8) would have frames numbered from 0 to 79. ID_OF_LAST_FRAME_IN_ROW would
+    // be equal to 7, and ID_OF_LAST_FRAME_IN_COL = 9. To get the last frame in the first row (frame id = 7), we need to
+    // get its x and y coords. x = position on row (first=0) * imagewidth. We add 1 to ID_OF_LAST_FRAME_IN_ROW, otherwise
+    // 7 % ID_OF_LAST_FRAME_IN_ROW (=7) would equal 0, and we would get the first frame instead. Same reason for y.
+
+    const int x = (whichFrameId % (ID_OF_LAST_FRAME_IN_ROW + 1)) * FRAME_WIDTH;
+    const int y = int(float(whichFrameId)) / (ID_OF_LAST_FRAME_IN_COL + 1) * FRAME_HEIGHT;
+
     QString spritePath;
     try {
         spritePath = SPRITE_PATH_BASE.at(characterType).at(whichPart);
@@ -84,7 +90,7 @@ QPixmap SpriteManager::GetFrameFromSprite(Character::CharacterType characterType
 
     QImage sprite(path);
 
-    QImage image = sprite.copy({row * IMAGE_WIDTH, col * IMAGE_HEIGHT, IMAGE_WIDTH, IMAGE_HEIGHT});
+    QImage image = sprite.copy({x, y, FRAME_WIDTH, FRAME_HEIGHT});
     if (image.isNull()) {
         return toReturn;
     }
