@@ -102,8 +102,8 @@ bool DungeonCrawler::IsTileInNeighbouringRange(Tile* from, Tile* to) {
 
 bool DungeonCrawler::IsTileToTileMovementLegal(Tile* from, Tile* to) {
     if (to->getTexture() == '#') return false;
-    if ((from->getTexture() == '_' && (to->getTexture() == '!' || to->getTexture() == '<'))
-        == false) {
+    if ((from->getTexture() == '_' && (to->getTexture() != '!' && to->getTexture() != '<'))
+        == true) {
         return false;
     }
     return true;
