@@ -54,24 +54,6 @@ void TileItem::mousePressEvent(QGraphicsSceneMouseEvent* event) {
     QGraphicsItem::mousePressEvent(event);
 }
 
-void TileItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
-    if (isMoveEventTooShortToMatter(event)) {
-        return;
-    }
-
-    QDrag* drag = new QDrag(event->widget());
-    GameItemMimeData* mime = new GameItemMimeData;
-    drag->setMimeData(mime);
-    mime->setText(Utilities::Q_ENUM_ToQString(m_tileType));
-    drag->setPixmap(this->m_texturePixmap.scaled(m_sideLength, m_sideLength));
-    drag->setHotSpot(this->boundingRect().center().toPoint());
-    drag->exec();
-}
-
-
-
-
-
 void TileItem::dropEvent(QGraphicsSceneDragDropEvent* event) {
     const DragAndDropGameItemMimeData* customMimeData
         = dynamic_cast<const DragAndDropGameItemMimeData*>(event->mimeData());
@@ -88,4 +70,8 @@ void TileItem::dropEvent(QGraphicsSceneDragDropEvent* event) {
     }
 
     event->accept();
+}
+
+void TileItem::addInfoToDragDropMimeData(DragAndDropGameItemMimeData* mimeData) {
+    mimeData->setText(Utilities::Q_ENUM_ToQString(m_tileType));
 }

@@ -33,8 +33,8 @@ signals:
     void tileClicked(TileItem* tile);
 
 protected:
+    void addInfoToDragDropMimeData(DragAndDropGameItemMimeData* mimeData) override;
     void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
-    void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
     void dropEvent(QGraphicsSceneDragDropEvent* event) override;
 };
 

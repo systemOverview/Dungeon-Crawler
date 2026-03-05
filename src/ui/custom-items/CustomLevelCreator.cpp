@@ -60,6 +60,10 @@ void CustomLevelCreator::createTileOptions() {
                                             typeIterator,
                                             GameItem::Mode::DragAndDropInitiator);
         tileOptionsLayout->addGameItem(tileOption, {typeIterator % 3, typeIterator / 3});
+        connect(m_levelVisualizer,
+                &GameBoardView::boardCellSizeChanged,
+                tileOption,
+                &TileItem::setDragAndDropPixmapSize);
     }
 }
 
@@ -74,6 +78,11 @@ void CustomLevelCreator::createCharactersOptions() {
         CharacterItem* characterOption = new CharacterItem(Types::CharacterType(typeIterator),
                                                            CHARACTERS_COUNT++,
                                                            CharacterItem::Mode::DragAndDropInitiator);
+        connect(m_levelVisualizer,
+                &GameBoardView::boardCellSizeChanged,
+                characterOption,
+                &CharacterItem::setDragAndDropPixmapSize);
+
         charactersOptionsLayout->addGameItem(characterOption, {typeIterator % 2, typeIterator / 2});
     }
 }

@@ -195,6 +195,7 @@ void CharacterItem::setHealthPercentage(float newHealthPercentage) {
     m_healthPercentage = newHealthPercentage;
     update();
 }
+
 //Debugging
 
 CharacterItem::~CharacterItem() {
@@ -214,25 +215,4 @@ void CharacterItem::mousePressEvent(QGraphicsSceneMouseEvent* event) {
         }
     }
     QGraphicsItem::mousePressEvent(event);
-}
-
-void CharacterItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
-    if (isMoveEventTooShortToMatter(event)) {
-        return;
-    }
-
-    QDrag* drag = new QDrag(event->widget());
-
-    DragAndDropGameItemMimeData* mime = new DragAndDropGameItemMimeData();
-    DragAndDropGameItemEvent dragDropEvent(this);
-    mime->event = dragDropEvent;
-
-    drag->setMimeData(mime);
-
-    drag->setPixmap(this->m_texturePixmap.scaled(m_sideLength, m_sideLength));
-    drag->setHotSpot(this->boundingRect().center().toPoint());
-    drag->exec();
-
-    // once exec returns, TileItem would have changed the mime data of the event to a GameItemMimeData and stored itself
-    // for retrieval.
 }

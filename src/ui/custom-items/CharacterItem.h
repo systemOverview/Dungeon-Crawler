@@ -35,6 +35,7 @@ private:
         }
     };
 
+
     std::vector<CharacterAnimation*> m_animationsQueue = {};
     void playNextAnimation();
     CharacterOrientation m_characterOrientation;
@@ -54,14 +55,13 @@ private:
     TileItem* m_tile = nullptr;
 
     void setDefaultParts();
-    QPixmap getPixmap() const;
+    QPixmap getPixmap() const override;
     CharacterAnimation* m_currentAnimation = nullptr;
     bool m_flipOnPositionUpdate = false;
 
 public slots:
     void assignPart(CharacterItem::CharacterPart partType, int whichGraphicsOption);
     void addAnimationToQueue(CharacterAnimation* animation);
-
 
 public:
     CharacterItem(Types::CharacterType characterType,
@@ -89,7 +89,6 @@ public:
 
 protected:
     void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
-    void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
 };
 
 #endif // CHARACTERITEM_H

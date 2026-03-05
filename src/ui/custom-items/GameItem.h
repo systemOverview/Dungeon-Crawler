@@ -42,8 +42,13 @@ protected:
     Mode m_mode{};
     qreal m_sideLength = 70;
     QPixmap m_texturePixmap;
-    bool isMoveEventTooShortToMatter(QGraphicsSceneMouseEvent* event);
     virtual void fixMyPosition() = 0;
+    virtual QPixmap getPixmap() const;
+
+    bool m_isDragAndDropPixmapSizeSet = false;
+    qreal m_dragAndDropPixmapSize{};
+    virtual void addInfoToDragDropMimeData(DragAndDropGameItemMimeData* data) {};
+    bool isMoveEventTooShortToMatter(QGraphicsSceneMouseEvent* event);
 
 public:
     GameItem(Mode mode, QPixmap texturePixmap = QPixmap());
@@ -53,23 +58,16 @@ public:
     void setSide(qreal sideLength);
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
 
+    DragAndDropGameItemMimeData* createMimeData();
 public slots:
     void setSideLength(qreal newSideLength);
     void resize();
+    void setDragAndDropPixmapSize(qreal size);
+    void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
     void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
     void dragEnterEvent(QGraphicsSceneDragDropEvent* event) override;
 signals:
     void dragAndDropGameItemEvent(DragAndDropGameItemEvent event);
 };
 
-class GameItemMimeData : public QMimeData
-{
-    GameItem* m_receiveingGameItem = nullptr;
-
-public:
-    GameItem* getReceivingGameItem() const { return m_receiveingGameItem; }
-    void setReceivingGameItem(GameItem* receiveingGameItem) {
-        m_receiveingGameItem = receiveingGameItem;
-    }
-};
 #endif // GAMEITEM_H
