@@ -3,6 +3,7 @@
 #include <QMap>
 #include <QtCore/qobject.h>
 #include "Types.h"
+#include <qstandardpaths.h>
 #include <sstream>
 struct Coordinates
 {
@@ -97,7 +98,18 @@ namespace GUIPaths {
 namespace GameSettings {
     constexpr inline static int FRAMES_PER_SECOND = 10;
     constexpr inline static int TILES_PER_SIDE = 10;
-}
+} // namespace GameSettings
+
+class DataPaths
+{
+public:
+    const inline static QString WritableLocationCustomLevelPostfix = "/custom-level.json";
+
+    static const QString GetCustomLevelPath() {
+        QString writableLocation = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+        return (writableLocation + WritableLocationCustomLevelPostfix);
+    }
+};
 
 namespace DjikstraStrings {
     enum DjikstraStringID {

@@ -3,6 +3,7 @@
 #include <QtWidgets/qpushbutton.h>
 #include "Constants.h"
 #include "GameBoardView.h"
+#include "JsonObjects.h"
 #include "SquareGridLayout.h"
 #include "TileItem.h"
 #include "Types.h"
@@ -53,11 +54,16 @@ void CustomLevelCreator::showTilesMap() {
 }
 
 void CustomLevelCreator::setupSidebar() {
+    qDebug() << DataPaths::GetCustomLevelPath().toStdString();
+
     QVBoxLayout* sidebarLayout = new QVBoxLayout(m_sidebar);
     createTileOptions();
     createCharactersOptions();
 
     QPushButton* saveLevel = new QPushButton("Save level", this);
+    connect(saveLevel, &QPushButton::clicked, [this]() {
+        JsonGenerator::SaveLevelToJson(m_levelModel, DataPaths::GetCustomLevelPath());
+    });
     sidebarLayout->addWidget(saveLevel);
 }
 

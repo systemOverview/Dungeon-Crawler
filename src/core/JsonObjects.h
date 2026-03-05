@@ -1,12 +1,20 @@
 #ifndef JSONOBJECTS_H
 #define JSONOBJECTS_H
 
-// #include <nlohmann/json.hpp>
+class Level;
+class Tile;
+class QString;
+#include <nlohmann/json.hpp>
 
-#include "Level.h"
+using json = nlohmann::json;
 
-namespace JsonGenerator{
-    void saveGameState(std::vector<Level *> levels);
-}
+class JsonGenerator
+{
+private:
+    static json TileToJson(Tile* tile);
+
+public:
+    static void SaveLevelToJson(Level* level, QString path);
+};
 
 #endif
