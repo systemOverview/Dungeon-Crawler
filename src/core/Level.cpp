@@ -12,13 +12,20 @@ Level::Level(std::string gameString) {
     for (int i = 0; i < gameString.length(); i++) {
         int row = i / 10;
         int column = i % 10;
-        Tile* tile = Tile::GenerateTile(gameString[i], row, column);
-        (TILES)[row][column] = tile;
-
         if (gameString[i] == 'H' || gameString[i] == 'S' || gameString[i] == 'G'
             || gameString[i] == 'A') {
-            DungeonCrawler::CreateCharacter(gameString[i], tile);
+            Tile* tile = Tile::GenerateTile(Types::TileType::Floor, row, column);
+            Character* character = Character::GenerateCharacter(gameString[i], tile);
+            (TILES)[row][column] = tile;
+            CHARACTERS.push_back(character);
+            continue;
         }
+
+        Tile* tile = Tile::GenerateTile(TypesIdentifiers::CHAR_TO_TILE_TYPE_LOOKUP_TABLE.at(
+                                            gameString[i]),
+                                        row,
+                                        column);
+        (TILES)[row][column] = tile;
     }
 }
 
@@ -30,8 +37,17 @@ Tile* Level::GetTile(int row, int col) {
 Tile* Level::GetTile(Coordinates coordinates) {
     return GetTile(coordinates.row, coordinates.column);
 }
+Character* Level::WhoIsOccupyingTile(Tile* tile) {
+    for (Character* character : CHARACTERS) {
+        if (character->getTile() == tile) {
+            return character;
+        }
+    }
+    return nullptr;
+}
 
 const std::vector<std::vector<Tile*> > Level::getTiles() const { return TILES; }
+const std::vector<Character*> Level::getCharacters() const { return CHARACTERS; }
 
 int Level::getHeight() const
 {

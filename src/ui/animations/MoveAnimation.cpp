@@ -4,10 +4,12 @@
 #include "Constants.h"
 MoveAnimation::MoveAnimation(CharacterItem* character,
                              Coordinates fromTileCoords,
-                             Coordinates toTileCoords)
+                             Coordinates toTileCoords,
+                             CharacterTile_UI_PlacementMediator* placementMediator)
     : CharacterAnimation(character, AnimationType::Walking)
     , m_fromTileCoordinates{fromTileCoords}
-    , m_toTileCoordinates{toTileCoords} {
+    , m_toTileCoordinates{toTileCoords}
+    , m_placementMediator{placementMediator} {
     m_timeline = new QTimeLine();
 }
 void MoveAnimation::start() {
@@ -33,7 +35,7 @@ void MoveAnimation::start() {
 };
 void MoveAnimation::playFrame(std::vector<int> frames, int iterator, Coordinates xyAdvancePerFrame) {
     m_character->setCurrentFrameID(frames.at(iterator));
-    CharacterTile_UI_PlacementMediator::AdvanceCharacter(m_character, xyAdvancePerFrame);
+    m_placementMediator->advanceCharacter(m_character, xyAdvancePerFrame);
     if (iterator == m_timeline->endFrame()) {
         delete m_timeline;
         m_timeline = new QTimeLine();

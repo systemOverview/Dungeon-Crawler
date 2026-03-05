@@ -4,6 +4,7 @@
 #include <QPushButton>
 #include <QRadioButton>
 #include <QSlider>
+#include <QStackedWidget>
 #include <QTextEdit>
 #include <Qlabel>
 #include <QtCore/qtimer.h>
@@ -13,9 +14,9 @@
 #include <QtWidgets/qtoolbar.h>
 #include <QtWidgets/qtoolbutton.h>
 #include "ButtonItem.h"
-#include "GraphicalUI.h"
 #include "LoopingAnimation.h"
 #include "SpriteManager.h"
+#include <CustomLevelCreator.h>
 #include <TileItem.h>
 
 void MainWindow::makeStartScreen() {
@@ -23,11 +24,6 @@ void MainWindow::makeStartScreen() {
     QHBoxLayout* mainLayout = new QHBoxLayout();
     central->setLayout(mainLayout);
 
-    m_scene = new QGraphicsScene();
-    m_view = new QGraphicsView();
-    m_view->installEventFilter(this);
-    m_view->setFrameStyle(QFrame::NoFrame);
-    m_view->setScene(m_scene);
     mainLayout->addWidget(m_view);
 
     m_sidebar = new QWidget();
@@ -39,7 +35,7 @@ void MainWindow::makeStartScreen() {
 
     mainLayout->addWidget(m_sidebar);
 
-    m_character = new CharacterItem(Character::CharacterType::Human, -1);
+    m_character = new CharacterItem(Types::CharacterType::Human, -1);
     m_character->addAnimationToQueue(new LoopingAnimation(m_character));
 
     createCharacterCustomizationOptions();
@@ -62,7 +58,7 @@ void MainWindow::makeStartScreen() {
 }
 
 void MainWindow::createCharacterCustomizationOptions() {
-    for (int i = 0; i < int(CharacterItem::CharacterPart::PAST_END); i++) {
+    for (int i = 0; i < int(CharacterItem::CharacterPart::PAST_ENUM_END); i++) {
         CharacterItem::CharacterPart characterPart = CharacterItem::CharacterPart(i);
         QWidget* options = new QWidget();
         QGridLayout* optionsLayout = new QGridLayout();
@@ -71,7 +67,7 @@ void MainWindow::createCharacterCustomizationOptions() {
 
         QButtonGroup* optionsButtonGroup = new QButtonGroup();
         std::vector<QPixmap> variants = SpriteManager::GetIdleFrameVariants(
-            Character::CharacterType::Human,
+            Types::CharacterType::Human,
             characterPart,
             SpriteManager::ImageProcessingMode::TrimTransparent);
         int counter = 0;
@@ -101,19 +97,12 @@ void MainWindow::createCharacterCustomizationOptions() {
 
 
 qreal MainWindow::calculateTextureDimension() {
-    return std::min(m_view->rect().width() / 10, m_view->rect().height() / 10);
+    return std::min(m_view->rect().width() / GameSettings::TILES_PER_SIDE,
+                    m_view->rect().height() / GameSettings::TILES_PER_SIDE);
 }
 
 std::map<CharacterItem::CharacterPart, int> MainWindow::getHumanPartsGraphics() const {
     return m_humanPartsGraphics;
-}
-
-void MainWindow::createDebugSidebar() {
-    QWidget* debugSidebar = new QWidget();
-    centralWidget()->layout()->addWidget(debugSidebar);
-    debugSidebar->setMinimumWidth(200);
-
-    QRadioButton* flipCharacter = new QRadioButton("Flip characters", debugSidebar);
 }
 
 void MainWindow::characterCustomizationClicked(CharacterItem::CharacterPart characterPart,
@@ -132,21 +121,18 @@ void MainWindow::startGame() {
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent) {
-    makeStartScreen();
-    QTimer::singleShot(10, [this]() {
-        createDebugSidebar();
-        startGame();
-    });
-    // startGame(); //TEST TODO , refactor this to work with the state machines
+}
+
+void MainWindow::AddGameItemToScene(GameItem* gameItem) {
+    connect(INSTANCE, &MainWindow::gameItemsSideLengthChanged, gameItem, &GameItem::setSideLength);
+    INSTANCE->m_scene->addItem(gameItem);
 }
 
 bool MainWindow::eventFilter(QObject* obj, QEvent* event) {
     if (event->type() == QEvent::Resize) {
         QGraphicsView* view = qobject_cast<QGraphicsView*>(obj);
-        QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
         if (view) {
-            GameItem::SetSideLength(calculateTextureDimension());
-            emit dimensionsChanged();
+            emit gameItemsSideLengthChanged(calculateTextureDimension());
         }
         m_scene->setSceneRect(m_scene->itemsBoundingRect());
     }
@@ -154,8 +140,3 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* event) {
 }
 
 MainWindow::~MainWindow() {}
-
-void MainWindow::addGameItemToScene(GameItem* gameItem) const {
-    connect(this, &MainWindow::dimensionsChanged, gameItem, &GameItem::resize);
-    m_scene->addItem(gameItem);
-}

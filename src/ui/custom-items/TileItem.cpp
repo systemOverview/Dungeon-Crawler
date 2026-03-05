@@ -1,70 +1,91 @@
 #include "TileItem.h"
+#include <QDrag>
 #include <QMessageBox>
+#include <QMimeData>
 #include <QPainter>
 #include <QtCore/qtimer.h>
 #include <QtWidgets/qgraphicssceneevent.h>
 #include "Constants.h"
+#include "Utilities.h"
 #include <SpriteManager.h>
+#include <qapplication.h>
 
-TileItem::TileItem(int row, int col, char textureID)
-    : m_coordinates{row, col}
-    , GameItem(QPixmap(GUIPaths::TileCharToPathRegister[textureID])) {
+TileItem::TileItem(Types::TileType tileType, Coordinates coordinates, Mode mode)
+    : m_tileType{tileType}
+    , m_coordinates{coordinates}
+    , GameItem(mode, GUIPaths::TileTypeToPathRegister.at(tileType)) {
     fixMyPosition();
 }
 
+TileItem::TileItem(Types::TileType tileType, int row, int col, Mode mode)
+    : TileItem(tileType, {row, col}, mode) {}
+
 void TileItem::fixMyPosition() {
-    QGraphicsItem::setPos(m_coordinates.column * SIDE_LENGTH, m_coordinates.row * SIDE_LENGTH);
+    QGraphicsItem::setPos(m_coordinates.column * m_sideLength, m_coordinates.row * m_sideLength);
 }
 
-void TileItem::mousePressEvent(QGraphicsSceneMouseEvent* event) {
-    if (event->button() == Qt::LeftButton) {
-        emit tilePressed(this);
-        QGraphicsItem::mousePressEvent(event);
-        return;
-    }
-
-    // QMessageBox debugInfo;
-    // QString text;
-    // QDebug{&text} << "cords" << m_coordinates;
-    // QDebug{&text} << "bounding rect" << boundingRect();
-    // QDebug{&text} << "position" << pos();
-
-    // for (auto element : collidingItems()) {
-    //     QDebug{&text} << element;
-    // }
-
-    // debugInfo.setText(text);
-    // // debugInfo.exec();
-    QGraphicsItem::mousePressEvent(event);
-}
-
-void TileItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) {
-    painter->drawPixmap(boundingRect(), m_texture, m_texture.rect());
-}
+Coordinates TileItem::getCoordinates() const { return m_coordinates; }
 
 int TileItem::getRow() const { return m_coordinates.row; }
 
 int TileItem::getColumn() const { return m_coordinates.column; }
 
-Coordinates TileItem::getCoordinates() const { return m_coordinates; }
-
-void TileItem::tileTextureChanged(char newTileTexture) {
-    m_texture = QPixmap(GUIPaths::TileCharToPathRegister[newTileTexture]);
+void TileItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) {
+    painter->drawPixmap(boundingRect(), m_texturePixmap, m_texturePixmap.rect());
 }
 
-// debugging
-void TileItem::drawLines(QPainter* painter) {
-    //TEST
-    float step = boundingRect().width() / 5;
-    float xpos = 0;
-    QPen pen;
-    pen.setColor(Qt::white);
-    pen.setWidth(1);
-    painter->setPen(pen);
-    for (int i = 0; i < 5; i++) {
-        QPoint from(xpos, 10);
-        QPoint to(xpos, boundingRect().height());
-        painter->drawLine(from, to);
-        xpos += step;
+// TileItem::~TileItem() { qDebug() << m_coordinates; }
+
+void TileItem::changeTileType(Types::TileType newTileType) {
+    m_texturePixmap = QPixmap(GUIPaths::TileTypeToPathRegister.at(newTileType));
+    update();
+}
+
+void TileItem::mousePressEvent(QGraphicsSceneMouseEvent* event) {
+    if (event->button() == Qt::LeftButton) {
+        if (m_mode == Mode::DragAndDropInitiator) {
+            event->setAccepted(true);
+            return;
+        }
+        emit tileClicked(this);
+        QGraphicsItem::mousePressEvent(event);
+        event->setAccepted(true);
     }
+    QGraphicsItem::mousePressEvent(event);
+}
+
+void TileItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
+    if (isMoveEventTooShortToMatter(event)) {
+        return;
+    }
+
+    QDrag* drag = new QDrag(event->widget());
+    GameItemMimeData* mime = new GameItemMimeData;
+    drag->setMimeData(mime);
+    mime->setText(Utilities::Q_ENUM_ToQString(m_tileType));
+    drag->setPixmap(this->m_texturePixmap.scaled(m_sideLength, m_sideLength));
+    drag->setHotSpot(this->boundingRect().center().toPoint());
+    drag->exec();
+}
+
+
+
+
+
+void TileItem::dropEvent(QGraphicsSceneDragDropEvent* event) {
+    const DragAndDropGameItemMimeData* customMimeData
+        = dynamic_cast<const DragAndDropGameItemMimeData*>(event->mimeData());
+    if (customMimeData != nullptr) {
+        DragAndDropGameItemEvent copy = customMimeData->event;
+        copy.setDroppedOnItem(this);
+        emit dragAndDropGameItemEvent(copy);
+    }
+
+    if (event->mimeData()->hasText()) {
+        Types::TileType newType = Utilities::QString_To_Q_ENUM<Types::TileType>(
+            event->mimeData()->text());
+        changeTileType(newType);
+    }
+
+    event->accept();
 }

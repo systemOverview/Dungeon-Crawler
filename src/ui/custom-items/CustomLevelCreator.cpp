@@ -1,0 +1,90 @@
+#include "CustomLevelCreator.h"
+#include <QtWidgets/qgraphicsscene.h>
+#include "Constants.h"
+#include "GameBoardView.h"
+#include "SquareGridLayout.h"
+#include "TileItem.h"
+#include "Types.h"
+#include <MainWindow.h>
+#include <qevent.h>
+CustomLevelCreator::CustomLevelCreator(QWidget* parent)
+    : QWidget{parent} {
+    QHBoxLayout* layout = new QHBoxLayout(this);
+
+    m_levelVisualizer = new GameBoardView();
+
+    layout->addWidget(m_levelVisualizer->getViewWidget(), 2);
+
+    m_sidebar = new QWidget(this);
+    layout->addWidget(m_sidebar, 1);
+
+    createLevelCustomizer();
+}
+
+void CustomLevelCreator::createLevelCustomizer() {
+    showTilesMap();
+    setupSidebar();
+}
+
+void CustomLevelCreator::showTilesMap() {
+    for (int i = 0; i < GameSettings::TILES_PER_SIDE; i++) {
+        for (int j = 0; j < GameSettings::TILES_PER_SIDE; j++) {
+            TileItem* tileView = m_levelVisualizer
+                                     ->createTileView(Types::TileType::Floor,
+                                                      {i, j},
+                                                      TileItem::Mode::DragAndDropReceiver);
+            connect(tileView,
+                    &TileItem::dragAndDropGameItemEvent,
+                    this,
+                    &CustomLevelCreator::characterDroppedOnTile);
+        }
+    }
+}
+
+void CustomLevelCreator::setupSidebar() {
+    QVBoxLayout* sidebarLayout = new QVBoxLayout(m_sidebar);
+    createTileOptions();
+    createCharactersOptions();
+}
+
+void CustomLevelCreator::createTileOptions() {
+    QGraphicsScene* tileOptionsScene = new QGraphicsScene(this);
+    QGraphicsView* tileOptionsView = new QGraphicsView(tileOptionsScene);
+
+    m_sidebar->layout()->addWidget(tileOptionsView);
+    SquareGridLayout* tileOptionsLayout = new SquareGridLayout(tileOptionsView);
+
+    for (int typeIterator = 0; typeIterator < int(Types::TileType::PAST_ENUM_END); typeIterator++) {
+        TileItem* tileOption = new TileItem(Types::TileType(typeIterator),
+                                            0,
+                                            typeIterator,
+                                            GameItem::Mode::DragAndDropInitiator);
+        tileOptionsLayout->addGameItem(tileOption, {typeIterator % 3, typeIterator / 3});
+    }
+}
+
+void CustomLevelCreator::createCharactersOptions() {
+    QGraphicsScene* charactersOptionsScene = new QGraphicsScene(this);
+    QGraphicsView* charactersOptionsView = new QGraphicsView(charactersOptionsScene);
+    m_sidebar->layout()->addWidget(charactersOptionsView);
+    SquareGridLayout* charactersOptionsLayout = new SquareGridLayout(charactersOptionsView);
+
+    for (int typeIterator = 0; typeIterator < int(Types::CharacterType::PAST_ENUM_END);
+         typeIterator++) {
+        CharacterItem* characterOption = new CharacterItem(Types::CharacterType(typeIterator),
+                                                           CHARACTERS_COUNT++,
+                                                           CharacterItem::Mode::DragAndDropInitiator);
+        charactersOptionsLayout->addGameItem(characterOption, {typeIterator % 2, typeIterator / 2});
+    }
+}
+
+void CustomLevelCreator::characterDroppedOnTile(DragAndDropGameItemEvent event) {
+    CharacterItem* draggedCharacter = dynamic_cast<CharacterItem*>(event.getDraggedItem());
+    TileItem* tileDroppedOnto = dynamic_cast<TileItem*>(event.getDroppedOnItem());
+
+    if (draggedCharacter != nullptr && tileDroppedOnto != nullptr) {
+        m_levelVisualizer->createCharacterView(draggedCharacter->getCharacterType(),
+                                               CHARACTERS_COUNT++,
+                                               tileDroppedOnto->getCoordinates());
+    }
+}

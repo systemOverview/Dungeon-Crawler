@@ -19,19 +19,8 @@
 #include "TileItem.h"
 #include <FightAnimation.h>
 #include <Utilities.h>
-CharacterItem::CharacterItem(Character::CharacterType characterType, int characterID)
-    : m_characterID{characterID}
-    , m_characterType{characterType}
-    , GameItem(QPixmap()) {
-    setDefaultParts();
-    d_createMenu();
-}
-
-void CharacterItem::setHealthPercentage(float newHealthPercentage) {
-    m_healthPercentage = newHealthPercentage;
-    update();
-}
-
+#include <qapplication.h>
+#include <qdrag.h>
 void CharacterItem::playNextAnimation() {
     if (m_animationsQueue.empty()) {
         return;
@@ -67,21 +56,12 @@ void CharacterItem::updateOrientation(QPointF oldPos, QPointF newPos) {
     }
 }
 
+int CharacterItem::getCharacterID() const { return m_characterID; }
+
 void CharacterItem::setDefaultParts() {
-    for (int i = 0; i < int(CharacterItem::CharacterPart::PAST_END); i++) {
+    for (int i = 0; i < int(CharacterItem::CharacterPart::PAST_ENUM_END); i++) {
         m_partsGraphicOptions.insert({CharacterItem::CharacterPart(i), 0});
     }
-}
-
-Character::CharacterType CharacterItem::getCharacterType() const { return m_characterType; }
-
-std::map<CharacterItem::CharacterPart, int> CharacterItem::getPartsGraphicsOptions() const {
-    return m_partsGraphicOptions;
-}
-
-void CharacterItem::setPartsGraphics(
-    std::map<CharacterItem::CharacterPart, int> partsGraphicsOptions) {
-    m_partsGraphicOptions = partsGraphicsOptions;
 }
 
 QPixmap CharacterItem::getPixmap() const {
@@ -107,14 +87,6 @@ QPixmap CharacterItem::getPixmap() const {
     return base;
 }
 
-void CharacterItem::fixMyPosition() {
-    if (scene()) {
-        QPointF newPos = CharacterTile_UI_PlacementMediator::GetCharacterPosition(this);
-        updateOrientation(pos(), newPos);
-        setPos(newPos);
-    }
-}
-
 void CharacterItem::assignPart(CharacterItem::CharacterPart partType, int whichGraphicsOption) {
     m_partsGraphicOptions.insert_or_assign(partType, whichGraphicsOption);
 }
@@ -134,6 +106,31 @@ void CharacterItem::addAnimationToQueue(CharacterAnimation* animation) {
     });
 }
 
+CharacterItem::CharacterItem(Types::CharacterType characterType,
+                             int characterID,
+                             Mode mode,
+                             bool isHealthbarShown)
+    : m_characterID{characterID}
+    , m_characterType{characterType}
+    , m_isHealthbarShown{isHealthbarShown}
+    , GameItem(mode) {
+    setDefaultParts();
+}
+
+Types::CharacterType CharacterItem::getCharacterType() const { return m_characterType; }
+
+TileItem* CharacterItem::getTile() const { return m_tile; }
+
+void CharacterItem::setTile(TileItem* tile) { m_tile = tile; }
+
+void CharacterItem::fixMyPosition() {}
+
+void CharacterItem::updatePosition(QPointF newPosition) {
+    updateOrientation(pos(), newPosition);
+    setPos(newPosition);
+    update();
+}
+
 void CharacterItem::paint(QPainter* painter,
                           const QStyleOptionGraphicsItem* option,
                           QWidget* widget) {
@@ -146,32 +143,45 @@ void CharacterItem::paint(QPainter* painter,
     SpriteManager::TrimTransparent(img);
     pixmap = QPixmap::fromImage(img);
 
-    float characterHeight = SIDE_LENGTH * 80 / 100;
+    if (m_flipOnPositionUpdate) {
+        pixmap = pixmap.transformed(flip);
+    }
 
-    pixmap = pixmap.transformed(flip);
+    float characterHeight = m_sideLength;
+
+    if (m_isHealthbarShown) {
+        characterHeight = m_sideLength * 80 / 100;
+        QPixmap healthBarBackground(GUIPaths::HealthBarBackground);
+        QPixmap healthBarInner(GUIPaths::HealthBarInner);
+
+        healthBarBackground = healthBarBackground.transformed(flip);
+        healthBarInner = healthBarInner.transformed(flip);
+
+        QPainter healthPainter(&healthBarBackground);
+
+        QRectF fillableHealthBarBackground = healthBarBackground.rect();
+        fillableHealthBarBackground.setWidth(healthBarBackground.width() * m_healthPercentage / 100);
+        healthPainter.drawPixmap(fillableHealthBarBackground, healthBarInner, healthBarInner.rect());
+        painter->drawPixmap(QRectF(0, 0, boundingRect().width(), m_sideLength - characterHeight),
+                            healthBarBackground,
+                            healthBarBackground.rect());
+    }
 
     painter->drawPixmap(QRectF{0,
-                               SIDE_LENGTH - characterHeight,
+                               m_sideLength - characterHeight,
                                boundingRect().width(),
                                characterHeight},
                         pixmap,
                         pixmap.rect());
+}
 
-    QPixmap healthBarBackground(GUIPaths::HealthBarBackground);
-    QPixmap healthBarInner(GUIPaths::HealthBarInner);
+std::map<CharacterItem::CharacterPart, int> CharacterItem::getPartsGraphicsOptions() const {
+    return m_partsGraphicOptions;
+}
 
-    healthBarBackground = healthBarBackground.transformed(flip);
-    healthBarInner = healthBarInner.transformed(flip);
-
-    QPainter healthPainter(&healthBarBackground);
-
-    QRectF fillableHealthBarBackground = healthBarBackground.rect();
-    fillableHealthBarBackground.setWidth(healthBarBackground.width() * m_healthPercentage / 100);
-    healthPainter.drawPixmap(fillableHealthBarBackground, healthBarInner, healthBarInner.rect());
-
-    painter->drawPixmap(QRectF(0, 0, boundingRect().width(), SIDE_LENGTH - characterHeight),
-                        healthBarBackground,
-                        healthBarBackground.rect());
+void CharacterItem::setPartsGraphics(
+    std::map<CharacterItem::CharacterPart, int> partsGraphicsOptions) {
+    m_partsGraphicOptions = partsGraphicsOptions;
 }
 
 int CharacterItem::getCurrentFrameID() const { return m_currentFrameId; }
@@ -181,22 +191,11 @@ void CharacterItem::setCurrentFrameID(int frameId) {
     update();
 }
 
-
-void CharacterItem::setTile(TileItem* tile) { m_tile = tile; }
-
-TileItem* CharacterItem::getTile() const { return m_tile; }
+void CharacterItem::setHealthPercentage(float newHealthPercentage) {
+    m_healthPercentage = newHealthPercentage;
+    update();
+}
 //Debugging
-
-void CharacterItem::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
-    d_contextMenu->exec(event->screenPos());
-}
-
-void CharacterItem::d_createMenu() {
-    d_contextMenu = new QMenu();
-    QAction* d_restoreDefaultFlip = new QAction();
-    d_restoreDefaultFlip->setText("Restore to default");
-    d_contextMenu->addAction(d_restoreDefaultFlip);
-}
 
 CharacterItem::~CharacterItem() {
     delete m_currentAnimation;
@@ -205,4 +204,35 @@ CharacterItem::~CharacterItem() {
         *it = nullptr;
         it = m_animationsQueue.erase(it);
     }
+}
+
+void CharacterItem::mousePressEvent(QGraphicsSceneMouseEvent* event) {
+    if (event->button() == Qt::LeftButton) {
+        if (m_mode == Mode::DragAndDropInitiator) {
+            event->setAccepted(true);
+            return;
+        }
+    }
+    QGraphicsItem::mousePressEvent(event);
+}
+
+void CharacterItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
+    if (isMoveEventTooShortToMatter(event)) {
+        return;
+    }
+
+    QDrag* drag = new QDrag(event->widget());
+
+    DragAndDropGameItemMimeData* mime = new DragAndDropGameItemMimeData();
+    DragAndDropGameItemEvent dragDropEvent(this);
+    mime->event = dragDropEvent;
+
+    drag->setMimeData(mime);
+
+    drag->setPixmap(this->m_texturePixmap.scaled(m_sideLength, m_sideLength));
+    drag->setHotSpot(this->boundingRect().center().toPoint());
+    drag->exec();
+
+    // once exec returns, TileItem would have changed the mime data of the event to a GameItemMimeData and stored itself
+    // for retrieval.
 }

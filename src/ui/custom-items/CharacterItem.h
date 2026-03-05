@@ -6,8 +6,8 @@
 #include <QtCore/qobject.h>
 #include <QtCore/qsequentialanimationgroup.h>
 #include <QtStateMachine/qstatemachine.h>
-#include "Character.h"
 #include "GameItem.h"
+#include "Types.h"
 class CharacterAnimation;
 class TileItem;
 class SpriteManager;
@@ -20,12 +20,10 @@ class CharacterItem : public GameItem
     friend TileItem;
 
 public:
-    enum class CharacterPart { Base, Head, Outfit, Weapon, PAST_END };
+    enum class CharacterPart { Base, Head, Outfit, Weapon, PAST_ENUM_END };
     Q_ENUM(CharacterPart);
 
 private:
-    std::vector<CharacterAnimation*> m_animationsQueue = {};
-    void playNextAnimation();
     struct CharacterOrientation
     {
         int horizontalFlip = 1;
@@ -36,16 +34,20 @@ private:
             verticalRotation = 0;
         }
     };
+
+    std::vector<CharacterAnimation*> m_animationsQueue = {};
+    void playNextAnimation();
     CharacterOrientation m_characterOrientation;
     void updateOrientation(QPointF oldPos, QPointF newPos);
 
     inline static constexpr int STANDING_FRAME = 10;
     int m_currentFrameId{STANDING_FRAME};
 
-    Character::CharacterType m_characterType;
+    Types::CharacterType m_characterType;
     int m_characterID{};
 
     float m_healthPercentage = 100;
+    bool m_isHealthbarShown = false;
 
     std::map<CharacterItem::CharacterPart, int> m_partsGraphicOptions = {};
 
@@ -54,21 +56,26 @@ private:
     void setDefaultParts();
     QPixmap getPixmap() const;
     CharacterAnimation* m_currentAnimation = nullptr;
+    bool m_flipOnPositionUpdate = false;
 
 public slots:
     void assignPart(CharacterItem::CharacterPart partType, int whichGraphicsOption);
     void addAnimationToQueue(CharacterAnimation* animation);
 
-signals:
 
 public:
-    CharacterItem(Character::CharacterType characterType, int characterID);
-    Character::CharacterType getCharacterType() const;
+    CharacterItem(Types::CharacterType characterType,
+                  int characterID,
+                  Mode mode = GameItem::Mode::Clickable,
+                  bool isHealthbarShown = false);
+    Types::CharacterType getCharacterType() const;
+    int getCharacterID() const;
 
     TileItem* getTile() const;
     void setTile(TileItem* tile);
 
     void fixMyPosition() override;
+    void updatePosition(QPointF newPosition);
 
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
     std::map<CharacterItem::CharacterPart, int> getPartsGraphicsOptions() const;
@@ -80,14 +87,9 @@ public:
 
     ~CharacterItem();
 
-//DEBUGGING INTERFACE TEST
 protected:
-    void contextMenuEvent(QGraphicsSceneContextMenuEvent* event) override;
-
-public:
-    bool d_flip = true;
-    QMenu* d_contextMenu;
-    void d_createMenu();
+    void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
+    void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
 };
 
 #endif // CHARACTERITEM_H

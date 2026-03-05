@@ -2,38 +2,40 @@
 #define TILEITEM_H
 
 #include <QGraphicsItem>
-#include "CharacterItem.h"
 #include "Constants.h"
 #include "GameItem.h"
 
 class TileItem : public GameItem
 {
     Q_OBJECT
+public:
+
 private:
-    // start debugging :
-    void drawLines(QPainter* painter);
-    //end debugging
-
     Coordinates m_coordinates = {-1, -1};
-    void fixMyPosition() override;
-    QTimer* m_doubleClickTimer;
 
-    CharacterItem* m_character = nullptr;
-    int m_characterCell = 1;
+    Types::TileType m_tileType{};
+
+    void fixMyPosition() override;
 
 public:
-    TileItem(int row, int col, char textureID);
-    void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
+    TileItem(Types::TileType tileType, Coordinates coordinates, Mode mode = Mode::Clickable);
+    TileItem(Types::TileType tileType, int row, int col, Mode mode = Mode::Clickable);
+
+    Coordinates getCoordinates() const;
     int getRow() const;
     int getColumn() const;
-    Coordinates getCoordinates() const;
+
+    void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
+
 public slots:
-    void tileTextureChanged(char newTileTexture);
+    void changeTileType(Types::TileType newTileType);
 signals:
-    void tilePressed(TileItem* tile);
+    void tileClicked(TileItem* tile);
 
 protected:
     void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
+    void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
+    void dropEvent(QGraphicsSceneDragDropEvent* event) override;
 };
 
 #endif // TILEITEM_H

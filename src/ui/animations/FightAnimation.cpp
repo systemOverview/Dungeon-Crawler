@@ -1,5 +1,6 @@
 #include "FightAnimation.h"
 #include "CharacterItem.h"
+#include "Constants.h"
 
 #include <QStateMachine>
 #include <QtCore/qtimeline.h>

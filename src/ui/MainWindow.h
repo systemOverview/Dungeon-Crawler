@@ -9,7 +9,7 @@
 #include <QtWidgets/qtoolbox.h>
 #include "CharacterItem.h"
 #include "Level.h"
-class GraphicalUI;
+class GameController;
 class DungeonCrawler;
 class TileItem;
 
@@ -20,19 +20,9 @@ class MainWindow;
 class MainWindow : public QMainWindow, public EventListener
 {
     Q_OBJECT
-    enum MoveDirection {
-        TopLeft,
-        TopCenter,
-        TopRight,
-        CenterLeft,
-        CenterCenter,
-        CenterRight,
-        BottomLeft,
-        BottomCenter,
-        BottomRight
-    };
 
 private:
+    inline static MainWindow* INSTANCE = nullptr;
     QGraphicsScene* m_scene = nullptr;
     QGraphicsView* m_view = nullptr;
 
@@ -59,7 +49,7 @@ private:
     QGridLayout* m_gameBoard;
 
     QWidget* m_arrowField;
-    GraphicalUI* GUI;
+    GameController* GUI;
 
     std::map<CharacterItem::CharacterPart, int> m_humanPartsGraphics;
 
@@ -67,7 +57,7 @@ public slots:
     void characterCustomizationClicked(CharacterItem::CharacterPart characterPart, int whichOption);
     void startGame();
 signals:
-    void dimensionsChanged();
+    void gameItemsSideLengthChanged(qreal newSideLength);
     void gameStarted();
 
 public:
@@ -75,11 +65,10 @@ public:
 
     ~MainWindow();
 
-    void addGameItemToScene(GameItem* gameItem) const;
+    static void AddGameItemToScene(GameItem* gameItem);
 
     bool eventFilter(QObject* obj, QEvent* event) override;
     std::map<CharacterItem::CharacterPart, int> getHumanPartsGraphics() const;
-    void createDebugSidebar();
 };
 
 #endif // MAINWINDOW_H

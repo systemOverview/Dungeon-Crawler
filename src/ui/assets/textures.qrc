@@ -58,6 +58,7 @@
         <file>characters/goblin/base/0.png</file>
         <file>characters/healthbar/background.png</file>
         <file>characters/healthbar/bar.png</file>
+        <file>characters/skeleton/base/0.png</file>
     </qresource>
     <qresource prefix="/fonts">
         <file>emulogic-font</file>
