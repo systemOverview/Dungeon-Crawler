@@ -1,5 +1,6 @@
 #include "CustomLevelCreator.h"
 #include <QtWidgets/qgraphicsscene.h>
+#include <QtWidgets/qpushbutton.h>
 #include "Constants.h"
 #include "GameBoardView.h"
 #include "SquareGridLayout.h"
@@ -27,16 +28,26 @@ void CustomLevelCreator::createLevelCustomizer() {
 }
 
 void CustomLevelCreator::showTilesMap() {
-    for (int i = 0; i < GameSettings::TILES_PER_SIDE; i++) {
-        for (int j = 0; j < GameSettings::TILES_PER_SIDE; j++) {
-            TileItem* tileView = m_levelVisualizer
-                                     ->createTileView(Types::TileType::Floor,
-                                                      {i, j},
-                                                      TileItem::Mode::DragAndDropReceiver);
-            connect(tileView,
-                    &TileItem::dragAndDropGameItemEvent,
-                    this,
-                    &CustomLevelCreator::characterDroppedOnTile);
+    m_levelModel = new Level();
+
+    connect(m_levelModel,
+            &Level::tileReplaced,
+            [this](Coordinates replacedTileCoordinates, Tile* newTile) {
+                m_levelVisualizer->replaceTileView(replacedTileCoordinates, newTile->getTileType());
+            });
+
+    for (int row = 0; row < m_levelModel->getTiles().size(); row++) {
+        for (const std::vector<Tile*>& row : m_levelModel->getTiles()) {
+            for (Tile* tile : row) {
+                TileItem* tileView = m_levelVisualizer
+                                         ->createTileView(Types::TileType::Floor,
+                                                          tile->getCoordinates(),
+                                                          TileItem::Mode::DragAndDropReceiver);
+                connect(tileView,
+                        &TileItem::dragAndDropGameItemEvent,
+                        this,
+                        &CustomLevelCreator::dragDropEvent);
+            }
         }
     }
 }
@@ -45,6 +56,9 @@ void CustomLevelCreator::setupSidebar() {
     QVBoxLayout* sidebarLayout = new QVBoxLayout(m_sidebar);
     createTileOptions();
     createCharactersOptions();
+
+    QPushButton* saveLevel = new QPushButton("Save level", this);
+    sidebarLayout->addWidget(saveLevel);
 }
 
 void CustomLevelCreator::createTileOptions() {
@@ -87,7 +101,7 @@ void CustomLevelCreator::createCharactersOptions() {
     }
 }
 
-void CustomLevelCreator::characterDroppedOnTile(DragAndDropGameItemEvent event) {
+void CustomLevelCreator::dragDropEvent(DragAndDropGameItemEvent event) {
     CharacterItem* draggedCharacter = dynamic_cast<CharacterItem*>(event.getDraggedItem());
     TileItem* tileDroppedOnto = dynamic_cast<TileItem*>(event.getDroppedOnItem());
 
@@ -95,5 +109,14 @@ void CustomLevelCreator::characterDroppedOnTile(DragAndDropGameItemEvent event) 
         m_levelVisualizer->createCharacterView(draggedCharacter->getCharacterType(),
                                                CHARACTERS_COUNT++,
                                                tileDroppedOnto->getCoordinates());
+        return;
+    }
+
+    else {
+        TileItem* draggedTile = dynamic_cast<TileItem*>(event.getDraggedItem());
+        if (draggedTile != nullptr && tileDroppedOnto != nullptr) {
+            m_levelModel->insertOrReplaceTile(draggedTile->getTileType(),
+                                              tileDroppedOnto->getCoordinates());
+        }
     }
 }

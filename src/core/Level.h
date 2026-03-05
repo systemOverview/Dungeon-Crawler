@@ -9,27 +9,36 @@
 using json = nlohmann::json;
 class Character;
 class Tile;
-class Level
+class Level : public QObject
 {
-    inline static std::vector<std::vector<Tile*>> TILES = {};
-
-    inline static std::vector<Character*> CHARACTERS = {};
-    int m_gameHeight = 10;
-    int m_gameWidth = 10;
+    Q_OBJECT
+    std::vector<std::vector<Tile*>> m_tiles = {};
+    std::vector<Character*> m_characters = {};
+    int m_numberOfRows = 10;
+    int m_numberOfColumns = 10;
 
 public: //static functions
-    static Tile* GetTile(int row, int col);
-    static Tile* GetTile(Coordinates coordinates);
-    static Character* WhoIsOccupyingTile(Tile* tile);
+    Tile* getTile(int row, int col);
+    Tile* getTile(Coordinates coordinates);
+    Character* whoIsOccupyingTile(Tile* tile);
+signals:
+    void tileReplaced(Coordinates coordinatesOfReplacedTile, Tile* newTile);
 
 public:
-    Level(std::string gameBoard);
+    Level(std::string gameBoard,
+          int numberOfRows = GameSettings::TILES_PER_SIDE,
+          int numberOfColumns = GameSettings::TILES_PER_SIDE);
+
+    Level(int numberOfRows = GameSettings::TILES_PER_SIDE,
+          int numberOfColumns = GameSettings::TILES_PER_SIDE);
+
     const std::vector<std::vector<Tile*>> getTiles() const;
     const std::vector<Character*> getCharacters() const;
 
-    int getHeight() const;
-    int getWidth() const;
+    void insertOrReplaceTile(Types::TileType tileType, Coordinates tileCoordinates);
+
     void setDefaultTiles();
+    void clear();
     ~Level();
 };
 

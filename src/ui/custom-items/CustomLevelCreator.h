@@ -7,12 +7,14 @@ class QGraphicsView;
 class TileItem;
 class GameBoardView;
 class DragAndDropGameItemEvent;
+class Level;
 class CustomLevelCreator : public QWidget
 {
     Q_OBJECT
 private:
     static inline int CHARACTERS_COUNT = 0;
     GameBoardView* m_levelVisualizer = nullptr;
+    Level* m_levelModel = nullptr;
     QWidget* m_sidebar = nullptr;
 
     void createLevelCustomizer();
@@ -23,7 +25,7 @@ private:
     void createTileOptions();
     void createCharactersOptions();
 public slots:
-    void characterDroppedOnTile(DragAndDropGameItemEvent event);
+    void dragDropEvent(DragAndDropGameItemEvent event);
 
 public:
     CustomLevelCreator(QWidget* parent = nullptr);
