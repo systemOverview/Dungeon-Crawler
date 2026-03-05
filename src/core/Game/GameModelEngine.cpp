@@ -20,11 +20,13 @@ void GameModelEngine::createGame() {
     for (Character* character : CURRENT_LEVEL->getCharacters()) {
         AbstractController* characterController = AbstractController::CreateCharacterController(
             character);
+        characterController->setLevel(CURRENT_LEVEL);
 
         connect(this,
                 &GameModelEngine::move,
                 characterController,
                 &AbstractController::moveCharacter);
+
         CHARACTERS_CONTROLLERS.insert({character, characterController});
     }
 }
@@ -33,7 +35,7 @@ bool GameModelEngine::RequestMove(Character* character, Tile* wantedTile) {
     if (!IsTileInNeighbouringRange(character->getTile(), wantedTile)) return false;
     if (!IsTileToTileMovementLegal(character->getTile(), wantedTile)) return false;
 
-    Character* characterAtWantedTile = Level::WhoIsOccupyingTile(wantedTile);
+    Character* characterAtWantedTile = CURRENT_LEVEL->whoIsOccupyingTile(wantedTile);
 
     if (characterAtWantedTile != nullptr && AreCharactersEnemies(character, characterAtWantedTile)) {
         return AttemptForcedTileTakeover(character, characterAtWantedTile);

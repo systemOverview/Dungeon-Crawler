@@ -43,6 +43,10 @@ Tile* Tile::GenerateTile(Types::TileType tileType, int row, int column, int port
     }
 }
 
+Tile* Tile::GenerateTile(Types::TileType tileType, Coordinates coordinates, int portalID) {
+    return Tile::GenerateTile(tileType, coordinates.row, coordinates.column, portalID);
+}
+
 Types::TileType Tile::getTileType() const { return m_tileType; }
 
 Character *Tile::getCharacter() const
