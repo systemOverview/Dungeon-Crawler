@@ -40,6 +40,9 @@ public slots:
     void tileClicked(TileItem* whichTile);
 signals:
     void gameStarted();
+    void tileModelReplaced(
+        Coordinates replacedTileCoordinates,
+        Types::TileType newTileType); // connects Level::tileReplaced to GameBoard::replaceTileView
     void humanHasInitiatedMove();
 
 public:

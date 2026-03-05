@@ -22,20 +22,25 @@
 #include <MoveAnimation.h>
 
 GameController::GameController() {
-    m_gameView = new GameBoardView();
     m_gameEngine = new GameModelEngine();
+
+    m_gameView = new GameBoardView();
+    connect(m_gameView, &GameBoardView::tileClicked, this, &GameController::tileClicked);
 
     createLevelView(m_gameEngine->getCurrentLevel());
 }
 
 void GameController::createLevelView(Level* level) {
+    connect(level, &Level::tileReplaced, [this](Coordinates replacedTileCoordinates, Tile* newTile) {
+        m_gameView->replaceTileView(replacedTileCoordinates, newTile->getTileType());
+    });
+
     for (const std::vector<Tile*>& row : level->getTiles()) {
         for (Tile* tileModel : row) {
             TileItem* tileView = m_gameView->createTileView(tileModel->getTileType(),
                                                             tileModel->getCoordinates());
 
             connect(tileModel, &Tile::tileTypeChanged, tileView, &TileItem::changeTileType);
-            connect(tileView, &TileItem::tileClicked, this, &GameController::tileClicked);
         }
     }
     for (Character* characterModel : level->getCharacters()) {

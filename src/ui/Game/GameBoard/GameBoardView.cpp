@@ -28,7 +28,10 @@ TileItem* GameBoardView::createTileView(Types::TileType tileType,
     m_scene->addItem(tileView);
 
     m_tileViews.insert(tileCoordinates, tileView);
+
+    connect(tileView, &TileItem::tileClicked, this, &GameBoardView::tileClicked);
     connect(this, &GameBoardView::boardCellSizeChanged, tileView, &GameItem::setSideLength);
+
     return tileView;
 }
 
@@ -84,4 +87,10 @@ bool GameBoardView::eventFilter(QObject* obj, QEvent* event) {
 qreal GameBoardView::calculateBoardCellSideSize() {
     return std::min(m_view->rect().width() / GameSettings::TILES_PER_SIDE,
                     m_view->rect().height() / GameSettings::TILES_PER_SIDE);
+}
+
+void GameBoardView::replaceTileView(Coordinates replacedTileCoordinates, Types::TileType newTyleType) {
+    assert(m_tileViews.count(replacedTileCoordinates) > 0 && "Level view and model mismatch");
+    (m_tileViews.find(replacedTileCoordinates)).value()->changeTileType(newTyleType);
+    // TileItem*
 }

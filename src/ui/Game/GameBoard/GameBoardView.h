@@ -21,6 +21,7 @@ class GameBoardView : public QObject
 
     qreal calculateBoardCellSideSize();
 public slots:
+    void replaceTileView(Coordinates replacedTileCoordinates, Types::TileType newTyleType);
     void moveCharacterView(int characterID, Coordinates from, Coordinates to);
 signals:
     void boardCellSizeChanged(qreal newSideLength);
