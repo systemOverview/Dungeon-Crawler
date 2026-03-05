@@ -1,7 +1,5 @@
 target_sources(DungeonCrawler PRIVATE
-    Event.h Event.cpp
-    EventBus.h EventBus.cpp
-    FightEvent.h FightEvent.cpp
-    EventBus.h EventBus.cpp
-)
+    Character.cpp Character.h
+    )
+add_subdirectory(Controllers)
 target_include_directories(DungeonCrawler PRIVATE  ${CMAKE_CURRENT_SOURCE_DIR})

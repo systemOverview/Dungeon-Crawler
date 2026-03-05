@@ -14,19 +14,10 @@ qt_standard_project_setup()
 set(CMAKE_AUTORCC ON)
 
 qt_add_executable(DungeonCrawler WIN32 MACOSX_BUNDLE
-    src/ui/Constants.cpp
 
     src/ui/assets/characters/human/base/0.png src/ui/assets/characters/human/base/1.png src/ui/assets/characters/human/base/2.png src/ui/assets/characters/human/head/0.png src/ui/assets/characters/human/head/1.png src/ui/assets/characters/human/head/2.png src/ui/assets/characters/human/head/3.png src/ui/assets/characters/human/head/4.png src/ui/assets/characters/human/head/5.png src/ui/assets/characters/human/head/6.png src/ui/assets/characters/human/head/7.png src/ui/assets/characters/human/outfit/0.png src/ui/assets/characters/human/outfit/1.png src/ui/assets/characters/human/outfit/2.png src/ui/assets/characters/human/outfit/3.png
-    src/ui/SpriteManager.h src/ui/SpriteManager.cpp
-    src/ui/animations/CMakeLists.txt
-
-    src/ui/custom-items/TileItem.h src/ui/custom-items/TileItem.cpp
-    src/ui/custom-items/GameItem.h src/ui/custom-items/GameItem.cpp
-    src/ui/CharacterTile_UI_PlacementMediator.h src/ui/CharacterTile_UI_PlacementMediator.cpp
-    src/core/HumanController.h src/core/HumanController.cpp
-    src/events/FightEvent.h src/events/FightEvent.cpp
-    src/ui/custom-items/PortalsConnector.h src/ui/custom-items/PortalsConnector.cpp
-
+    src/core/Game/GameModelEngine.h src/core/Game/GameModelEngine.cpp
+    src/core/Game/tiles/CMakeLists.txt
    )
 add_definitions( -DMAGICKCORE_QUANTUM_DEPTH=16 )
 add_definitions( -DMAGICKCORE_HDRI_ENABLE=0 )
@@ -63,4 +54,4 @@ qt_generate_deploy_app_script(
 install(SCRIPT ${deploy_script})
 target_include_directories(DungeonCrawler PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
-
+#git mv CharacterTile_UI_PlacementMediator.h Game/GameBoard/CharacterTile_UI_PlacementMediator.h
