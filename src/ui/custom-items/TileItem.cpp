@@ -20,6 +20,8 @@ TileItem::TileItem(Types::TileType tileType, Coordinates coordinates, Mode mode)
 TileItem::TileItem(Types::TileType tileType, int row, int col, Mode mode)
     : TileItem(tileType, {row, col}, mode) {}
 
+Types::TileType TileItem::getTileType() const { return m_tileType; }
+
 void TileItem::fixMyPosition() {
     QGraphicsItem::setPos(m_coordinates.column * m_sideLength, m_coordinates.row * m_sideLength);
 }
@@ -33,8 +35,6 @@ int TileItem::getColumn() const { return m_coordinates.column; }
 void TileItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) {
     painter->drawPixmap(boundingRect(), m_texturePixmap, m_texturePixmap.rect());
 }
-
-// TileItem::~TileItem() { qDebug() << m_coordinates; }
 
 void TileItem::changeTileType(Types::TileType newTileType) {
     m_texturePixmap = QPixmap(GUIPaths::TileTypeToPathRegister.at(newTileType));
@@ -63,15 +63,6 @@ void TileItem::dropEvent(QGraphicsSceneDragDropEvent* event) {
         emit dragAndDropGameItemEvent(copy);
     }
 
-    if (event->mimeData()->hasText()) {
-        Types::TileType newType = Utilities::QString_To_Q_ENUM<Types::TileType>(
-            event->mimeData()->text());
-        changeTileType(newType);
-    }
 
     event->accept();
-}
-
-void TileItem::addInfoToDragDropMimeData(DragAndDropGameItemMimeData* mimeData) {
-    mimeData->setText(Utilities::Q_ENUM_ToQString(m_tileType));
 }

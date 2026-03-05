@@ -27,13 +27,14 @@ public:
 
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
 
+    Types::TileType getTileType() const;
+
 public slots:
     void changeTileType(Types::TileType newTileType);
 signals:
     void tileClicked(TileItem* tile);
 
 protected:
-    void addInfoToDragDropMimeData(DragAndDropGameItemMimeData* mimeData) override;
     void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
     void dropEvent(QGraphicsSceneDragDropEvent* event) override;
 };
