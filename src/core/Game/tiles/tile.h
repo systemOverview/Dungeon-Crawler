@@ -26,6 +26,8 @@ signals:
 
 public:
     static Tile* GenerateTile(Types::TileType tileType, int row, int column, int portalID = 0);
+    static Tile* GenerateTile(Types::TileType tileType, Coordinates coordinates, int portalID = 0);
+
     Types::TileType getTileType() const;
     Character *getCharacter() const;
     void setCharacter(Character* characterToPlace);

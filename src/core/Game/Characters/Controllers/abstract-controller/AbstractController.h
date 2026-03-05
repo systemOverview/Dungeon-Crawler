@@ -14,6 +14,7 @@ class AbstractController : public QObject
 
 protected:
     Character* m_controlledCharacter = nullptr;
+    Level* m_level = nullptr;
 
     virtual Coordinates getNextMove() = 0;
 
@@ -22,6 +23,7 @@ public slots:
 
 public:
     AbstractController(Character* controlledCharacter);
+    void setLevel(Level* level);
     static AbstractController* CreateCharacterController(Character* character);
 };
 

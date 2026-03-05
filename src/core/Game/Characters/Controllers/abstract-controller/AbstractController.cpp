@@ -8,9 +8,11 @@
 #include <GameModelEngine.h>
 #include <Level.h>
 
+void AbstractController::setLevel(Level* level) { m_level = level; }
+
 void AbstractController::moveCharacter() {
     Coordinates newTileCoordinates = getNextMove();
-    Tile* newTile = Level::GetTile(newTileCoordinates);
+    Tile* newTile = m_level->getTile(newTileCoordinates);
     if (GameModelEngine::RequestMove(m_controlledCharacter, newTile)) {
         m_controlledCharacter->setTile(newTile);
     };
