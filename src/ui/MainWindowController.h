@@ -11,6 +11,7 @@ class QStackedWidget;
 class MainWindowController : public QObject
 {
     Q_OBJECT
+private:
     MainWindow* m_mainWindow = nullptr;
     QStackedWidget* m_appScreens = nullptr;
 

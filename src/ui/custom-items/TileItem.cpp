@@ -3,7 +3,9 @@
 #include <QMessageBox>
 #include <QMimeData>
 #include <QPainter>
+#include <QStyleOptionGraphicsItem>
 #include <QtCore/qtimer.h>
+#include <QtWidgets/qgraphicseffect.h>
 #include <QtWidgets/qgraphicssceneevent.h>
 #include "Constants.h"
 #include "Utilities.h"
@@ -14,6 +16,7 @@ TileItem::TileItem(Types::TileType tileType, Coordinates coordinates, Mode mode)
     : m_tileType{tileType}
     , m_coordinates{coordinates}
     , GameItem(mode, GUIPaths::TileTypeToPathRegister.at(tileType)) {
+    setAcceptHoverEvents(true);
     fixMyPosition();
 }
 
@@ -66,3 +69,7 @@ void TileItem::dropEvent(QGraphicsSceneDragDropEvent* event) {
 
     event->accept();
 }
+
+void TileItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {}
+
+void TileItem::hoverEnterEvent(QGraphicsSceneHoverEvent* event) {}

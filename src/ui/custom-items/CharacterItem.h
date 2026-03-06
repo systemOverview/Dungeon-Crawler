@@ -21,6 +21,8 @@ class CharacterItem : public GameItem
 
 public:
     enum class CharacterPart { Base, Head, Outfit, Weapon, PAST_ENUM_END };
+    enum class PositionUpdateReason { WindowResize, CharacterMovement };
+
     Q_ENUM(CharacterPart);
 
 private:
@@ -57,7 +59,8 @@ private:
     void setDefaultParts();
     QPixmap getPixmap() const override;
     CharacterAnimation* m_currentAnimation = nullptr;
-    bool m_flipOnPositionUpdate = false;
+    PositionUpdateReason m_lastPositionUpdateReason{
+              CharacterItem::PositionUpdateReason::WindowResize};
 
 public slots:
     void assignPart(CharacterItem::CharacterPart partType, int whichGraphicsOption);
@@ -75,7 +78,9 @@ public:
     void setTile(TileItem* tile);
 
     void fixMyPosition() override;
-    void updatePosition(QPointF newPosition);
+    void updatePosition(
+        QPointF newPosition,
+        PositionUpdateReason reason = CharacterItem::PositionUpdateReason::WindowResize);
 
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
     std::map<CharacterItem::CharacterPart, int> getPartsGraphicsOptions() const;

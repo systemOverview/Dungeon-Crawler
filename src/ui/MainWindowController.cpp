@@ -3,6 +3,12 @@
 #include "CustomLevelCreator.h"
 #include "GameController.h"
 #include <MainWindow.h>
+MainWindowController::MainWindowController() {
+    m_mainWindow = new MainWindow();
+    createAppScreens();
+    m_mainWindow->setCentralWidget(m_appScreens);
+    m_mainWindow->show();
+}
 
 void MainWindowController::createAppScreens() {
     m_appScreens = new QStackedWidget();
@@ -15,11 +21,12 @@ void MainWindowController::createAppScreens() {
     m_appScreens->setCurrentIndex(levelCustomizerPageIndex);
 
     m_mainWindow->setCentralWidget(m_appScreens);
+
+    connect(customLevelCreator,
+            &CustomLevelCreator::finished,
+            [this, gameController, gameplayPageIndex]() {
+                gameController->startNewGame(GameController::GameSource::CustomLevels);
+                m_appScreens->setCurrentIndex(gameplayPageIndex);
+            });
 }
 
-MainWindowController::MainWindowController() {
-    m_mainWindow = new MainWindow();
-    createAppScreens();
-    m_mainWindow->setCentralWidget(m_appScreens);
-    m_mainWindow->show();
-}

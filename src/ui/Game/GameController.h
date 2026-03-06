@@ -32,9 +32,6 @@ private:
     void customEvent(QEvent* event) override;
     void animateFight(FightEvent* fightEvent);
     void animateFightRound(FightRound fightRound);
-    CharacterItem* createCharacterUI(Types::CharacterType characterType,
-                                     Coordinates tileCoordinates,
-                                     int characterID);
 
 public slots:
     void tileClicked(TileItem* whichTile);
@@ -43,10 +40,11 @@ signals:
     void tileModelReplaced(
         Coordinates replacedTileCoordinates,
         Types::TileType newTileType); // connects Level::tileReplaced to GameBoard::replaceTileView
-    void humanHasInitiatedMove();
 
 public:
+    enum class GameSource { DefaultLevels, CustomLevels };
     GameController();
+    void startNewGame(GameSource gameSource);
     void createLevelView(Level* level);
     void start();
     QGraphicsView* getGameBoardView() const;

@@ -21,6 +21,7 @@ CustomLevelCreator::CustomLevelCreator(QWidget* parent)
     layout->addWidget(m_sidebar, 1);
 
     createLevelCustomizer();
+    // m_levelVisualizer->getViewWidget()->setMask()
 }
 
 void CustomLevelCreator::createLevelCustomizer() {
@@ -54,8 +55,6 @@ void CustomLevelCreator::showTilesMap() {
 }
 
 void CustomLevelCreator::setupSidebar() {
-    qDebug() << DataPaths::GetCustomLevelPath().toStdString();
-
     QVBoxLayout* sidebarLayout = new QVBoxLayout(m_sidebar);
     createTileOptions();
     createCharactersOptions();
@@ -63,6 +62,7 @@ void CustomLevelCreator::setupSidebar() {
     QPushButton* saveLevel = new QPushButton("Save level", this);
     connect(saveLevel, &QPushButton::clicked, [this]() {
         JsonGenerator::SaveLevelToJson(m_levelModel, DataPaths::GetCustomLevelPath());
+        emit finished();
     });
     sidebarLayout->addWidget(saveLevel);
 }
@@ -96,7 +96,7 @@ void CustomLevelCreator::createCharactersOptions() {
     for (int typeIterator = 0; typeIterator < int(Types::CharacterType::PAST_ENUM_END);
          typeIterator++) {
         CharacterItem* characterOption = new CharacterItem(Types::CharacterType(typeIterator),
-                                                           CHARACTERS_COUNT++,
+                                                           --CHARACTERS_COUNT,
                                                            CharacterItem::Mode::DragAndDropInitiator);
         connect(m_levelVisualizer,
                 &GameBoardView::boardCellSizeChanged,
@@ -112,17 +112,23 @@ void CustomLevelCreator::dragDropEvent(DragAndDropGameItemEvent event) {
     TileItem* tileDroppedOnto = dynamic_cast<TileItem*>(event.getDroppedOnItem());
 
     if (draggedCharacter != nullptr && tileDroppedOnto != nullptr) {
+        Character* characterModel
+            = m_levelModel->createAndInsertCharacter(draggedCharacter->getCharacterType(),
+                                                     tileDroppedOnto->getCoordinates());
+
         m_levelVisualizer->createCharacterView(draggedCharacter->getCharacterType(),
-                                               CHARACTERS_COUNT++,
+                                               characterModel->getCharacterID(),
                                                tileDroppedOnto->getCoordinates());
+        qDebug() << characterModel->getTile()->getCoordinates();
+
         return;
     }
 
     else {
         TileItem* draggedTile = dynamic_cast<TileItem*>(event.getDraggedItem());
         if (draggedTile != nullptr && tileDroppedOnto != nullptr) {
-            m_levelModel->insertOrReplaceTile(draggedTile->getTileType(),
-                                              tileDroppedOnto->getCoordinates());
+            m_levelModel->createAndInsertOrReplaceTile(draggedTile->getTileType(),
+                                                       tileDroppedOnto->getCoordinates());
         }
     }
 }

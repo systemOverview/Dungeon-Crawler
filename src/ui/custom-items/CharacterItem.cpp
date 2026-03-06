@@ -125,7 +125,8 @@ void CharacterItem::setTile(TileItem* tile) { m_tile = tile; }
 
 void CharacterItem::fixMyPosition() {}
 
-void CharacterItem::updatePosition(QPointF newPosition) {
+void CharacterItem::updatePosition(QPointF newPosition, PositionUpdateReason reason) {
+    m_lastPositionUpdateReason = reason;
     updateOrientation(pos(), newPosition);
     setPos(newPosition);
     update();
@@ -143,7 +144,7 @@ void CharacterItem::paint(QPainter* painter,
     SpriteManager::TrimTransparent(img);
     pixmap = QPixmap::fromImage(img);
 
-    if (m_flipOnPositionUpdate) {
+    if (m_lastPositionUpdateReason == PositionUpdateReason::CharacterMovement) {
         pixmap = pixmap.transformed(flip);
     }
 

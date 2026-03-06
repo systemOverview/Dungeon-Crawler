@@ -27,6 +27,9 @@ private:
 public slots:
     void dragDropEvent(DragAndDropGameItemEvent event);
 
+signals:
+    void finished();
+
 public:
     CustomLevelCreator(QWidget* parent = nullptr);
 };

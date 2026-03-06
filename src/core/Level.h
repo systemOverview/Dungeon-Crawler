@@ -13,6 +13,7 @@ class Level : public QObject
 {
     Q_OBJECT
     std::vector<std::vector<Tile*>> m_tiles = {};
+
     std::vector<Character*> m_characters = {};
     int m_numberOfRows = 10;
     int m_numberOfColumns = 10;
@@ -32,10 +33,17 @@ public:
     Level(int numberOfRows = GameSettings::TILES_PER_SIDE,
           int numberOfColumns = GameSettings::TILES_PER_SIDE);
 
+    Level(json levelJson,
+          int numberOfRows = GameSettings::TILES_PER_SIDE,
+          int numberOfColumns = GameSettings::TILES_PER_SIDE);
+
     const std::vector<std::vector<Tile*>> getTiles() const;
     const std::vector<Character*> getCharacters() const;
 
-    void insertOrReplaceTile(Types::TileType tileType, Coordinates tileCoordinates);
+    void createAndInsertOrReplaceTile(Types::TileType tileType, Coordinates tileCoordinates);
+    Character* createAndInsertCharacter(Types::CharacterType characterType, Coordinates coordinate);
+
+    void connectPortals(Coordinates firstCoordinates, Coordinates secondCoordinates);
 
     void setDefaultTiles();
     void clear();

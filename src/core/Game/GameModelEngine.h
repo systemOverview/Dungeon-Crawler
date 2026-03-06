@@ -2,6 +2,9 @@
 #define GAMEMODELENGINE_H
 
 #include <QObject>
+#include <nlohmann/json.hpp>
+
+using json = nlohmann::json;
 
 class GameController;
 class AbstractController;
@@ -14,7 +17,6 @@ class GameModelEngine : public QObject
 {
     Q_OBJECT
 private:
-    void createGame();
     inline static Level* CURRENT_LEVEL = nullptr;
     GameController* m_gameController = nullptr;
 
@@ -38,6 +40,8 @@ signals:
 
 public:
     GameModelEngine();
+    void createGameFromString(std::string gameString);
+    void createGameFromJson(json jsonInfo);
     static bool RequestMove(Character* character, Tile* wantedTile);
     Level* getCurrentLevel();
 };

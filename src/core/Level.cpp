@@ -5,6 +5,7 @@
 #include "Level.h"
 #include "AttackController.h"
 #include "DungeonCrawler.h"
+#include <Utilities.h>
 #include <qDebug>
 
 Level::Level(std::string gameString, int numberOfRows, int numberOfColumns)
@@ -17,7 +18,8 @@ Level::Level(std::string gameString, int numberOfRows, int numberOfColumns)
         if (gameString[i] == 'H' || gameString[i] == 'S' || gameString[i] == 'G'
             || gameString[i] == 'A') {
             Tile* tile = Tile::GenerateTile(Types::TileType::Floor, row, column);
-            Character* character = Character::GenerateCharacter(gameString[i], tile);
+            Character* character = Character::GenerateCharacter(
+                TypesIdentifiers::CHAR_TO_CHARACTER_TYPE_LOOKUP_TABLE.at(gameString[i]), tile);
             (m_tiles)[row][column] = tile;
             m_characters.push_back(character);
             continue;
@@ -36,6 +38,30 @@ Level::Level(int numberOfRows, int numberOfColumns)
     , m_numberOfColumns(numberOfColumns) {
     m_tiles.reserve(numberOfRows);
     setDefaultTiles();
+}
+
+Level::Level(json levelJson, int numberOfRows, int numberOfColumns) {
+    setDefaultTiles();
+
+    for (auto tileJson : levelJson["tiles"]) {
+        Types::TileType tileType = Utilities::QString_To_Q_ENUM<Types::TileType>(
+            QString::fromStdString(tileJson["type"]));
+        int row = tileJson["row"];
+        int column = tileJson["column"];
+
+        createAndInsertOrReplaceTile(tileType, {row, column});
+    }
+
+    for (auto tileJson : levelJson["characters"]) {
+        Types::CharacterType characterType = Utilities::QString_To_Q_ENUM<Types::CharacterType>(
+            QString::fromStdString(tileJson["type"]));
+        int row = tileJson["row"];
+        int column = tileJson["column"];
+
+        createAndInsertCharacter(characterType, {row, column});
+
+        // insertOrReplaceTile(tileType, {row, column});
+    }
 }
 
 Tile* Level::getTile(int row, int col) {
@@ -58,7 +84,7 @@ Character* Level::whoIsOccupyingTile(Tile* tile) {
 const std::vector<std::vector<Tile*> > Level::getTiles() const { return m_tiles; }
 const std::vector<Character*> Level::getCharacters() const { return m_characters; }
 
-void Level::insertOrReplaceTile(Types::TileType tileType, Coordinates tileCoordinates) {
+void Level::createAndInsertOrReplaceTile(Types::TileType tileType, Coordinates tileCoordinates) {
     Tile* currentTile = m_tiles[tileCoordinates.row][tileCoordinates.column];
 
     Tile* newTile = Tile::GenerateTile(tileType, tileCoordinates);
@@ -68,6 +94,30 @@ void Level::insertOrReplaceTile(Types::TileType tileType, Coordinates tileCoordi
         emit tileReplaced(currentTile->getCoordinates(), newTile);
         delete currentTile;
         currentTile = nullptr;
+    }
+}
+
+Character* Level::createAndInsertCharacter(Types::CharacterType characterType,
+                                           Coordinates coordinates) {
+    Character* character
+        = Character::GenerateCharacter(characterType, m_tiles[coordinates.row][coordinates.column]);
+
+    character->setTile(m_tiles[coordinates.row][coordinates.column]);
+
+    m_characters.push_back(character);
+
+    return character;
+}
+
+void Level::connectPortals(Coordinates firstCoordinates, Coordinates secondCoordinates) {
+    Portal* firstPortal = dynamic_cast<Portal*>(
+        m_tiles[firstCoordinates.row][firstCoordinates.column]);
+    Portal* secondPortal = dynamic_cast<Portal*>(
+        m_tiles[secondCoordinates.row][secondCoordinates.column]);
+
+    if (firstPortal != nullptr && secondPortal != nullptr) {
+        firstPortal->setSiblingPortal(secondPortal);
+        secondPortal->setSiblingPortal(firstPortal);
     }
 }
 
@@ -81,7 +131,7 @@ void Level::setDefaultTiles()
         m_tiles.push_back(row);
         for (int j = 0; j < m_numberOfColumns; j++) {
             m_tiles[i].push_back(nullptr);
-            insertOrReplaceTile(Types::TileType::Floor, {i, j});
+            createAndInsertOrReplaceTile(Types::TileType::Floor, {i, j});
         }
     }
 }

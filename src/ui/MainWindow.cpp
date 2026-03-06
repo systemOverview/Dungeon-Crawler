@@ -121,12 +121,9 @@ void MainWindow::startGame() {
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent) {
+    QPushButton* customizeLevelButton = new QPushButton("Create custom level");
 }
 
-void MainWindow::AddGameItemToScene(GameItem* gameItem) {
-    connect(INSTANCE, &MainWindow::gameItemsSideLengthChanged, gameItem, &GameItem::setSideLength);
-    INSTANCE->m_scene->addItem(gameItem);
-}
 
 bool MainWindow::eventFilter(QObject* obj, QEvent* event) {
     if (event->type() == QEvent::Resize) {

@@ -37,6 +37,14 @@ signals:
 protected:
     void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
     void dropEvent(QGraphicsSceneDragDropEvent* event) override;
+
+// QGraphicsItem interface
+protected:
+    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
+
+// QGraphicsItem interface
+protected:
+    void hoverEnterEvent(QGraphicsSceneHoverEvent* event) override;
 };
 
 #endif // TILEITEM_H

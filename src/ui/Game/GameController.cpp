@@ -17,14 +17,23 @@
 #include "FightEvent.h"
 #include "GameBoardView.h"
 #include "GameModelEngine.h"
+#include "JsonObjects.h"
 #include "MainWindow.h"
 #include "TileItem.h"
 #include <MoveAnimation.h>
 
-GameController::GameController() {
-    m_gameEngine = new GameModelEngine();
+GameController::GameController() { m_gameView = new GameBoardView(); }
 
-    m_gameView = new GameBoardView();
+void GameController::startNewGame(GameSource gameSource) {
+    m_gameEngine = new GameModelEngine();
+    if (gameSource == GameSource::CustomLevels) {
+        json jsonInfo = JsonGenerator::parseFileJson(DataPaths::GetCustomLevelPath());
+        m_gameEngine->createGameFromJson(jsonInfo);
+    }
+    else {
+        m_gameEngine->createGameFromString(GameData::GameStrings[0]);
+    }
+
     connect(m_gameView, &GameBoardView::tileClicked, this, &GameController::tileClicked);
 
     createLevelView(m_gameEngine->getCurrentLevel());
@@ -58,22 +67,12 @@ void GameController::createLevelView(Level* level) {
 void GameController::tileClicked(TileItem* whichTile) {
     LAST_TILE_CLICKED_CORDS = whichTile->getCoordinates();
     m_gameEngine->askCharactersToMove();
-    emit humanHasInitiatedMove(); //connected to &DungeonCrawler::move;
 }
 
 Coordinates GameController::GetLastTileClickedCords() { return LAST_TILE_CLICKED_CORDS; }
 
 TileItem* GameController::GetGraphicalTile(Coordinates tileCoordinates) {
     return GRAPHICAL_TILES.at(tileCoordinates);
-}
-
-CharacterItem* GameController::createCharacterUI(Types::CharacterType characterType,
-                                                 Coordinates tileCoordinates,
-                                                 int characterID) {
-    CharacterItem* characterView = new CharacterItem(characterType, characterID);
-    GRAPHICAL_CHARACTERS.insert({characterID, characterView});
-    characterView->setZValue(100);
-    return characterView;
 }
 
 GameController::~GameController() {}

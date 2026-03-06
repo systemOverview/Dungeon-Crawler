@@ -12,10 +12,27 @@
 #include "GameController.h"
 #include "Level.h"
 
-GameModelEngine::GameModelEngine() { createGame(); }
+GameModelEngine::GameModelEngine() {}
 
-void GameModelEngine::createGame() {
-    CURRENT_LEVEL = new Level(GameData::GameStrings[0]);
+void GameModelEngine::createGameFromString(std::string gameString) {
+    CURRENT_LEVEL = new Level(gameString);
+
+    for (Character* character : CURRENT_LEVEL->getCharacters()) {
+        AbstractController* characterController = AbstractController::CreateCharacterController(
+            character);
+        characterController->setLevel(CURRENT_LEVEL);
+
+        connect(this,
+                &GameModelEngine::move,
+                characterController,
+                &AbstractController::moveCharacter);
+
+        CHARACTERS_CONTROLLERS.insert({character, characterController});
+    }
+}
+
+void GameModelEngine::createGameFromJson(json jsonInfo) {
+    CURRENT_LEVEL = new Level(jsonInfo);
 
     for (Character* character : CURRENT_LEVEL->getCharacters()) {
         AbstractController* characterController = AbstractController::CreateCharacterController(

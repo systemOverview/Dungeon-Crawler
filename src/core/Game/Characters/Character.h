@@ -34,7 +34,7 @@ signals:
     void characterMoved(int characterID, Coordinates from, Coordinates to);
 
 public:
-    static Character* GenerateCharacter(char texture, Tile* tile = nullptr);
+    static Character* GenerateCharacter(Types::CharacterType characterType, Tile* tile = nullptr);
 
     int getCharacterID() const;
     Types::CharacterType getCharacterType() const;

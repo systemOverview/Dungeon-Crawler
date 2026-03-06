@@ -10,7 +10,7 @@ Tile::Tile(Types::TileType type, int row, int col)
     : m_tileType{type}
     , m_coordinates{row, col} {}
 
-Tile* Tile::GenerateTile(Types::TileType tileType, int row, int column, int portalID) {
+Tile* Tile::GenerateTile(Types::TileType tileType, int row, int column) {
     switch (tileType) {
     case Types::TileType::Floor:
         return new Floor(row, column);
@@ -36,15 +36,15 @@ Tile* Tile::GenerateTile(Types::TileType tileType, int row, int column, int port
     case Types::TileType::GameWinner:
         return new GameWinner(row, column);
     case Types::TileType::Portal:
-        return new Portal(row, column, portalID);
+        return new Portal(row, column);
 
     default:
         return new Floor(row, column);
     }
 }
 
-Tile* Tile::GenerateTile(Types::TileType tileType, Coordinates coordinates, int portalID) {
-    return Tile::GenerateTile(tileType, coordinates.row, coordinates.column, portalID);
+Tile* Tile::GenerateTile(Types::TileType tileType, Coordinates coordinates) {
+    return Tile::GenerateTile(tileType, coordinates.row, coordinates.column);
 }
 
 Types::TileType Tile::getTileType() const { return m_tileType; }
@@ -71,11 +71,8 @@ void Portal::setSiblingPortal(Portal* newSiblingPortal) {
 
 ;
 
-Portal::Portal(int row, int column, int portalId)
-    : Tile(Types::TileType::Portal, row, column)
-    , m_portalId{portalId} {
-    PortalsConnector::AddPortal(this);
-}
+Portal::Portal(int row, int column)
+    : Tile(Types::TileType::Portal, row, column) {}
 
 void Portal::setPortal(Portal* portal) { m_siblingPortal = portal; }
 

@@ -59,7 +59,8 @@ void CharacterTile_UI_PlacementMediator::advanceCharacter(CharacterItem* charact
 
     m_charactersPositions.insert_or_assign(character, newPosition);
 
-    character->updatePosition(calculateCharaterScenePosition(character));
+    character->updatePosition(calculateCharaterScenePosition(character),
+                              CharacterItem::PositionUpdateReason::CharacterMovement);
 }
 
 void CharacterTile_UI_PlacementMediator::recalculateCharactersScenePositions() {

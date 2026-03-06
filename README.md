@@ -28,3 +28,13 @@ The game is currently functional and usable, but there is a lot of refactoring t
 This project was over a semester long, and being new to C++ and OOP generally meant that how I saw the big picture of the project changed every day I spent working on it. I've realized that initial design decisions shouldn't force future ones, and that refactoring was as important as writing new code. 
 
 What I regret is not spending enough time learning Qt framework properly before starting, which made the design now "glued". I didn't care enough about it at the start because I thought its just the frontend, but if I did I wouldve saved much more time not having to keep trying different Qt methods until one works. 
+
+# Credits : 
+
+https://www.vecteezy.com/vector-art/42677943-pixel-art-90s-mood-8bit-retro-style-arrows-directions-set-of-white-arrows-icons-or-symbols-on-pixelated-style-illustration
+https://opengameart.org/content/hero-spritesheets-ars-notoria
+https://www.vecteezy.com/vector-art/7498614-set-of-black-arrows-icons-free-vector-collection
+https://opengameart.org/content/gui-window-buttons
+https://opengameart.org/content/goblin-corps-mv-platformer-set
+https://opengameart.org/content/communication-terminal-32x32'
+https://opengameart.org/content/mv-platformer-weapon-set-animated

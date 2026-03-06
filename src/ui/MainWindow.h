@@ -65,7 +65,6 @@ public:
 
     ~MainWindow();
 
-    static void AddGameItemToScene(GameItem* gameItem);
 
     bool eventFilter(QObject* obj, QEvent* event) override;
     std::map<CharacterItem::CharacterPart, int> getHumanPartsGraphics() const;

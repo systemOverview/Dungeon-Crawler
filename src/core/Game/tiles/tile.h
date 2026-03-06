@@ -25,8 +25,8 @@ signals:
     void tileTypeChanged(Types::TileType tileType);
 
 public:
-    static Tile* GenerateTile(Types::TileType tileType, int row, int column, int portalID = 0);
-    static Tile* GenerateTile(Types::TileType tileType, Coordinates coordinates, int portalID = 0);
+    static Tile* GenerateTile(Types::TileType tileType, int row, int column);
+    static Tile* GenerateTile(Types::TileType tileType, Coordinates coordinates);
 
     Types::TileType getTileType() const;
     Character *getCharacter() const;
@@ -39,8 +39,7 @@ public:
 };
 
 class Floor : public Tile
-{ // Accessible tile, characters can enter/leave them
-
+{
 public:
     Floor(int row, int column)
         : Tile(Types::TileType::Floor, row, column) {};
@@ -66,7 +65,7 @@ class Portal : public Tile, public EventListener
     int m_portalId;
 
 public:
-    Portal(int row, int column, int portalId);
+    Portal(int row, int column);
 
     void setPortal(Portal* portal);
     void setPortalId (int portalId);

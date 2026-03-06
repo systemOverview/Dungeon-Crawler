@@ -15,6 +15,12 @@ void Character::setTile(Tile* newTile) {
     emit characterMoved(m_characterID,
                         preMoveTile->getCoordinates(),
                         m_currentTile->getCoordinates());
+
+    if (newTile->getTileType() == Types::TileType::Portal
+        && preMoveTile->getTileType() != Types::TileType::Portal) {
+        Portal* currentPortal = dynamic_cast<Portal*>(newTile);
+        setTile(currentPortal->getSiblingPortal());
+    }
 }
 
 Character::Character(Types::CharacterType characterType,
@@ -27,15 +33,15 @@ Character::Character(Types::CharacterType characterType,
 
 {}
 
-Character* Character::GenerateCharacter(char texture, Tile* tile) {
-    switch (texture) {
-    case 'H':
+Character* Character::GenerateCharacter(Types::CharacterType characterType, Tile* tile) {
+    switch (characterType) {
+    case Types::CharacterType::Human:
         return new Human(Types::CharacterType::Human, tile);
-    case 'S':
+    case Types::CharacterType::StationaryZombie:
         return new Zombie(Types::CharacterType::StationaryZombie, tile);
-    case 'G':
+    case Types::CharacterType::GuardZombie:
         return new Zombie(Types::CharacterType::GuardZombie, tile);
-    case 'A':
+    case Types::CharacterType::Attacker:
         return new Attacker(Types::CharacterType::Attacker, tile);
     default:
         assert(false && "Character type not handled at Character factory.");
