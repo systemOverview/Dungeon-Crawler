@@ -4,16 +4,20 @@
 #include <QGraphicsItem>
 #include "Constants.h"
 #include "GameItem.h"
-
+#include "LineConnectingItems.h"
 class TileItem : public GameItem
 {
     Q_OBJECT
 public:
-
 private:
+    LineConnectingItems* m_lineOriginatingFromMe = nullptr;
     Coordinates m_coordinates = {-1, -1};
 
     Types::TileType m_tileType{};
+
+    void handlePlayerMoveRequest(QGraphicsSceneMouseEvent* event);
+
+    TileItem* findTileUnderPosition(QPointF scenePosition) const;
 
     void fixMyPosition() override;
 
@@ -37,14 +41,8 @@ signals:
 protected:
     void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
     void dropEvent(QGraphicsSceneDragDropEvent* event) override;
-
-// QGraphicsItem interface
-protected:
-    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
-
-// QGraphicsItem interface
-protected:
-    void hoverEnterEvent(QGraphicsSceneHoverEvent* event) override;
+    void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
+    void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
 };
 
 #endif // TILEITEM_H

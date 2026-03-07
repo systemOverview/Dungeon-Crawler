@@ -66,22 +66,23 @@ void GameItem::resize() {
 }
 
 void GameItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
-    if (isMoveEventTooShortToMatter(event)) {
-        return;
-    }
+        if (isMoveEventTooShortToMatter(event)) {
+            return;
+        }
 
-    QDrag* drag = new QDrag(event->widget());
-    DragAndDropGameItemMimeData* mimeData = createMimeData();
-    drag->setMimeData(mimeData);
+        QDrag* drag = new QDrag(event->widget());
+        DragAndDropGameItemMimeData* mimeData = createMimeData();
+        drag->setMimeData(mimeData);
 
-    if (m_isDragAndDropPixmapSizeSet) {
-        drag->setPixmap(this->getPixmap().scaled(m_dragAndDropPixmapSize, m_dragAndDropPixmapSize));
-    }
-    else {
-        drag->setPixmap(this->getPixmap().scaled(m_sideLength, m_sideLength));
-    }
-    drag->setHotSpot(drag->pixmap().rect().center());
-    drag->exec();
+        if (m_isDragAndDropPixmapSizeSet) {
+            drag->setPixmap(
+                this->getPixmap().scaled(m_dragAndDropPixmapSize, m_dragAndDropPixmapSize));
+        }
+        else {
+            drag->setPixmap(this->getPixmap().scaled(m_sideLength, m_sideLength));
+        }
+        drag->setHotSpot(drag->pixmap().rect().center());
+        drag->exec();
 }
 void GameItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
     if (event->button() == Qt::LeftButton && m_mode == Mode::DragAndDropInitiator) {

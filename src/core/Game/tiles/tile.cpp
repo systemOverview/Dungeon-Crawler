@@ -85,7 +85,6 @@ Portal* Portal::getSiblingPortal()
 
 void Portal::onPortalCreation(PortalCreationEvent *event)
 {
-    qDebug() << m_portalId;
     assert(m_siblingPortal==nullptr && "More than two portals with the same id"); // for now maximum amount of portals with the same id is 2
     setPortal(event->getCreatedPortal());
     event->getCreatedPortal()->setPortal(this);

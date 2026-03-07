@@ -18,6 +18,7 @@ qt_add_executable(DungeonCrawler WIN32 MACOSX_BUNDLE
     src/ui/assets/characters/human/base/0.png src/ui/assets/characters/human/base/1.png src/ui/assets/characters/human/base/2.png src/ui/assets/characters/human/head/0.png src/ui/assets/characters/human/head/1.png src/ui/assets/characters/human/head/2.png src/ui/assets/characters/human/head/3.png src/ui/assets/characters/human/head/4.png src/ui/assets/characters/human/head/5.png src/ui/assets/characters/human/head/6.png src/ui/assets/characters/human/head/7.png src/ui/assets/characters/human/outfit/0.png src/ui/assets/characters/human/outfit/1.png src/ui/assets/characters/human/outfit/2.png src/ui/assets/characters/human/outfit/3.png
     src/core/Game/GameModelEngine.h src/core/Game/GameModelEngine.cpp
     src/core/Game/tiles/CMakeLists.txt
+    src/ui/custom-items/LineConnectingItems.h src/ui/custom-items/LineConnectingItems.cpp
 
    )
 add_definitions( -DMAGICKCORE_QUANTUM_DEPTH=16 )

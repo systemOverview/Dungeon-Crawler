@@ -21,7 +21,7 @@ CustomLevelCreator::CustomLevelCreator(QWidget* parent)
     layout->addWidget(m_sidebar, 1);
 
     createLevelCustomizer();
-    // m_levelVisualizer->getViewWidget()->setMask()
+
 }
 
 void CustomLevelCreator::createLevelCustomizer() {
@@ -119,7 +119,6 @@ void CustomLevelCreator::dragDropEvent(DragAndDropGameItemEvent event) {
         m_levelVisualizer->createCharacterView(draggedCharacter->getCharacterType(),
                                                characterModel->getCharacterID(),
                                                tileDroppedOnto->getCoordinates());
-        qDebug() << characterModel->getTile()->getCoordinates();
 
         return;
     }
