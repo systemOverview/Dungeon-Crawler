@@ -5,8 +5,10 @@
 
 json JsonGenerator::TileToJson(Tile* tile) {
     std::string tileType = Utilities::Q_ENUM_ToQString(tile->getTileType()).toStdString();
+
     json tileJSON = json::object(
         {{"type", tileType}, {"row", tile->getRow()}, {"column", tile->getColumn()}});
+
     return tileJSON;
 }
 json JsonGenerator::CharacterToJson(Character* character) {
@@ -19,6 +21,18 @@ json JsonGenerator::CharacterToJson(Character* character) {
     return characterJSON;
 }
 
+json JsonGenerator::PortalConnectionToJson(Portal* portal) {
+    Portal* siblingPortal = portal->getSiblingPortal();
+    json portalJSON = json::object({
+                {"firstPortalRow", portal->getRow()},
+                {"firstPortalColumn", portal->getColumn()},
+                {"secondPortalRow", siblingPortal->getRow()},
+                {"secondPortalColumn", siblingPortal->getColumn()},
+
+    });
+    return portalJSON;
+}
+
 void JsonGenerator::SaveLevelToJson(Level* level, QString path) {
     std::ofstream file(path.toStdString());
 
@@ -26,10 +40,24 @@ void JsonGenerator::SaveLevelToJson(Level* level, QString path) {
 
     auto tilesArray = json::array();
     auto charactersArray = json::array();
+    auto portalConnectionsArray = json::array();
+
+    std::vector<Portal*> convertedPortals;
 
     for (const std::vector<Tile*>& row : level->getTiles()) {
         for (Tile* tile : row) {
             tilesArray.push_back(TileToJson(tile));
+
+            if (tile->getTileType() == Types::TileType::Portal) {
+                Portal* portal = dynamic_cast<Portal*>(tile);
+                if (std::find(convertedPortals.begin(),
+                              convertedPortals.end(),
+                              portal->getSiblingPortal())
+                    == convertedPortals.end()) {
+                    portalConnectionsArray.push_back(PortalConnectionToJson(portal));
+                    convertedPortals.push_back(portal);
+                }
+            }
         }
     }
 
@@ -41,6 +69,7 @@ void JsonGenerator::SaveLevelToJson(Level* level, QString path) {
 
     root["tiles"] = tilesArray;
     root["characters"] = charactersArray;
+    root["portalConnection"] = portalConnectionsArray;
 
     file << std::setw(4) << root;
 }

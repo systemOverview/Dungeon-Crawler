@@ -4,8 +4,9 @@
 
 class Level;
 class Tile;
-class QString;
+class Portal;
 class Character;
+class QString;
 
 using json = nlohmann::json;
 
@@ -15,6 +16,7 @@ private:
     static json TileToJson(Tile* tile);
 
     static json CharacterToJson(Character* character);
+    static json PortalConnectionToJson(Portal* portal);
 
 public:
     static void SaveLevelToJson(Level* level, QString path);
