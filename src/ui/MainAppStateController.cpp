@@ -1,17 +1,18 @@
-#include "MainWindowController.h"
+#include "MainAppStateController.h"
 #include <QtWidgets/qstackedwidget.h>
 #include "CustomLevelCreator.h"
 #include "GameController.h"
 #include <MainWindow.h>
-MainWindowController::MainWindowController() {
+MainAppStateController::MainAppStateController() {
     m_mainWindow = new MainWindow();
     createAppScreens();
     m_mainWindow->setCentralWidget(m_appScreens);
     m_mainWindow->show();
 }
 
-void MainWindowController::createAppScreens() {
+void MainAppStateController::createAppScreens() {
     m_appScreens = new QStackedWidget();
+
     GameController* gameController = new GameController();
     CustomLevelCreator* customLevelCreator = new CustomLevelCreator();
 
@@ -29,4 +30,3 @@ void MainWindowController::createAppScreens() {
                 m_appScreens->setCurrentIndex(gameplayPageIndex);
             });
 }
-

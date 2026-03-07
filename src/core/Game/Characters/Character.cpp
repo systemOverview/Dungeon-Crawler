@@ -17,6 +17,8 @@ void Character::setTile(Tile* newTile) {
 
     if (newTile->getTileType() == Types::TileType::Portal
         && preMoveTile->getTileType() != Types::TileType::Portal) {
+        // Only when a player moves in first to a portal does he call setTile again with sibling portal, otherwise it will
+        // be infinite loop.
         Portal* currentPortal = dynamic_cast<Portal*>(newTile);
         setTile(currentPortal->getSiblingPortal());
     }

@@ -18,7 +18,13 @@ class Level : public QObject
     int m_numberOfRows = 10;
     int m_numberOfColumns = 10;
 
-public: //static functions
+public:
+    enum LevelValidationResult {
+        Success,
+        PortalConnectionsMissing,
+        HumanCharacterMissing,
+        ComputerCharacterMissing
+    };
     Tile* getTile(int row, int col);
     Tile* getTile(Coordinates coordinates);
     Character* whoIsOccupyingTile(Tile* tile);

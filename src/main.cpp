@@ -1,8 +1,8 @@
 #include <QApplication>
-#include "MainWindowController.h"
+#include "MainAppStateController.h"
 #include <qDebug>
 int main(int argc, char* argv[]) {
     QApplication a(argc, argv);
-    MainWindowController mainWindowController;
+    MainAppStateController mainWindowController;
     return a.exec();
 }

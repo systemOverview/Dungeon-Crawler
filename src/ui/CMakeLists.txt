@@ -3,7 +3,7 @@ target_sources(DungeonCrawler PRIVATE
     MainWindow.ui
     SpriteManager.h SpriteManager.cpp
     SquareGridLayout.h SquareGridLayout.cpp
-    MainWindowController.h MainWindowController.cpp
+    MainAppStateController.h MainAppStateController.cpp
 
     assets/textures.qrc
 )
