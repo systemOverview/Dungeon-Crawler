@@ -52,14 +52,22 @@ Level::Level(json levelJson, int numberOfRows, int numberOfColumns) {
         createAndInsertOrReplaceTile(tileType, {row, column});
     }
 
-    for (auto tileJson : levelJson["characters"]) {
+    for (auto characterJSON : levelJson["characters"]) {
         Types::CharacterType characterType = Utilities::QString_To_Q_ENUM<Types::CharacterType>(
-            QString::fromStdString(tileJson["type"]));
-        int row = tileJson["row"];
-        int column = tileJson["column"];
+            QString::fromStdString(characterJSON["type"]));
+        int row = characterJSON["row"];
+        int column = characterJSON["column"];
 
         createAndInsertCharacter(characterType, {row, column});
+    }
 
+    for (auto portalConnectionJSON : levelJson["portalConnections"]) {
+        int firstPortalRow = portalConnectionJSON["firstPortalRow"];
+        int firstPortalColumn = portalConnectionJSON["firstPortalColumn"];
+        int secondPortalRow = portalConnectionJSON["secondPortalRow"];
+        int secondPortalColumn = portalConnectionJSON["firstPortalColumn"];
+
+        connectPortals({firstPortalRow, firstPortalColumn}, {secondPortalRow, secondPortalColumn});
     }
 }
 
@@ -86,8 +94,6 @@ Character* Level::whoIsOccupyingTile(Tile* tile) {
     return nullptr;
 }
 
-const std::vector<std::vector<Tile*> > Level::getTiles() const { return m_tiles; }
-const std::vector<Character*> Level::getCharacters() const { return m_characters; }
 
 void Level::createAndInsertOrReplaceTile(Types::TileType tileType, Coordinates tileCoordinates) {
     Tile* currentTile = m_tiles[tileCoordinates.row][tileCoordinates.column];
@@ -138,6 +144,7 @@ void Level::clear() {
     m_tiles.clear();
 }
 
+//getters
 Tile* Level::getTile(int row, int col) {
     Tile* tileToReturn = m_tiles[row][col];
     return tileToReturn;
@@ -146,5 +153,8 @@ Tile* Level::getTile(int row, int col) {
 Tile* Level::getTile(Coordinates coordinates) {
     return getTile(coordinates.row, coordinates.column);
 }
+
+const std::vector<std::vector<Tile*> > Level::getTiles() const { return m_tiles; }
+const std::vector<Character*> Level::getCharacters() const { return m_characters; }
 
 Level::~Level() {}

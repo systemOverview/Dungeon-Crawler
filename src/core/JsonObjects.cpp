@@ -69,7 +69,7 @@ void JsonGenerator::SaveLevelToJson(Level* level, QString path) {
 
     root["tiles"] = tilesArray;
     root["characters"] = charactersArray;
-    root["portalConnection"] = portalConnectionsArray;
+    root["portalConnections"] = portalConnectionsArray;
 
     file << std::setw(4) << root;
 }

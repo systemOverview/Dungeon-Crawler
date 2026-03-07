@@ -9,7 +9,6 @@
 
 void Character::setTile(Tile* newTile) {
     Tile* preMoveTile = m_currentTile;
-
     m_currentTile = newTile;
     newTile->alertOfAccess();
     emit characterMoved(m_characterID,
