@@ -37,6 +37,7 @@ public slots:
     void changeTileType(Types::TileType newTileType);
 signals:
     void tileClicked(TileItem* tile);
+    void lineCreated(LineConnectingItems* line);
 
 protected:
     void mousePressEvent(QGraphicsSceneMouseEvent* event) override;

@@ -8,6 +8,7 @@ class TileItem;
 class GameBoardView;
 class DragAndDropGameItemEvent;
 class Level;
+class LineConnectingItems;
 class CustomLevelCreator : public QWidget
 {
     Q_OBJECT
@@ -26,6 +27,7 @@ private:
     void createCharactersOptions();
 public slots:
     void dragDropEvent(DragAndDropGameItemEvent event);
+    void portalsConnected(LineConnectingItems* portalsLine);
 
 signals:
     void finished();

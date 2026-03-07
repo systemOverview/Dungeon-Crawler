@@ -49,6 +49,11 @@ void CustomLevelCreator::showTilesMap() {
                         &TileItem::dragAndDropGameItemEvent,
                         this,
                         &CustomLevelCreator::dragDropEvent);
+
+                connect(tileView,
+                        &TileItem::lineCreated,
+                        this,
+                        &CustomLevelCreator::portalsConnected);
             }
         }
     }
@@ -129,5 +134,14 @@ void CustomLevelCreator::dragDropEvent(DragAndDropGameItemEvent event) {
             m_levelModel->createAndInsertOrReplaceTile(draggedTile->getTileType(),
                                                        tileDroppedOnto->getCoordinates());
         }
+    }
+}
+
+void CustomLevelCreator::portalsConnected(LineConnectingItems* portalsLine) {
+    TileItem* from = dynamic_cast<TileItem*>(portalsLine->getFromItem());
+    TileItem* to = dynamic_cast<TileItem*>(portalsLine->getToItem());
+
+    if (from != nullptr && to != nullptr) {
+        m_levelModel->connectPortals(from->getCoordinates(), to->getCoordinates());
     }
 }

@@ -86,17 +86,18 @@ void TileItem::mousePressEvent(QGraphicsSceneMouseEvent* event) {
         break;
     }
 
-    if (event->button() == Qt::RightButton) {
+    if (event->button() == Qt::RightButton && (m_lineOriginatingFromMe == nullptr)) {
         m_lineOriginatingFromMe = new LineConnectingItems(this, nullptr);
         event->setAccepted(true);
     }
 }
 
 void TileItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
-    if (this->getTileType() == Types::TileType::Portal && m_lineOriginatingFromMe != nullptr) {
+    if (this->getTileType() == Types::TileType::Portal && m_lineOriginatingFromMe != nullptr
+        && m_lineOriginatingFromMe->getToItem() == nullptr) {
         m_lineOriginatingFromMe->setToPos(event->scenePos());
     }
-    else {
+    else if (m_mode == GameItem::Mode::DragAndDropInitiator) {
         GameItem::mouseMoveEvent(event);
     }
 }
@@ -121,6 +122,7 @@ void TileItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
             event->accept();
 
             m_lineOriginatingFromMe->setToItem(tileUnderMouse);
+            emit lineCreated(m_lineOriginatingFromMe);
         }
 
         else {

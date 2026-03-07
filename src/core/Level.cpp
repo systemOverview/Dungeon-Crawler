@@ -60,18 +60,23 @@ Level::Level(json levelJson, int numberOfRows, int numberOfColumns) {
 
         createAndInsertCharacter(characterType, {row, column});
 
-        // insertOrReplaceTile(tileType, {row, column});
     }
 }
 
-Tile* Level::getTile(int row, int col) {
-    Tile* tileToReturn = m_tiles[row][col];
-    return tileToReturn;
+void Level::setDefaultTiles() {
+    clear();
+    m_tiles.reserve(m_numberOfRows);
+
+    for (int i = 0; i < m_numberOfRows; i++) {
+        std::vector<Tile*> row;
+        m_tiles.push_back(row);
+        for (int j = 0; j < m_numberOfColumns; j++) {
+            m_tiles[i].push_back(nullptr);
+            createAndInsertOrReplaceTile(Types::TileType::Floor, {i, j});
+        }
+    }
 }
 
-Tile* Level::getTile(Coordinates coordinates) {
-    return getTile(coordinates.row, coordinates.column);
-}
 Character* Level::whoIsOccupyingTile(Tile* tile) {
     for (Character* character : m_characters) {
         if (character->getTile() == tile) {
@@ -121,21 +126,6 @@ void Level::connectPortals(Coordinates firstCoordinates, Coordinates secondCoord
     }
 }
 
-void Level::setDefaultTiles()
-{
-    clear();
-    m_tiles.reserve(m_numberOfRows);
-
-    for (int i = 0; i < m_numberOfRows; i++) {
-        std::vector<Tile*> row;
-        m_tiles.push_back(row);
-        for (int j = 0; j < m_numberOfColumns; j++) {
-            m_tiles[i].push_back(nullptr);
-            createAndInsertOrReplaceTile(Types::TileType::Floor, {i, j});
-        }
-    }
-}
-
 void Level::clear() {
     for (int row = 0; row < m_tiles.size(); row++) {
         for (int col = 0; col < m_tiles[row].size(); col++) {
@@ -146,6 +136,15 @@ void Level::clear() {
         }
     }
     m_tiles.clear();
+}
+
+Tile* Level::getTile(int row, int col) {
+    Tile* tileToReturn = m_tiles[row][col];
+    return tileToReturn;
+}
+
+Tile* Level::getTile(Coordinates coordinates) {
+    return getTile(coordinates.row, coordinates.column);
 }
 
 Level::~Level() {}
