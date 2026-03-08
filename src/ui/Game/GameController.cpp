@@ -26,6 +26,7 @@ GameController::GameController() { m_gameView = new GameBoardView(); }
 
 void GameController::startNewGame(GameSource gameSource) {
     m_gameEngine = new GameModelEngine();
+
     if (gameSource == GameSource::CustomLevels) {
         json jsonInfo = JsonGenerator::parseFileJson(DataPaths::GetCustomLevelPath());
         m_gameEngine->createGameFromJson(jsonInfo);
@@ -35,6 +36,8 @@ void GameController::startNewGame(GameSource gameSource) {
     }
 
     connect(m_gameView, &GameBoardView::tileClicked, this, &GameController::tileClicked);
+
+    connect(m_gameEngine, &GameModelEngine::fightErupted, m_gameView, &GameBoardView::animateFight);
 
     createLevelView(m_gameEngine->getCurrentLevel());
 }
@@ -53,10 +56,10 @@ void GameController::createLevelView(Level* level) {
         }
     }
     for (Character* characterModel : level->getCharacters()) {
-        CharacterItem* characterView
-            = m_gameView->createCharacterView(characterModel->getCharacterType(),
-                                              characterModel->getCharacterID(),
-                                              characterModel->getTile()->getCoordinates());
+        m_gameView->createCharacterView(characterModel->getCharacterType(),
+                                        characterModel->getCharacterID(),
+                                        characterModel->getTile()->getCoordinates(),
+                                        true);
         connect(characterModel,
                 &Character::characterMoved,
                 m_gameView,
@@ -68,54 +71,8 @@ void GameController::tileClicked(TileItem* whichTile) {
     LAST_TILE_CLICKED_CORDS = whichTile->getCoordinates();
     m_gameEngine->askCharactersToMove();
 }
-
 Coordinates GameController::GetLastTileClickedCords() { return LAST_TILE_CLICKED_CORDS; }
 
-TileItem* GameController::GetGraphicalTile(Coordinates tileCoordinates) {
-    return GRAPHICAL_TILES.at(tileCoordinates);
-}
+QGraphicsView* GameController::getGameBoardView() const { return m_gameView->getViewWidget(); }
 
 GameController::~GameController() {}
-
-void GameController::customEvent(QEvent* event) {
-    if (event->type() == FightEvent::type()) {
-        FightEvent* fightEvent = static_cast<FightEvent*>(event);
-        animateFight(fightEvent);
-    }
-}
-
-void GameController::animateFight(FightEvent* fightEvent) {
-    for (FightRound fightRound : fightEvent->getFightRounds()) {
-        animateFightRound(fightRound);
-    }
-}
-
-void GameController::animateFightRound(FightRound fightRound) {
-    CharacterItem* attackerView = GRAPHICAL_CHARACTERS.at(
-        fightRound.getAttackingCharacterInfo().getCharacterID());
-    FightAttackingAnimation* attackerAnimation = new FightAttackingAnimation(attackerView);
-
-    CharacterItem* defenderView = GRAPHICAL_CHARACTERS.at(
-        fightRound.getDefendingCharacterInfo().getCharacterID());
-    FightDefendingAnimation* defenderAnimation
-        = new FightDefendingAnimation(defenderView,
-                                      fightRound.getDefendingCharacterInfo().getHealthPostRound());
-
-    connect(attackerAnimation,
-            &FightAttackingAnimation::iPunchedDefender,
-            defenderAnimation,
-            &FightDefendingAnimation::attackerPunchedMe);
-
-    if (fightRound.getFightRoundOutcome() == FightRound::FightRoundOutcome::DefenderKilled) {
-        connect(defenderAnimation, &FightDefendingAnimation::finished, [defenderView]() mutable {
-            delete defenderView;
-            defenderView = nullptr;
-        });
-    }
-    defenderView->addAnimationToQueue(defenderAnimation);
-    attackerView->addAnimationToQueue(attackerAnimation);
-}
-
-void GameController::start() {}
-
-QGraphicsView* GameController::getGameBoardView() const { return m_gameView->getViewWidget(); }

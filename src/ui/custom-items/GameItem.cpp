@@ -66,6 +66,7 @@ void GameItem::resize() {
 }
 
 void GameItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
+    if (m_mode == Mode::DragAndDropInitiator) {
         if (isMoveEventTooShortToMatter(event)) {
             return;
         }
@@ -83,6 +84,7 @@ void GameItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
         }
         drag->setHotSpot(drag->pixmap().rect().center());
         drag->exec();
+    }
 }
 void GameItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
     if (event->button() == Qt::LeftButton && m_mode == Mode::DragAndDropInitiator) {

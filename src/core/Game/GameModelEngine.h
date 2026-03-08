@@ -12,11 +12,13 @@ class Level;
 class Tile;
 class Character;
 class FightRound;
+class FightEvent;
 
 class GameModelEngine : public QObject
 {
     Q_OBJECT
 private:
+    inline static GameModelEngine* INSTANCE = nullptr;
     inline static Level* CURRENT_LEVEL = nullptr;
     GameController* m_gameController = nullptr;
 
@@ -29,14 +31,15 @@ private:
     static bool AreCharactersEnemies(Character* firstCharacter, Character* secondCharacter);
 
     // Fighting functions.
-    [[nodiscard]] static bool AttemptForcedTileTakeover(Character* attacker, Character* defender);
-    [[nodiscard]] static FightRound HoldFightRound(Character* attacker, Character* defender);
+    [[nodiscard]] bool attemptForcedTileTakeover(Character* attacker, Character* defender);
+    [[nodiscard]] FightRound holdFightRound(Character* attacker, Character* defender);
 
 public:
 public slots:
     void askCharactersToMove();
 signals:
     void move(); // alerts controllers to move their characters
+    void fightErupted(FightEvent* fightEvent);
 
 public:
     GameModelEngine();

@@ -21,9 +21,9 @@ void FightAnimation::start() {
 FightAnimation::FightAnimation(CharacterItem* character, AnimationType animationType)
     : CharacterAnimation{character, animationType} {}
 
-
 //attacking animation.
 void FightAttackingAnimation::playFrame(int iterator) {
+
     m_character->setCurrentFrameID(m_animationFrames[iterator]);
     if (iterator == WHICH_STEP_TO_PUNCH) {
         emit iPunchedDefender();
@@ -38,6 +38,7 @@ FightAttackingAnimation::FightAttackingAnimation(CharacterItem* character)
 
 //defending animation.
 void FightDefendingAnimation::playFrame(int iterator) {
+
     m_character->setCurrentFrameID(m_animationFrames[iterator]);
     if (iterator == WHICH_STEP_TO_WAIT_FOR_PUNCH) {
         m_timeline->setPaused(true);

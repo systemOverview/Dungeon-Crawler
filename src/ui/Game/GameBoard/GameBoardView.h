@@ -9,8 +9,11 @@ class QGraphicsScene;
 class QGraphicsView;
 class CharacterItem;
 class CharacterTile_UI_PlacementMediator;
+class FightEvent;
+class FightRound;
 class GameBoardView : public QObject
 {
+private:
     Q_OBJECT
     QGraphicsScene* m_scene = nullptr;
     QGraphicsView* m_view = nullptr;
@@ -20,9 +23,13 @@ class GameBoardView : public QObject
     QMap<int, CharacterItem*> m_characterViews{};
 
     qreal calculateBoardCellSideSize();
+    void animateFightRound(FightRound fightRound);
+
 public slots:
     void replaceTileView(Coordinates replacedTileCoordinates, Types::TileType newTyleType);
     void moveCharacterView(int characterID, Coordinates from, Coordinates to);
+    void animateFight(FightEvent* fightEvent);
+
 signals:
     void boardCellSizeChanged(qreal newSideLength);
     void tileClicked(TileItem* whichTile);
@@ -33,7 +40,6 @@ public:
     QGraphicsView* getViewWidget() const;
     CharacterTile_UI_PlacementMediator* getPlacementMediator() const;
 
-    //Tile insertion/retrieval :
     TileItem* createTileView(Types::TileType tileType,
                              Coordinates tileCoordinates,
                              TileItem::Mode mode = TileItem::Mode::Clickable);
@@ -41,7 +47,8 @@ public:
 
     CharacterItem* createCharacterView(Types::CharacterType characterType,
                                        int characterId,
-                                       Coordinates initialTileCoordinates);
+                                       Coordinates initialTileCoordinates,
+                                       bool isCharacterHealthBarShown = false);
     void changeCharacterCoordinates(int characterID, Coordinates newCoordinates);
 
     bool eventFilter(QObject* obj, QEvent* event);

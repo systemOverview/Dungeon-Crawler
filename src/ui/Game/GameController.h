@@ -24,15 +24,6 @@ private:
 
     inline static Coordinates LAST_TILE_CLICKED_CORDS = {-1, -1};
 
-    inline static std::map<Coordinates, TileItem*> GRAPHICAL_TILES = {};
-    inline static std::map<int, CharacterItem*> GRAPHICAL_CHARACTERS = {};
-
-    void startAnimationLoop();
-
-    void customEvent(QEvent* event) override;
-    void animateFight(FightEvent* fightEvent);
-    void animateFightRound(FightRound fightRound);
-
 public slots:
     void tileClicked(TileItem* whichTile);
 signals:
@@ -44,13 +35,14 @@ signals:
 public:
     enum class GameSource { DefaultLevels, CustomLevels };
     GameController();
+
     void startNewGame(GameSource gameSource);
+
     void createLevelView(Level* level);
-    void start();
     QGraphicsView* getGameBoardView() const;
 
     static Coordinates GetLastTileClickedCords();
-    static TileItem* GetGraphicalTile(Coordinates tileCoordinates);
+
     ~GameController();
 };
 #endif // GRAPHICALUI_H

@@ -102,6 +102,7 @@ void CustomLevelCreator::createCharactersOptions() {
          typeIterator++) {
         CharacterItem* characterOption = new CharacterItem(Types::CharacterType(typeIterator),
                                                            --CHARACTERS_COUNT,
+                                                           false,
                                                            CharacterItem::Mode::DragAndDropInitiator);
         connect(m_levelVisualizer,
                 &GameBoardView::boardCellSizeChanged,

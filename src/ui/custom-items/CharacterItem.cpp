@@ -21,6 +21,22 @@
 #include <Utilities.h>
 #include <qapplication.h>
 #include <qdrag.h>
+
+CharacterItem::CharacterItem(Types::CharacterType characterType,
+                             int characterID,
+                             bool isHealthbarShown,
+                             Mode mode)
+    : m_characterID{characterID}
+    , m_characterType{characterType}
+    , m_isHealthbarShown{isHealthbarShown}
+    , GameItem(mode) {
+    setDefaultParts();
+}
+
+void CharacterItem::lookTowardsPosition(QPointF pos) {
+    updateOrientation(this->pos(), pos);
+}
+
 void CharacterItem::playNextAnimation() {
     if (m_animationsQueue.empty()) {
         return;
@@ -77,7 +93,6 @@ QPixmap CharacterItem::getPixmap() const {
         }
         if (part == CharacterPart::Base) {
             base = pixmap;
-            Utilities::SaveToFile(pixmap, "base");
         }
         else {
             QPainter painter = QPainter(&base);
@@ -100,21 +115,10 @@ void CharacterItem::addAnimationToQueue(CharacterAnimation* animation) {
     connect(animation, &CharacterAnimation::finished, [this, animation]() {
         delete animation;
         m_currentFrameId = STANDING_FRAME;
-        m_characterOrientation.reset();
+        m_characterOrientation.reset(false, true);
         update();
         playNextAnimation();
     });
-}
-
-CharacterItem::CharacterItem(Types::CharacterType characterType,
-                             int characterID,
-                             Mode mode,
-                             bool isHealthbarShown)
-    : m_characterID{characterID}
-    , m_characterType{characterType}
-    , m_isHealthbarShown{isHealthbarShown}
-    , GameItem(mode) {
-    setDefaultParts();
 }
 
 Types::CharacterType CharacterItem::getCharacterType() const { return m_characterType; }
@@ -126,8 +130,9 @@ void CharacterItem::setTile(TileItem* tile) { m_tile = tile; }
 void CharacterItem::fixMyPosition() {}
 
 void CharacterItem::updatePosition(QPointF newPosition, PositionUpdateReason reason) {
-    m_lastPositionUpdateReason = reason;
-    updateOrientation(pos(), newPosition);
+    if (reason == PositionUpdateReason::CharacterMovement) {
+        updateOrientation(pos(), newPosition);
+    }
     setPos(newPosition);
     update();
 }
@@ -135,6 +140,8 @@ void CharacterItem::updatePosition(QPointF newPosition, PositionUpdateReason rea
 void CharacterItem::paint(QPainter* painter,
                           const QStyleOptionGraphicsItem* option,
                           QWidget* widget) {
+    constexpr static int spaceTakenByCharacterPercentage = 80;
+
     QTransform flip;
     flip.scale(m_characterOrientation.horizontalFlip, 1);
     flip.rotate(m_characterOrientation.verticalRotation);
@@ -144,14 +151,37 @@ void CharacterItem::paint(QPainter* painter,
     SpriteManager::TrimTransparent(img);
     pixmap = QPixmap::fromImage(img);
 
-    if (m_lastPositionUpdateReason == PositionUpdateReason::CharacterMovement) {
-        pixmap = pixmap.transformed(flip);
+    pixmap = pixmap.transformed(flip);
+
+    QRectF characterRect = boundingRect();
+    QRectF healthbarRect = boundingRect();
+
+
+    if (m_isHealthbarShown == true) {
+        if (m_characterOrientation.verticalRotation != 0) {
+            // depending on vertical orientation, healthbar is either on left or right side of rectangle.
+            if (m_characterOrientation.verticalRotation == -90) {
+                healthbarRect.setWidth(characterRect.width()
+                                       * (100 - spaceTakenByCharacterPercentage) / 100);
+
+                characterRect.setX(healthbarRect.width());
+            }
+            else {
+                characterRect.setWidth(boundingRect().width() * spaceTakenByCharacterPercentage
+                                       / 100);
+                healthbarRect.setX(characterRect.width());
+            }
+        }
+        else {
+            // if character is standing normally (no verticalRotation), we just put the healthbar on top of it.
+
+            qreal characterHeight = boundingRect().height() * spaceTakenByCharacterPercentage / 100;
+            healthbarRect.setHeight(boundingRect().height() - characterHeight);
+            characterRect.setY(healthbarRect.height());
+        }
     }
 
-    float characterHeight = m_sideLength;
-
     if (m_isHealthbarShown) {
-        characterHeight = m_sideLength * 80 / 100;
         QPixmap healthBarBackground(GUIPaths::HealthBarBackground);
         QPixmap healthBarInner(GUIPaths::HealthBarInner);
 
@@ -161,21 +191,15 @@ void CharacterItem::paint(QPainter* painter,
         QPainter healthPainter(&healthBarBackground);
 
         QRectF fillableHealthBarBackground = healthBarBackground.rect();
+
         fillableHealthBarBackground.setWidth(healthBarBackground.width() * m_healthPercentage / 100);
+
         healthPainter.drawPixmap(fillableHealthBarBackground, healthBarInner, healthBarInner.rect());
-        painter->drawPixmap(QRectF(0, 0, boundingRect().width(), m_sideLength - characterHeight),
-                            healthBarBackground,
-                            healthBarBackground.rect());
+        painter->drawPixmap(healthbarRect, healthBarBackground, healthBarBackground.rect());
     }
 
-    painter->drawPixmap(QRectF{0,
-                               m_sideLength - characterHeight,
-                               boundingRect().width(),
-                               characterHeight},
-                        pixmap,
-                        pixmap.rect());
+    painter->drawPixmap(characterRect, pixmap, pixmap.rect());
 }
-
 std::map<CharacterItem::CharacterPart, int> CharacterItem::getPartsGraphicsOptions() const {
     return m_partsGraphicOptions;
 }
@@ -214,6 +238,8 @@ void CharacterItem::mousePressEvent(QGraphicsSceneMouseEvent* event) {
             event->setAccepted(true);
             return;
         }
+        else {
+            QGraphicsItem::mousePressEvent(event); // proapagate to tile underneath.
+        }
     }
-    QGraphicsItem::mousePressEvent(event);
 }

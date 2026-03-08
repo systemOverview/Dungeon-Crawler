@@ -2,7 +2,11 @@
 #include <QtWidgets>
 #include "CharacterItem.h"
 #include "CharacterTile_UI_PlacementMediator.h"
+#include "FightEvent.h"
 #include "TileItem.h"
+#include "Utilities.h"
+#include <FightAnimation.h>
+#include <FightAnimationMediator.h>
 #include <MoveAnimation.h>
 
 GameBoardView::GameBoardView() {
@@ -41,8 +45,11 @@ const TileItem* GameBoardView::getTileViewByCoordinates(Coordinates coordinates)
 
 CharacterItem* GameBoardView::createCharacterView(Types::CharacterType characterType,
                                                   int characterId,
-                                                  Coordinates initialTileCoordinates) {
-    CharacterItem* characterView = new CharacterItem(characterType, characterId);
+                                                  Coordinates initialTileCoordinates,
+                                                  bool isCharacterHealthBarShown) {
+    CharacterItem* characterView = new CharacterItem(characterType,
+                                                     characterId,
+                                                     isCharacterHealthBarShown);
     connect(this, &GameBoardView::boardCellSizeChanged, characterView, &GameItem::setSideLength);
 
     characterView->setSideLength(
@@ -93,4 +100,62 @@ void GameBoardView::replaceTileView(Coordinates replacedTileCoordinates, Types::
     assert(m_tileViews.count(replacedTileCoordinates) > 0 && "Level view and model mismatch");
     (m_tileViews.find(replacedTileCoordinates)).value()->changeTileType(newTyleType);
     // TileItem*
+}
+
+void GameBoardView::animateFight(FightEvent* fightEvent) {
+    if (fightEvent->getFightRounds().size() == 0) {
+        return;
+    }
+    CharacterItem* firstCharacter = *(m_characterViews.find(
+        fightEvent->getFightRounds().at(0).getAttackingCharacterInfo().getCharacterID()));
+
+    CharacterItem* secondCharacter = *(m_characterViews.find(
+        fightEvent->getFightRounds().at(0).getDefendingCharacterInfo().getCharacterID()));
+
+    QMap<int, CharacterItem*> fightingCharacters
+        = {{firstCharacter->getCharacterID(), firstCharacter},
+           {secondCharacter->getCharacterID(),
+            secondCharacter}}; // only pass the characters fight animation mediator needs.
+
+    FightAnimationMediator* firstRoundAnimation = new FightAnimationMediator(fightEvent,
+                                                                             fightingCharacters);
+
+    firstRoundAnimation->start();
+    // for (FightRound fightRound : fightEvent->getFightRounds()) {
+    //     animateFightRound(fightRound);
+    // }
+}
+
+void GameBoardView::animateFightRound(FightRound fightRound) {
+    CharacterItem* attackerView = *(
+        m_characterViews.find(fightRound.getAttackingCharacterInfo().getCharacterID()));
+
+    FightAttackingAnimation* attackerAnimation = new FightAttackingAnimation(attackerView);
+
+    CharacterItem* defenderView = *(
+        m_characterViews.find(fightRound.getDefendingCharacterInfo().getCharacterID()));
+    FightDefendingAnimation* defenderAnimation
+        = new FightDefendingAnimation(defenderView,
+                                      fightRound.getDefendingCharacterInfo().getHealthPostRound());
+
+    defenderView->lookTowardsPosition(attackerView->pos());
+
+    connect(attackerAnimation,
+            &FightAttackingAnimation::iPunchedDefender,
+            defenderAnimation,
+            &FightDefendingAnimation::attackerPunchedMe);
+
+    if (fightRound.getFightRoundOutcome() == FightRound::FightRoundOutcome::DefenderKilled) {
+        connect(defenderAnimation, &FightDefendingAnimation::finished, [defenderView]() mutable {
+            delete defenderView;
+            defenderView = nullptr;
+        });
+    }
+
+    defenderView->addAnimationToQueue(defenderAnimation);
+    attackerView->addAnimationToQueue(attackerAnimation);
+
+    return;
+
+    // Utilities::QtSleepMilliSeconds(7000);
 }

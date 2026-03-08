@@ -22,19 +22,6 @@ protected:
     virtual void playFrame(int iterator) = 0;
 
 public:
-    // mediator : AnimatingFightPreparation / AnimatingFightAttack / Restoring
-    // states : prepareForAction/doAction/restoreDefault
-    // Update :
-    // attacker doAction :
-
-    // GUI changes state of involved characters to fighting.
-    // GUI alerts both characters animations to prepare.
-    // Animations prepare and emit a signal.
-    // GUI connects preparation end to attacker punching state.
-    // Attacker alerts GUI of punching end.
-    // GUI alerts defender to doAction.
-    // defender alerts GUI of action end.
-    // GUI alerts both to finish up.
     FightAnimation(CharacterItem* character, AnimationType animationType);
 
     void animateFightPreparation();

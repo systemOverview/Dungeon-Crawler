@@ -19,9 +19,11 @@ void MainAppStateController::createAppScreens() {
     int gameplayPageIndex = m_appScreens->addWidget(gameController->getGameBoardView());
     int levelCustomizerPageIndex = m_appScreens->addWidget(customLevelCreator);
 
-    m_appScreens->setCurrentIndex(levelCustomizerPageIndex);
+    m_appScreens->setCurrentIndex(gameplayPageIndex);
 
     m_mainWindow->setCentralWidget(m_appScreens);
+
+    gameController->startNewGame(GameController::GameSource::CustomLevels);
 
     connect(customLevelCreator,
             &CustomLevelCreator::finished,

@@ -24,6 +24,7 @@ public:
     enum class PositionUpdateReason { WindowResize, CharacterMovement };
 
     Q_ENUM(CharacterPart);
+    Q_ENUM(PositionUpdateReason);
 
 private:
     struct CharacterOrientation
@@ -31,12 +32,11 @@ private:
         int horizontalFlip = 1;
         qreal verticalRotation = 0;
 
-        void reset() {
-            horizontalFlip = 1;
-            verticalRotation = 0;
+        void reset(bool resetHorizontally = true, bool resetVertically = true) {
+            if (resetHorizontally == true) horizontalFlip = 1;
+            if (resetVertically == true) verticalRotation = 0;
         }
     };
-
 
     std::vector<CharacterAnimation*> m_animationsQueue = {};
     void playNextAnimation();
@@ -69,8 +69,9 @@ public slots:
 public:
     CharacterItem(Types::CharacterType characterType,
                   int characterID,
-                  Mode mode = GameItem::Mode::Clickable,
-                  bool isHealthbarShown = false);
+                  bool isHealthbarShown = false,
+                  Mode mode = GameItem::Mode::Clickable);
+    void lookTowardsPosition(QPointF pos);
     Types::CharacterType getCharacterType() const;
     int getCharacterID() const;
 

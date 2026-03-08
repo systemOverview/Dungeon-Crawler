@@ -12,7 +12,7 @@
 #include "GameController.h"
 #include "Level.h"
 
-GameModelEngine::GameModelEngine() {}
+GameModelEngine::GameModelEngine() { INSTANCE = this; }
 
 void GameModelEngine::createGameFromString(std::string gameString) {
     CURRENT_LEVEL = new Level(gameString);
@@ -55,7 +55,7 @@ bool GameModelEngine::RequestMove(Character* character, Tile* wantedTile) {
     Character* characterAtWantedTile = CURRENT_LEVEL->whoIsOccupyingTile(wantedTile);
 
     if (characterAtWantedTile != nullptr && AreCharactersEnemies(character, characterAtWantedTile)) {
-        return AttemptForcedTileTakeover(character, characterAtWantedTile);
+        return INSTANCE->attemptForcedTileTakeover(character, characterAtWantedTile);
     }
 
     return true;
@@ -89,26 +89,26 @@ bool GameModelEngine::AreCharactersEnemies(Character* firstCharacter, Character*
 
 // End of ValidateMove helpers
 
-bool GameModelEngine::AttemptForcedTileTakeover(Character* attacker, Character* defender) {
+bool GameModelEngine::attemptForcedTileTakeover(Character* attacker, Character* defender) {
     bool didAttackerWin = true;
 
     FightEvent* fightEvent = new FightEvent();
 
-    FightRound firstRound = HoldFightRound(attacker, defender);
+    FightRound firstRound = holdFightRound(attacker, defender);
     fightEvent->addFightRound(firstRound);
 
     if (firstRound.getFightRoundOutcome() != FightRound::FightRoundOutcome::DefenderKilled) {
-        FightRound secondRound = HoldFightRound(defender, attacker); // inversed now
+        FightRound secondRound = holdFightRound(defender, attacker); // inversed now
         fightEvent->addFightRound(secondRound);
         didAttackerWin = false;
     }
 
-    // QCoreApplication::postEvent(GUI, fightEvent);
+    emit fightErupted(fightEvent);
 
     return didAttackerWin;
 }
 
-FightRound GameModelEngine::HoldFightRound(Character* attacker, Character* defender) {
+FightRound GameModelEngine::holdFightRound(Character* attacker, Character* defender) {
     defender->decrementFromHealthPoints(attacker->getStrength());
 
     const FightRound::CharacterInfo attackerPostRoundInfo = {attacker->getCharacterID(),
