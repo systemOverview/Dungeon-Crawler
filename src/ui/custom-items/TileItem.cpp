@@ -26,6 +26,10 @@ TileItem::TileItem(Types::TileType tileType, int row, int col, Mode mode)
 
 Types::TileType TileItem::getTileType() const { return m_tileType; }
 
+void TileItem::setPortalConnection(LineConnectingItems* newPortalConnection) {
+    m_portalConnection = newPortalConnection;
+}
+
 void TileItem::handlePlayerMoveRequest(QGraphicsSceneMouseEvent* event) {
     // During game play , tile is clicked means player wants to move here.
 
@@ -86,16 +90,20 @@ void TileItem::mousePressEvent(QGraphicsSceneMouseEvent* event) {
         break;
     }
 
-    if (event->button() == Qt::RightButton && (m_lineOriginatingFromMe == nullptr)) {
-        m_lineOriginatingFromMe = new LineConnectingItems(this, nullptr);
+    if (event->button() == Qt::RightButton && (m_portalConnection == nullptr)) {
+        qDebug() << "created" << m_coordinates << this->getTileType();
+        m_portalConnection = new LineConnectingItems(this, nullptr);
         event->setAccepted(true);
+    }
+    else {
+        event->setAccepted(false);
     }
 }
 
 void TileItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
-    if (this->getTileType() == Types::TileType::Portal && m_lineOriginatingFromMe != nullptr
-        && m_lineOriginatingFromMe->getToItem() == nullptr) {
-        m_lineOriginatingFromMe->setToPos(event->scenePos());
+    if (this->getTileType() == Types::TileType::Portal && m_portalConnection != nullptr
+        && m_portalConnection->getToItem() == nullptr) {
+        m_portalConnection->setToPos(event->scenePos());
     }
     else if (m_mode == GameItem::Mode::DragAndDropInitiator) {
         GameItem::mouseMoveEvent(event);
@@ -115,19 +123,19 @@ void TileItem::dropEvent(QGraphicsSceneDragDropEvent* event) {
 }
 
 void TileItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
-    if (m_lineOriginatingFromMe != nullptr) {
+    if (m_portalConnection != nullptr) {
         TileItem* tileUnderMouse = findTileUnderPosition(event->scenePos());
 
         if (tileUnderMouse != nullptr && tileUnderMouse->getTileType() == Types::TileType::Portal) {
             event->accept();
-
-            m_lineOriginatingFromMe->setToItem(tileUnderMouse);
-            emit lineCreated(m_lineOriginatingFromMe);
+            m_portalConnection->setToItem(tileUnderMouse);
+            tileUnderMouse->setPortalConnection(m_portalConnection);
+            emit lineCreated(m_portalConnection);
         }
 
         else {
-            delete m_lineOriginatingFromMe;
-            m_lineOriginatingFromMe = nullptr;
+            delete m_portalConnection;
+            m_portalConnection = nullptr;
         }
     }
 }

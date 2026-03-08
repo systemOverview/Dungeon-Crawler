@@ -4,7 +4,6 @@
 #include "CharacterTile_UI_PlacementMediator.h"
 #include "FightEvent.h"
 #include "TileItem.h"
-#include "Utilities.h"
 #include <FightAnimation.h>
 #include <FightAnimationMediator.h>
 #include <MoveAnimation.h>
@@ -99,6 +98,7 @@ qreal GameBoardView::calculateBoardCellSideSize() {
 void GameBoardView::replaceTileView(Coordinates replacedTileCoordinates, Types::TileType newTyleType) {
     assert(m_tileViews.count(replacedTileCoordinates) > 0 && "Level view and model mismatch");
     (m_tileViews.find(replacedTileCoordinates)).value()->changeTileType(newTyleType);
+    qDebug() << m_scene->items().count();
     // TileItem*
 }
 

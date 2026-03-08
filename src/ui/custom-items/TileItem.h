@@ -8,9 +8,11 @@
 class TileItem : public GameItem
 {
     Q_OBJECT
-public:
+protected:
+    void setPortalConnection(LineConnectingItems* newPortalConnection);
+
 private:
-    LineConnectingItems* m_lineOriginatingFromMe = nullptr;
+    LineConnectingItems* m_portalConnection = nullptr;
     Coordinates m_coordinates = {-1, -1};
 
     Types::TileType m_tileType{};
