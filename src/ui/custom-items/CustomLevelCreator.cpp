@@ -32,6 +32,8 @@ void CustomLevelCreator::createLevelCustomizer() {
 void CustomLevelCreator::showTilesMap() {
     m_levelModel = new Level();
 
+    m_levelModel->initializeAllTilesToFloor();
+
     connect(m_levelModel,
             &Level::tileReplaced,
             [this](Coordinates replacedTileCoordinates, Tile* newTile) {

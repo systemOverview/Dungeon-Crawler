@@ -10,42 +10,6 @@ Tile::Tile(Types::TileType type, int row, int col)
     : m_tileType{type}
     , m_coordinates{row, col} {}
 
-Tile* Tile::GenerateTile(Types::TileType tileType, int row, int column) {
-    switch (tileType) {
-    case Types::TileType::Floor:
-        return new Floor(row, column);
-
-    case Types::TileType::Wall:
-        return new Wall(row, column);
-
-    case Types::TileType::OpenDoor: {
-        return new Door(Types::TileType::OpenDoor, row, column);
-    }
-    case Types::TileType::ClosedDoor:
-        return new Door(Types::TileType::ClosedDoor, row, column);
-    case Types::TileType::Switch:
-        return new Switch(row, column);
-    case Types::TileType::Pit:
-
-        return new Pit(row, column);
-    case Types::TileType::Ramp:
-        return new Ramp(row, column);
-
-    case Types::TileType::LevelChanger:
-        return new LevelChanger(row, column);
-    case Types::TileType::GameWinner:
-        return new GameWinner(row, column);
-    case Types::TileType::Portal:
-        return new Portal(row, column);
-
-    default:
-        return new Floor(row, column);
-    }
-}
-
-Tile* Tile::GenerateTile(Types::TileType tileType, Coordinates coordinates) {
-    return Tile::GenerateTile(tileType, coordinates.row, coordinates.column);
-}
 
 Types::TileType Tile::getTileType() const { return m_tileType; }
 
@@ -92,7 +56,7 @@ void Portal::onPortalCreation(PortalCreationEvent *event)
 }
 
 /*door*/
-void Door::alertOfAccess() {
+void Door::switchDoorStatus() {
     if (m_tileType == Types::TileType::OpenDoor) {
         m_tileType = Types::TileType::ClosedDoor;
     }

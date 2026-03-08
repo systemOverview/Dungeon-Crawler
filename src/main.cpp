@@ -4,6 +4,6 @@
 
 int main(int argc, char* argv[]) {
     QApplication a(argc, argv);
-    MainAppStateController mainWindowController;
+    MainAppStateController mainController;
     return a.exec();
 }

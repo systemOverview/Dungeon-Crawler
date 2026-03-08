@@ -23,7 +23,7 @@ void MainAppStateController::createAppScreens() {
 
     m_mainWindow->setCentralWidget(m_appScreens);
 
-    gameController->startNewGame(GameController::GameSource::CustomLevels);
+    gameController->startNewGame(GameController::GameSource::DefaultLevels);
 
     connect(customLevelCreator,
             &CustomLevelCreator::finished,
@@ -32,3 +32,5 @@ void MainAppStateController::createAppScreens() {
                 m_appScreens->setCurrentIndex(gameplayPageIndex);
             });
 }
+
+void MainAppStateController::setDefaultSettings() {}

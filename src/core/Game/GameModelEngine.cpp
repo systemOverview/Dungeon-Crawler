@@ -10,29 +10,13 @@
 #include "Character.h"
 #include "FightEvent.h"
 #include "GameController.h"
+#include "JsonObjects.h"
 #include "Level.h"
 
 GameModelEngine::GameModelEngine() { INSTANCE = this; }
 
-void GameModelEngine::createGameFromString(std::string gameString) {
-    CURRENT_LEVEL = new Level(gameString);
-
-    for (Character* character : CURRENT_LEVEL->getCharacters()) {
-        AbstractController* characterController = AbstractController::CreateCharacterController(
-            character);
-        characterController->setLevel(CURRENT_LEVEL);
-
-        connect(this,
-                &GameModelEngine::move,
-                characterController,
-                &AbstractController::moveCharacter);
-
-        CHARACTERS_CONTROLLERS.insert({character, characterController});
-    }
-}
-
-void GameModelEngine::createGameFromJson(json jsonInfo) {
-    CURRENT_LEVEL = new Level(jsonInfo);
+void GameModelEngine::createGameFromJson(QString filePath) {
+    CURRENT_LEVEL = JsonGenerator::CreateLevelFromJsonFile(filePath);
 
     for (Character* character : CURRENT_LEVEL->getCharacters()) {
         AbstractController* characterController = AbstractController::CreateCharacterController(

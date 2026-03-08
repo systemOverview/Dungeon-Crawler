@@ -12,11 +12,12 @@ class Tile;
 class Level : public QObject
 {
     Q_OBJECT
-    std::vector<std::vector<Tile*>> m_tiles = {};
 
     std::vector<Character*> m_characters = {};
     int m_numberOfRows = 10;
     int m_numberOfColumns = 10;
+
+    TileManager* m_tileManager = nullptr;
 
 public:
     enum LevelValidationResult {
@@ -32,10 +33,6 @@ signals:
     void tileReplaced(Coordinates coordinatesOfReplacedTile, Tile* newTile);
 
 public:
-    Level(std::string gameBoard,
-          int numberOfRows = GameSettings::TILES_PER_SIDE,
-          int numberOfColumns = GameSettings::TILES_PER_SIDE);
-
     Level(int numberOfRows = GameSettings::TILES_PER_SIDE,
           int numberOfColumns = GameSettings::TILES_PER_SIDE);
 
@@ -50,10 +47,12 @@ public:
     Character* createAndInsertCharacter(Types::CharacterType characterType, Coordinates coordinate);
 
     void connectPortals(Coordinates firstCoordinates, Coordinates secondCoordinates);
+    void initializeAllTilesToFloor();
 
-    void setDefaultTiles();
     void clear();
     ~Level();
+    int getNumberOfRows() const;
+    int getNumberOfColumns() const;
 };
 
 #endif //PRAK_LEVEL_H

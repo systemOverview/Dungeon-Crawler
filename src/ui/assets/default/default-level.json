@@ -1,0 +1,536 @@
+{
+    "characters": [
+        {
+            "column": 4,
+            "health": 120,
+            "row": 4,
+            "type": "Human"
+        },
+        {
+            "column": 7,
+            "health": 45,
+            "row": 9,
+            "type": "GuardZombie"
+        },
+        {
+            "column": 9,
+            "health": 45,
+            "row": 6,
+            "type": "Attacker"
+        }
+    ],
+    "levelInfo": {
+        "numberOfColumns": 10,
+        "numberOfRows": 10
+    },
+    "portalConnections": [
+        {
+            "firstPortalColumn": 6,
+            "firstPortalRow": 2,
+            "secondPortalColumn": 6,
+            "secondPortalRow": 7
+        }
+    ],
+    "tiles": [
+        {
+            "column": 0,
+            "row": 0,
+            "type": "Floor"
+        },
+        {
+            "column": 1,
+            "row": 0,
+            "type": "Floor"
+        },
+        {
+            "column": 2,
+            "row": 0,
+            "type": "Floor"
+        },
+        {
+            "column": 3,
+            "row": 0,
+            "type": "Floor"
+        },
+        {
+            "column": 4,
+            "row": 0,
+            "type": "Floor"
+        },
+        {
+            "column": 5,
+            "row": 0,
+            "type": "Floor"
+        },
+        {
+            "column": 6,
+            "row": 0,
+            "type": "Floor"
+        },
+        {
+            "column": 7,
+            "row": 0,
+            "type": "Floor"
+        },
+        {
+            "column": 8,
+            "row": 0,
+            "type": "Floor"
+        },
+        {
+            "column": 9,
+            "row": 0,
+            "type": "Floor"
+        },
+        {
+            "column": 0,
+            "row": 1,
+            "type": "Floor"
+        },
+        {
+            "column": 1,
+            "row": 1,
+            "type": "Floor"
+        },
+        {
+            "column": 2,
+            "row": 1,
+            "type": "Floor"
+        },
+        {
+            "column": 3,
+            "row": 1,
+            "type": "Floor"
+        },
+        {
+            "column": 4,
+            "row": 1,
+            "type": "Floor"
+        },
+        {
+            "column": 5,
+            "row": 1,
+            "type": "Floor"
+        },
+        {
+            "column": 6,
+            "row": 1,
+            "type": "Floor"
+        },
+        {
+            "column": 7,
+            "row": 1,
+            "type": "Floor"
+        },
+        {
+            "column": 8,
+            "row": 1,
+            "type": "Floor"
+        },
+        {
+            "column": 9,
+            "row": 1,
+            "type": "Floor"
+        },
+        {
+            "column": 0,
+            "row": 2,
+            "type": "Floor"
+        },
+        {
+            "column": 1,
+            "row": 2,
+            "type": "Floor"
+        },
+        {
+            "column": 2,
+            "row": 2,
+            "type": "Floor"
+        },
+        {
+            "column": 3,
+            "row": 2,
+            "type": "Floor"
+        },
+        {
+            "column": 4,
+            "row": 2,
+            "type": "Floor"
+        },
+        {
+            "column": 5,
+            "row": 2,
+            "type": "Floor"
+        },
+        {
+            "column": 6,
+            "row": 2,
+            "type": "Portal"
+        },
+        {
+            "column": 7,
+            "row": 2,
+            "type": "Floor"
+        },
+        {
+            "column": 8,
+            "row": 2,
+            "type": "Floor"
+        },
+        {
+            "column": 9,
+            "row": 2,
+            "type": "Floor"
+        },
+        {
+            "column": 0,
+            "row": 3,
+            "type": "Floor"
+        },
+        {
+            "column": 1,
+            "row": 3,
+            "type": "Floor"
+        },
+        {
+            "column": 2,
+            "row": 3,
+            "type": "Floor"
+        },
+        {
+            "column": 3,
+            "row": 3,
+            "type": "Floor"
+        },
+        {
+            "column": 4,
+            "row": 3,
+            "type": "Floor"
+        },
+        {
+            "column": 5,
+            "row": 3,
+            "type": "Floor"
+        },
+        {
+            "column": 6,
+            "row": 3,
+            "type": "Floor"
+        },
+        {
+            "column": 7,
+            "row": 3,
+            "type": "Floor"
+        },
+        {
+            "column": 8,
+            "row": 3,
+            "type": "Floor"
+        },
+        {
+            "column": 9,
+            "row": 3,
+            "type": "Floor"
+        },
+        {
+            "column": 0,
+            "row": 4,
+            "type": "Floor"
+        },
+        {
+            "column": 1,
+            "row": 4,
+            "type": "Floor"
+        },
+        {
+            "column": 2,
+            "row": 4,
+            "type": "Floor"
+        },
+        {
+            "column": 3,
+            "row": 4,
+            "type": "Floor"
+        },
+        {
+            "column": 4,
+            "row": 4,
+            "type": "Floor"
+        },
+        {
+            "column": 5,
+            "row": 4,
+            "type": "Floor"
+        },
+        {
+            "column": 6,
+            "row": 4,
+            "type": "Floor"
+        },
+        {
+            "column": 7,
+            "row": 4,
+            "type": "ClosedDoor"
+        },
+        {
+            "column": 8,
+            "row": 4,
+            "type": "Floor"
+        },
+        {
+            "column": 9,
+            "row": 4,
+            "type": "Floor"
+        },
+        {
+            "column": 0,
+            "row": 5,
+            "type": "Floor"
+        },
+        {
+            "column": 1,
+            "row": 5,
+            "type": "Floor"
+        },
+        {
+            "column": 2,
+            "row": 5,
+            "type": "Floor"
+        },
+        {
+            "column": 3,
+            "row": 5,
+            "type": "Floor"
+        },
+        {
+            "column": 4,
+            "row": 5,
+            "type": "Floor"
+        },
+        {
+            "column": 5,
+            "row": 5,
+            "type": "Switch"
+        },
+        {
+            "column": 6,
+            "row": 5,
+            "type": "Floor"
+        },
+        {
+            "column": 7,
+            "row": 5,
+            "type": "Floor"
+        },
+        {
+            "column": 8,
+            "row": 5,
+            "type": "Floor"
+        },
+        {
+            "column": 9,
+            "row": 5,
+            "type": "Floor"
+        },
+        {
+            "column": 0,
+            "row": 6,
+            "type": "Floor"
+        },
+        {
+            "column": 1,
+            "row": 6,
+            "type": "Floor"
+        },
+        {
+            "column": 2,
+            "row": 6,
+            "type": "Floor"
+        },
+        {
+            "column": 3,
+            "row": 6,
+            "type": "Floor"
+        },
+        {
+            "column": 4,
+            "row": 6,
+            "type": "Floor"
+        },
+        {
+            "column": 5,
+            "row": 6,
+            "type": "Floor"
+        },
+        {
+            "column": 6,
+            "row": 6,
+            "type": "Floor"
+        },
+        {
+            "column": 7,
+            "row": 6,
+            "type": "Floor"
+        },
+        {
+            "column": 8,
+            "row": 6,
+            "type": "Floor"
+        },
+        {
+            "column": 9,
+            "row": 6,
+            "type": "Floor"
+        },
+        {
+            "column": 0,
+            "row": 7,
+            "type": "Floor"
+        },
+        {
+            "column": 1,
+            "row": 7,
+            "type": "Floor"
+        },
+        {
+            "column": 2,
+            "row": 7,
+            "type": "Floor"
+        },
+        {
+            "column": 3,
+            "row": 7,
+            "type": "Floor"
+        },
+        {
+            "column": 4,
+            "row": 7,
+            "type": "Floor"
+        },
+        {
+            "column": 5,
+            "row": 7,
+            "type": "Floor"
+        },
+        {
+            "column": 6,
+            "row": 7,
+            "type": "Portal"
+        },
+        {
+            "column": 7,
+            "row": 7,
+            "type": "Floor"
+        },
+        {
+            "column": 8,
+            "row": 7,
+            "type": "Floor"
+        },
+        {
+            "column": 9,
+            "row": 7,
+            "type": "Floor"
+        },
+        {
+            "column": 0,
+            "row": 8,
+            "type": "Floor"
+        },
+        {
+            "column": 1,
+            "row": 8,
+            "type": "Floor"
+        },
+        {
+            "column": 2,
+            "row": 8,
+            "type": "Floor"
+        },
+        {
+            "column": 3,
+            "row": 8,
+            "type": "Floor"
+        },
+        {
+            "column": 4,
+            "row": 8,
+            "type": "Floor"
+        },
+        {
+            "column": 5,
+            "row": 8,
+            "type": "Floor"
+        },
+        {
+            "column": 6,
+            "row": 8,
+            "type": "Floor"
+        },
+        {
+            "column": 7,
+            "row": 8,
+            "type": "Floor"
+        },
+        {
+            "column": 8,
+            "row": 8,
+            "type": "Floor"
+        },
+        {
+            "column": 9,
+            "row": 8,
+            "type": "Floor"
+        },
+        {
+            "column": 0,
+            "row": 9,
+            "type": "Floor"
+        },
+        {
+            "column": 1,
+            "row": 9,
+            "type": "Floor"
+        },
+        {
+            "column": 2,
+            "row": 9,
+            "type": "Floor"
+        },
+        {
+            "column": 3,
+            "row": 9,
+            "type": "Floor"
+        },
+        {
+            "column": 4,
+            "row": 9,
+            "type": "Floor"
+        },
+        {
+            "column": 5,
+            "row": 9,
+            "type": "Floor"
+        },
+        {
+            "column": 6,
+            "row": 9,
+            "type": "Floor"
+        },
+        {
+            "column": 7,
+            "row": 9,
+            "type": "Floor"
+        },
+        {
+            "column": 8,
+            "row": 9,
+            "type": "Floor"
+        },
+        {
+            "column": 9,
+            "row": 9,
+            "type": "Floor"
+        }
+    ]
+}

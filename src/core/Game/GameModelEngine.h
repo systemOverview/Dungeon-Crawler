@@ -43,8 +43,7 @@ signals:
 
 public:
     GameModelEngine();
-    void createGameFromString(std::string gameString);
-    void createGameFromJson(json jsonInfo);
+    void createGameFromJson(QString filePath);
     static bool RequestMove(Character* character, Tile* wantedTile);
     Level* getCurrentLevel();
 };

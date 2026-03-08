@@ -17,6 +17,7 @@ private:
     QStackedWidget* m_appScreens = nullptr;
 
     void createAppScreens();
+    void setDefaultSettings();
 
 public:
     MainAppStateController();

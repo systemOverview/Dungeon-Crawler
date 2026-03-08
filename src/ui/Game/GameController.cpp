@@ -28,11 +28,11 @@ void GameController::startNewGame(GameSource gameSource) {
     m_gameEngine = new GameModelEngine();
 
     if (gameSource == GameSource::CustomLevels) {
-        json jsonInfo = JsonGenerator::parseFileJson(DataPaths::GetCustomLevelPath());
-        m_gameEngine->createGameFromJson(jsonInfo);
+        m_gameEngine->createGameFromJson(DataPaths::GetCustomLevelPath());
     }
+
     else {
-        m_gameEngine->createGameFromString(GameData::GameStrings[0]);
+        m_gameEngine->createGameFromJson(DataPaths::DefaultLevelPath);
     }
 
     connect(m_gameView, &GameBoardView::tileClicked, this, &GameController::tileClicked);

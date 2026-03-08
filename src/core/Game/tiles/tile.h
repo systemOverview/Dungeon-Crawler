@@ -9,10 +9,15 @@
 #include "PassiveAktive.h"
 #include "Types.h"
 #include <nlohmann/json.hpp>
+class TileManager;
+
 using json = nlohmann::json;
+
 class Tile : public QObject
 {
     Q_OBJECT
+    friend TileManager;
+
 public:
 
 protected:
@@ -20,21 +25,19 @@ protected:
     Coordinates m_coordinates;
     Character* character{nullptr};
     Tile(Types::TileType tileType, int row, int col);
-
+public slots:
+    virtual void alertOfAccess() { emit tileAccessed(); };
 signals:
     void tileTypeChanged(Types::TileType tileType);
+    void tileAccessed();
 
 public:
-    static Tile* GenerateTile(Types::TileType tileType, int row, int column);
-    static Tile* GenerateTile(Types::TileType tileType, Coordinates coordinates);
-
     Types::TileType getTileType() const;
     Character *getCharacter() const;
     void setCharacter(Character* characterToPlace);
     int getRow() const;
     int getColumn() const;
     Coordinates getCoordinates() const;
-    virtual void alertOfAccess() {};
     virtual ~Tile();
 };
 
@@ -85,13 +88,15 @@ public:
 
 class Door : public Tile
 {
+    Q_OBJECT
 public:
     Door(Types::TileType doorType, int row, int column)
         : Tile(doorType, row, column) {
         assert((doorType == Types::TileType::OpenDoor || doorType == Types::TileType::ClosedDoor)
                && "Type supplied is not a door.");
     }
-    void alertOfAccess() override;
+public slots:
+    void switchDoorStatus();
 };
 
 class Pit : public Tile
