@@ -40,7 +40,6 @@ void CustomLevelCreator::showTilesMap() {
                 m_levelVisualizer->replaceTileView(replacedTileCoordinates, newTile->getTileType());
             });
 
-    for (int row = 0; row < m_levelModel->getTiles().size(); row++) {
         for (const std::vector<Tile*>& row : m_levelModel->getTiles()) {
             for (Tile* tile : row) {
                 TileItem* tileView = m_levelVisualizer
@@ -58,7 +57,6 @@ void CustomLevelCreator::showTilesMap() {
                         &CustomLevelCreator::portalsConnected);
             }
         }
-    }
 }
 
 void CustomLevelCreator::setupSidebar() {
