@@ -43,7 +43,7 @@ protected:
     qreal m_sideLength = 70;
     QPixmap m_texturePixmap;
     virtual void fixMyPosition() = 0;
-    virtual QPixmap getPixmap() const;
+    virtual QPixmap getPixmap();
 
     bool m_isDragAndDropPixmapSizeSet = false;
     qreal m_dragAndDropPixmapSize{};

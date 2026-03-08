@@ -6,7 +6,7 @@
 #include <qapplication.h>
 #include <qdrag.h>
 
-QPixmap GameItem::getPixmap() const { return m_texturePixmap; }
+QPixmap GameItem::getPixmap() { return m_texturePixmap; }
 
 bool GameItem::isMoveEventTooShortToMatter(QGraphicsSceneMouseEvent* event) {
     if (QLineF(event->screenPos(), event->buttonDownScreenPos(Qt::LeftButton)).length()

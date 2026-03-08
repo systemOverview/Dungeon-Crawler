@@ -1,11 +1,7 @@
 #ifndef CHARACTERITEM_H
 #define CHARACTERITEM_H
 
-#include <QGraphicsItem>
 #include <QObject>
-#include <QtCore/qobject.h>
-#include <QtCore/qsequentialanimationgroup.h>
-#include <QtStateMachine/qstatemachine.h>
 #include "GameItem.h"
 #include "Types.h"
 class CharacterAnimation;
@@ -57,7 +53,7 @@ private:
     TileItem* m_tile = nullptr;
 
     void setDefaultParts();
-    QPixmap getPixmap() const override;
+    QPixmap getPixmap() override;
     CharacterAnimation* m_currentAnimation = nullptr;
     PositionUpdateReason m_lastPositionUpdateReason{
               CharacterItem::PositionUpdateReason::WindowResize};

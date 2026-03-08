@@ -1,4 +1,5 @@
 #include "CharacterItem.h"
+#include <QDateTime>
 #include <QFile>
 #include <QFinalState>
 #include <QMenu>
@@ -80,7 +81,7 @@ void CharacterItem::setDefaultParts() {
     }
 }
 
-QPixmap CharacterItem::getPixmap() const {
+QPixmap CharacterItem::getPixmap() {
     QPixmap base = QPixmap();
 
     for (const auto& [part, partOption] : m_partsGraphicOptions) {
@@ -88,6 +89,8 @@ QPixmap CharacterItem::getPixmap() const {
                                                            part,
                                                            partOption,
                                                            m_currentFrameId);
+
+
         if (pixmap.isNull()) {
             continue;
         }
@@ -104,6 +107,7 @@ QPixmap CharacterItem::getPixmap() const {
 
 void CharacterItem::assignPart(CharacterItem::CharacterPart partType, int whichGraphicsOption) {
     m_partsGraphicOptions.insert_or_assign(partType, whichGraphicsOption);
+    update();
 }
 
 void CharacterItem::addAnimationToQueue(CharacterAnimation* animation) {
@@ -140,6 +144,7 @@ void CharacterItem::updatePosition(QPointF newPosition, PositionUpdateReason rea
 void CharacterItem::paint(QPainter* painter,
                           const QStyleOptionGraphicsItem* option,
                           QWidget* widget) {
+    static int c = 0;
     constexpr static int spaceTakenByCharacterPercentage = 80;
 
     QTransform flip;
@@ -147,6 +152,7 @@ void CharacterItem::paint(QPainter* painter,
     flip.rotate(m_characterOrientation.verticalRotation);
 
     QPixmap pixmap = getPixmap();
+
     QImage img = pixmap.toImage();
     SpriteManager::TrimTransparent(img);
     pixmap = QPixmap::fromImage(img);

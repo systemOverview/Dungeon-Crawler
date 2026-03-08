@@ -29,8 +29,7 @@ public:
     void initializeAllTilesToType(Types::TileType type);
 
     void clearTiles();
-
-signals:
+    ~TileManager();
 };
 
 #endif // TILEMANAGER_H

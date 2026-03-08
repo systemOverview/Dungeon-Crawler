@@ -2,6 +2,8 @@
 #include <QtWidgets/qstackedwidget.h>
 #include "CustomLevelCreator.h"
 #include "GameController.h"
+#include "QGraphicsView"
+#include <CharacterCustomizer.h>
 #include <MainWindow.h>
 MainAppStateController::MainAppStateController() {
     m_mainWindow = new MainWindow();
@@ -15,11 +17,13 @@ void MainAppStateController::createAppScreens() {
 
     GameController* gameController = new GameController();
     CustomLevelCreator* customLevelCreator = new CustomLevelCreator();
+    CharacterCustomizer* characterCustomizer = new CharacterCustomizer();
 
     int gameplayPageIndex = m_appScreens->addWidget(gameController->getGameBoardView());
-    int levelCustomizerPageIndex = m_appScreens->addWidget(customLevelCreator);
+    // int levelCustomizerPageIndex = m_appScreens->addWidget(customLevelCreator);
+    int characterCustomizerPageIndex = m_appScreens->addWidget(characterCustomizer->getWidget());
 
-    m_appScreens->setCurrentIndex(levelCustomizerPageIndex);
+    m_appScreens->setCurrentIndex(characterCustomizerPageIndex);
 
     m_mainWindow->setCentralWidget(m_appScreens);
 

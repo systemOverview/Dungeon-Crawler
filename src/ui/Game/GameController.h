@@ -1,19 +1,15 @@
 #ifndef GRAPHICALUI_H
 #define GRAPHICALUI_H
-#include <QDialog>
-#include <QMainWindow>
 #include <QObject>
-#include <QPainter>
-#include <QTextEdit>
-#include "Level.h"
-#include "MainWindow.h"
-
-class DungeonCrawler;
+#include "Constants.h"
 class FightEvent;
 class FightRound;
 class GameBoardView;
 class CharacterTile_UI_PlacementMediator;
 class GameModelEngine;
+class TileItem;
+class QGraphicsView;
+class Level;
 class GameController : public QObject
 {
     Q_OBJECT

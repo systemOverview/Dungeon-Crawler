@@ -1,13 +1,17 @@
 #include "CustomLevelCreator.h"
+#include <QtWidgets/qboxlayout.h>
 #include <QtWidgets/qgraphicsscene.h>
 #include <QtWidgets/qmessagebox.h>
 #include <QtWidgets/qpushbutton.h>
 #include "Constants.h"
 #include "GameBoardView.h"
 #include "JsonObjects.h"
+#include "Level.h"
+#include "QGraphicsView"
 #include "SquareGridLayout.h"
 #include "TileItem.h"
 #include "Types.h"
+#include <CharacterItem.h>
 #include <MainWindow.h>
 #include <qevent.h>
 CustomLevelCreator::CustomLevelCreator(QWidget* parent)

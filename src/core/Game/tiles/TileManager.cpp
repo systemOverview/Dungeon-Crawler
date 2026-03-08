@@ -91,3 +91,5 @@ void TileManager::clearTiles() {
     }
     m_tiles.clear();
 }
+
+TileManager::~TileManager() { clearTiles(); }

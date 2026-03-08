@@ -1,6 +1,4 @@
 #include "Constants.h"
-#include "tile.h"
-
 bool Coordinates::operator==(const Coordinates& rhs) const {
     return (this->row == rhs.row && this->column == rhs.column);
 }

@@ -14,39 +14,6 @@ Level::Level(int numberOfRows, int numberOfColumns)
     m_tileManager = new TileManager(numberOfRows, numberOfColumns, this);
 }
 
-Level::Level(json levelJson, int numberOfRows, int numberOfColumns)
-    : m_numberOfRows{numberOfRows}
-    , m_numberOfColumns{numberOfColumns} {
-    m_tileManager = new TileManager(numberOfRows, numberOfColumns, this);
-
-    for (auto tileJson : levelJson["tiles"]) {
-        Types::TileType tileType = Utilities::QString_To_Q_ENUM<Types::TileType>(
-            QString::fromStdString(tileJson["type"]));
-        int row = tileJson["row"];
-        int column = tileJson["column"];
-
-        createAndInsertOrReplaceTile(tileType, {row, column});
-    }
-
-    for (auto characterJSON : levelJson["characters"]) {
-        Types::CharacterType characterType = Utilities::QString_To_Q_ENUM<Types::CharacterType>(
-            QString::fromStdString(characterJSON["type"]));
-        int row = characterJSON["row"];
-        int column = characterJSON["column"];
-
-        createAndInsertCharacter(characterType, {row, column});
-    }
-
-    for (auto portalConnectionJSON : levelJson["portalConnections"]) {
-        int firstPortalRow = portalConnectionJSON["firstPortalRow"];
-        int firstPortalColumn = portalConnectionJSON["firstPortalColumn"];
-        int secondPortalRow = portalConnectionJSON["secondPortalRow"];
-        int secondPortalColumn = portalConnectionJSON["firstPortalColumn"];
-
-        connectPortals({firstPortalRow, firstPortalColumn}, {secondPortalRow, secondPortalColumn});
-    }
-}
-
 Character* Level::whoIsOccupyingTile(Tile* tile) {
     for (Character* character : m_characters) {
         if (character->getTile() == tile) {
@@ -61,6 +28,10 @@ void Level::createAndInsertOrReplaceTile(Types::TileType tileType, Coordinates t
     Tile* replacedTile = m_tileManager->getTile(tileCoordinates);
 
     Tile* newTile = m_tileManager->createAndInsertOrReplaceTile(tileType, tileCoordinates);
+
+    if (newTile->getTileType() == Types::TileType::LevelChanger) {
+        emit levelFinished();
+    }
 
     if (replacedTile != nullptr) {
         emit tileReplaced(replacedTile->getCoordinates(), newTile);
@@ -157,4 +128,4 @@ Tile* Level::getTile(Coordinates coordinates) { return m_tileManager->getTile(co
 const std::vector<std::vector<Tile*> > Level::getTiles() const { return m_tileManager->getTiles(); }
 const std::vector<Character*> Level::getCharacters() const { return m_characters; }
 
-Level::~Level() {}
+Level::~Level() { delete m_tileManager; }

@@ -35,13 +35,10 @@ public:
     Character* whoIsOccupyingTile(Tile* tile);
 signals:
     void tileReplaced(Coordinates coordinatesOfReplacedTile, Tile* newTile);
+    void levelFinished();
 
 public:
     Level(int numberOfRows = GameSettings::TILES_PER_SIDE,
-          int numberOfColumns = GameSettings::TILES_PER_SIDE);
-
-    Level(json levelJson,
-          int numberOfRows = GameSettings::TILES_PER_SIDE,
           int numberOfColumns = GameSettings::TILES_PER_SIDE);
 
     const std::vector<std::vector<Tile*>> getTiles() const;

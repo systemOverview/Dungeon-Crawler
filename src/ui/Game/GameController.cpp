@@ -11,6 +11,7 @@
 #include <QtWidgets/qlabel.h>
 #include <QtWidgets/qmessagebox.h>
 #include <QtWidgets/qpushbutton.h>
+#include "Character.h"
 #include "CharacterTile_UI_PlacementMediator.h"
 #include "Constants.h"
 #include "FightAnimation.h"
@@ -18,6 +19,7 @@
 #include "GameBoardView.h"
 #include "GameModelEngine.h"
 #include "JsonObjects.h"
+#include "Level.h"
 #include "MainWindow.h"
 #include "TileItem.h"
 #include <MoveAnimation.h>

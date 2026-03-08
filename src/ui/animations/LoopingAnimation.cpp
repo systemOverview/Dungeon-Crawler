@@ -17,6 +17,8 @@ void LoopingAnimation::start() {
     connect(m_timeline, &QTimeLine::frameChanged, this, &LoopingAnimation::playFrame);
     connect(m_timeline, &QTimeLine::finished, this, [this]() mutable {
         delete m_timeline;
+        m_timeline = nullptr;
+        m_timeline = new QTimeLine();
         start();
     });
     m_timeline->start();
