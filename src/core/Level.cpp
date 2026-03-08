@@ -96,12 +96,59 @@ void Level::initializeAllTilesToFloor() {
     m_tileManager->initializeAllTilesToType(Types::TileType::Floor);
 }
 
+Level::LevelValidationResult Level::validateSelf() const {
+    switch (getHumansCount()) {
+    case 0:
+        return LevelValidationResult::HumanCharacterMissing;
+    case 1:
+        break;
+    default:
+        return LevelValidationResult::MoreThanOneHuman;
+    }
+
+    if (m_characters.size() <= 1) {
+        return LevelValidationResult::ComputerCharacterMissing;
+    }
+
+    if (arePortalsConnected() == false) {
+        return LevelValidationResult::PortalConnectionsMissing;
+    }
+    return LevelValidationResult::Success;
+}
+
 void Level::clear() { m_tileManager->clearTiles(); }
 
 //getters
 int Level::getNumberOfRows() const { return m_numberOfRows; }
 
 int Level::getNumberOfColumns() const { return m_numberOfColumns; }
+
+int Level::getHumansCount() const {
+    int humansCounter = 0;
+    for (Character* character : m_characters) {
+        if (character->getCharacterType() == Types::CharacterType::Human) {
+            humansCounter++;
+        }
+    }
+    return humansCounter;
+}
+
+bool Level::arePortalsConnected() const {
+    for (std::vector<Tile*> row : m_tileManager->getTiles()) {
+        for (Tile* tile : row) {
+            if (tile->getTileType() == Types::TileType::Portal) {
+                Portal* converted = dynamic_cast<Portal*>(tile);
+
+                if (converted
+                    && (converted->getSiblingPortal() == nullptr
+                        || converted->getSiblingPortal()->getSiblingPortal() != converted)) {
+                    return false;
+                }
+            }
+        }
+    }
+    return true;
+}
 
 Tile* Level::getTile(int row, int col) { return getTile({row, col}); }
 

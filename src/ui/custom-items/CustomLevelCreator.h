@@ -25,6 +25,7 @@ private:
     void setupSidebar();
     void createTileOptions();
     void createCharactersOptions();
+    bool validateLevelAndShowMessage();
 public slots:
     void dragDropEvent(DragAndDropGameItemEvent event);
     void portalsConnected(LineConnectingItems* portalsLine);

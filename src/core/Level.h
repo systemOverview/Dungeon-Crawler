@@ -12,18 +12,22 @@ class Tile;
 class Level : public QObject
 {
     Q_OBJECT
-
+private:
     std::vector<Character*> m_characters = {};
     int m_numberOfRows = 10;
     int m_numberOfColumns = 10;
 
     TileManager* m_tileManager = nullptr;
 
+    int getHumansCount() const;
+    bool arePortalsConnected() const;
+
 public:
-    enum LevelValidationResult {
+    enum class LevelValidationResult {
         Success,
         PortalConnectionsMissing,
         HumanCharacterMissing,
+        MoreThanOneHuman,
         ComputerCharacterMissing
     };
     Tile* getTile(int row, int col);
@@ -48,6 +52,8 @@ public:
 
     void connectPortals(Coordinates firstCoordinates, Coordinates secondCoordinates);
     void initializeAllTilesToFloor();
+
+    LevelValidationResult validateSelf() const;
 
     void clear();
     ~Level();

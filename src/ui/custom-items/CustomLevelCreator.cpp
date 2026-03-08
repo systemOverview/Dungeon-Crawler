@@ -1,5 +1,6 @@
 #include "CustomLevelCreator.h"
 #include <QtWidgets/qgraphicsscene.h>
+#include <QtWidgets/qmessagebox.h>
 #include <QtWidgets/qpushbutton.h>
 #include "Constants.h"
 #include "GameBoardView.h"
@@ -66,8 +67,10 @@ void CustomLevelCreator::setupSidebar() {
 
     QPushButton* saveLevel = new QPushButton("Save level", this);
     connect(saveLevel, &QPushButton::clicked, [this]() {
-        JsonGenerator::SaveLevelToJson(m_levelModel, DataPaths::GetCustomLevelPath());
-        emit finished();
+        if (validateLevelAndShowMessage() == true) {
+            JsonGenerator::SaveLevelToJson(m_levelModel, DataPaths::GetCustomLevelPath());
+            emit finished();
+        }
     });
     sidebarLayout->addWidget(saveLevel);
 }
@@ -111,6 +114,39 @@ void CustomLevelCreator::createCharactersOptions() {
 
         charactersOptionsLayout->addGameItem(characterOption, {typeIterator % 2, typeIterator / 2});
     }
+}
+
+bool CustomLevelCreator::validateLevelAndShowMessage() {
+    Level::LevelValidationResult validationResult = m_levelModel->validateSelf();
+    QString validationString;
+    switch (validationResult) {
+    case Level::LevelValidationResult::Success:
+        return true;
+        break;
+    case Level::LevelValidationResult::PortalConnectionsMissing: {
+        validationString = "Not all portals are connected";
+        break;
+    }
+    case Level::LevelValidationResult::HumanCharacterMissing: {
+        validationString = "You must create a human character";
+        break;
+    }
+
+    case Level::LevelValidationResult::MoreThanOneHuman: {
+        validationString = "You can only add one human character";
+        break;
+    }
+
+    case Level::LevelValidationResult::ComputerCharacterMissing: {
+        validationString = "You must add computer characters too";
+        break;
+    }
+    }
+
+    QMessageBox errorMessage;
+    errorMessage.setText(validationString);
+    errorMessage.exec();
+    return false;
 }
 
 void CustomLevelCreator::dragDropEvent(DragAndDropGameItemEvent event) {

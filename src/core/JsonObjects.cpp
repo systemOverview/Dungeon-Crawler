@@ -52,6 +52,9 @@ void JsonGenerator::JsonToCharacter(Level* level, QJsonObject characterJSON) {
 
 QJsonObject JsonGenerator::PortalConnectionToJson(Portal* portal) {
     Portal* siblingPortal = portal->getSiblingPortal();
+    if (!portal) {
+        return QJsonObject();
+    }
     QJsonObject portalJSON;
 
     portalJSON.insert("firstPortalRow", portal->getRow());
