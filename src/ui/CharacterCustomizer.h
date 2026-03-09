@@ -1,11 +1,12 @@
 #ifndef CUSTOMCHARACTERCREATOR_H
 #define CUSTOMCHARACTERCREATOR_H
 
+#include "AppPageController.h"
 #include <CharacterItem.h>
 class QGraphicsView;
 class QVBoxLayout;
 class QToolBox;
-class CharacterCustomizer : public QObject
+class CharacterCustomizer : public QObject, public AppPageController
 {
     Q_OBJECT
 private:
@@ -25,12 +26,17 @@ private:
     void createCharacterCustomizationOptions();
 
     void characterCustomizationClicked(CharacterItem::CharacterPart characterPart, int whichOption);
+private slots:
+    void showCharacterCustomizer();
 
 public:
     CharacterCustomizer();
-    void ShowCharacterCustomizer();
-    QWidget* getWidget() const;
+    QWidget* getWidget() override;
     // std::map<CharacterItem::CharacterPart, int> getHumanPartsGraphics() const;
+
+// AppPage interface
+protected:
+    void createActions() override;
 };
 
 #endif // CUSTOMCHARACTERCREATOR_H

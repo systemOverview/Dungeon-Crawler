@@ -98,8 +98,6 @@ qreal GameBoardView::calculateBoardCellSideSize() {
 void GameBoardView::replaceTileView(Coordinates replacedTileCoordinates, Types::TileType newTyleType) {
     assert(m_tileViews.count(replacedTileCoordinates) > 0 && "Level view and model mismatch");
     (m_tileViews.find(replacedTileCoordinates)).value()->changeTileType(newTyleType);
-    qDebug() << m_scene->items().count();
-    // TileItem*
 }
 
 void GameBoardView::animateFight(FightEvent* fightEvent) {

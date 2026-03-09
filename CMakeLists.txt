@@ -22,6 +22,8 @@ qt_add_executable(DungeonCrawler WIN32 MACOSX_BUNDLE
     src/ui/animations/FightAnimationMediator.h src/ui/animations/FightAnimationMediator.cpp
     src/core/Game/tiles/TileManager.h src/core/Game/tiles/TileManager.cpp
     src/ui/CharacterCustomizer.h src/ui/CharacterCustomizer.cpp
+    src/ui/AppPageController.h src/ui/AppPageController.cpp
+    src/ui/PageNavigatorButton.h src/ui/PageNavigatorButton.cpp
 
    )
 add_definitions( -DMAGICKCORE_QUANTUM_DEPTH=16 )

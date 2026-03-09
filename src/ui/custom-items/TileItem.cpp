@@ -91,7 +91,6 @@ void TileItem::mousePressEvent(QGraphicsSceneMouseEvent* event) {
     }
 
     if (event->button() == Qt::RightButton && (m_portalConnection == nullptr)) {
-        qDebug() << "created" << m_coordinates << this->getTileType();
         m_portalConnection = new LineConnectingItems(this, nullptr);
         event->setAccepted(true);
     }

@@ -16,9 +16,15 @@ CharacterCustomizer::CharacterCustomizer() {
 
     m_scene = new QGraphicsScene(m_widget);
     m_view = new QGraphicsView(m_scene, m_widget);
-    ShowCharacterCustomizer();
 }
-void CharacterCustomizer::ShowCharacterCustomizer() {
+
+void CharacterCustomizer::createActions() {
+    GameAction* action = new GameAction(GameAction::ActionID::CustomizeCharacter);
+    connect(action, &QAction::triggered, this, &CharacterCustomizer::showCharacterCustomizer);
+    action->setText("Customize your character.");
+    m_actions.push_back(action);
+}
+void CharacterCustomizer::showCharacterCustomizer() {
     QHBoxLayout* mainLayout = new QHBoxLayout(m_widget);
 
     mainLayout->addWidget(m_view);
@@ -87,4 +93,4 @@ void CharacterCustomizer::characterCustomizationClicked(CharacterItem::Character
     m_character->assignPart(characterPart, whichOption);
 }
 
-QWidget* CharacterCustomizer::getWidget() const { return m_widget; }
+QWidget* CharacterCustomizer::getWidget() { return m_widget; }

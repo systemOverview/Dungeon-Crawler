@@ -2,6 +2,7 @@
 #define CUSTOMLEVELCREATOR_H
 
 #include <QWidget>
+#include <AppPageController.h>
 class QGraphicsScene;
 class QGraphicsView;
 class TileItem;
@@ -9,7 +10,7 @@ class GameBoardView;
 class DragAndDropGameItemEvent;
 class Level;
 class LineConnectingItems;
-class CustomLevelCreator : public QWidget
+class CustomLevelCreator : public QWidget, public AppPageController
 {
     Q_OBJECT
 private:
@@ -18,7 +19,6 @@ private:
     Level* m_levelModel = nullptr;
     QWidget* m_sidebar = nullptr;
 
-    void createLevelCustomizer();
 
     void showTilesMap();
 
@@ -26,6 +26,8 @@ private:
     void createTileOptions();
     void createCharactersOptions();
     bool validateLevelAndShowMessage();
+private slots:
+    void createLevelCustomizer();
 public slots:
     void dragDropEvent(DragAndDropGameItemEvent event);
     void portalsConnected(LineConnectingItems* portalsLine);
@@ -35,6 +37,13 @@ signals:
 
 public:
     CustomLevelCreator(QWidget* parent = nullptr);
+
+// AppPageController interface
+public:
+    QWidget* getWidget() override { return this; }
+
+protected:
+    void createActions() override;
 };
 
 #endif // CUSTOMLEVELCREATOR_H

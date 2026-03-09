@@ -6,6 +6,10 @@
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
+
+public slots:
+    void setCentralWidget(QWidget* widget);
+
 public:
     explicit MainWindow(QWidget* parent = nullptr);
 

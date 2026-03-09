@@ -5,36 +5,41 @@
 #include "QGraphicsView"
 #include <CharacterCustomizer.h>
 #include <MainWindow.h>
+#include <PageNavigatorButton.h>
+#include <qgridlayout.h>
 MainAppStateController::MainAppStateController() {
     m_mainWindow = new MainWindow();
-    createAppScreens();
-    m_mainWindow->setCentralWidget(m_appScreens);
+    createPageControllers();
+    createStartScreen();
     m_mainWindow->show();
 }
 
-void MainAppStateController::createAppScreens() {
-    m_appScreens = new QStackedWidget();
-
+void MainAppStateController::createPageControllers() {
     GameController* gameController = new GameController();
     CustomLevelCreator* customLevelCreator = new CustomLevelCreator();
     CharacterCustomizer* characterCustomizer = new CharacterCustomizer();
 
-    int gameplayPageIndex = m_appScreens->addWidget(gameController->getGameBoardView());
-    // int levelCustomizerPageIndex = m_appScreens->addWidget(customLevelCreator);
-    int characterCustomizerPageIndex = m_appScreens->addWidget(characterCustomizer->getWidget());
+    m_pageControllers.push_back(gameController);
+    m_pageControllers.push_back(customLevelCreator);
+    m_pageControllers.push_back(characterCustomizer);
 
-    m_appScreens->setCurrentIndex(characterCustomizerPageIndex);
-
-    m_mainWindow->setCentralWidget(m_appScreens);
-
-    // gameController->startNewGame(GameController::GameSource::DefaultLevels);
-
-    connect(customLevelCreator,
-            &CustomLevelCreator::finished,
-            [this, gameController, gameplayPageIndex]() {
-                gameController->startNewGame(GameController::GameSource::CustomLevels);
-                m_appScreens->setCurrentIndex(gameplayPageIndex);
-            });
 }
 
-void MainAppStateController::setDefaultSettings() {}
+void MainAppStateController::createStartScreen() {
+    QWidget* buttons = new QWidget(m_mainWindow);
+    QGridLayout* buttonsLayout = new QGridLayout(buttons);
+
+    for (AppPageController* pageController : m_pageControllers) {
+        for (GameAction* action : pageController->getActions()) {
+            PageNavigatorButton* button = new PageNavigatorButton(pageController->getWidget(),
+                                                                  action);
+            buttonsLayout->addWidget(button);
+            connect(button,
+                    &PageNavigatorButton::showWidget,
+                    m_mainWindow,
+                    &MainWindow::setCentralWidget);
+        }
+    }
+
+    m_mainWindow->setCentralWidget(buttons);
+}

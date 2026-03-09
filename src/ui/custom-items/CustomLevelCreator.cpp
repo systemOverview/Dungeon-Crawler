@@ -23,10 +23,15 @@ CustomLevelCreator::CustomLevelCreator(QWidget* parent)
     layout->addWidget(m_levelVisualizer->getViewWidget(), 2);
 
     m_sidebar = new QWidget(this);
+
     layout->addWidget(m_sidebar, 1);
+}
 
-    createLevelCustomizer();
-
+void CustomLevelCreator::createActions() {
+    GameAction* action = new GameAction(GameAction::ActionID::CustomizeLevel);
+    connect(action, &QAction::triggered, this, &CustomLevelCreator::createLevelCustomizer);
+    action->setText("Create a custom level.");
+    m_actions.push_back(action);
 }
 
 void CustomLevelCreator::createLevelCustomizer() {

@@ -2,15 +2,12 @@
 #define GRAPHICALUI_H
 #include <QObject>
 #include "Constants.h"
-class FightEvent;
-class FightRound;
+#include <AppPageController.h>
 class GameBoardView;
-class CharacterTile_UI_PlacementMediator;
 class GameModelEngine;
 class TileItem;
-class QGraphicsView;
 class Level;
-class GameController : public QObject
+class GameController : public QObject, public AppPageController
 {
     Q_OBJECT
 
@@ -30,15 +27,22 @@ signals:
 
 public:
     enum class GameSource { DefaultLevels, CustomLevels };
+
     GameController();
 
     void startNewGame(GameSource gameSource);
 
     void createLevelView(Level* level);
-    QGraphicsView* getGameBoardView() const;
 
     static Coordinates GetLastTileClickedCords();
 
     ~GameController();
+
+    // AppPageController interface
+public:
+    QWidget* getWidget() override;
+
+protected:
+    void createActions() override;
 };
 #endif // GRAPHICALUI_H

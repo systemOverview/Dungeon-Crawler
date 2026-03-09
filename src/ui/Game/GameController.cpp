@@ -1,28 +1,14 @@
 #include "GameController.h"
-#include <QAudioOutput>
-#include <QMediaPlayer>
-#include <QPainter>
-#include <QShortcut>
-#include <QTimer>
-#include <QtCore/qpropertyanimation.h>
-#include <QtCore/qsequentialanimationgroup.h>
-#include <QtStateMachine/qfinalstate.h>
 #include <QtWidgets/qapplication.h>
 #include <QtWidgets/qlabel.h>
 #include <QtWidgets/qmessagebox.h>
 #include <QtWidgets/qpushbutton.h>
 #include "Character.h"
-#include "CharacterTile_UI_PlacementMediator.h"
-#include "Constants.h"
-#include "FightAnimation.h"
-#include "FightEvent.h"
 #include "GameBoardView.h"
 #include "GameModelEngine.h"
-#include "JsonObjects.h"
 #include "Level.h"
-#include "MainWindow.h"
+#include "QGraphicsView"
 #include "TileItem.h"
-#include <MoveAnimation.h>
 
 GameController::GameController() { m_gameView = new GameBoardView(); }
 
@@ -42,6 +28,25 @@ void GameController::startNewGame(GameSource gameSource) {
     connect(m_gameEngine, &GameModelEngine::fightErupted, m_gameView, &GameBoardView::animateFight);
 
     createLevelView(m_gameEngine->getCurrentLevel());
+}
+void GameController::createActions() {
+    GameAction* startDefaultGame = new GameAction(GameAction::ActionID::LoadDefaultGame);
+
+    connect(startDefaultGame, &QAction::triggered, [this]() {
+        startNewGame(GameSource::DefaultLevels);
+    });
+
+    startDefaultGame->setText("Start a new game.");
+    m_actions.push_back(startDefaultGame);
+
+    GameAction* resumeSavedGame = new GameAction(GameAction::ActionID::LoadSavedGame);
+
+    connect(resumeSavedGame, &QAction::triggered, [this]() {
+        startNewGame(GameSource::CustomLevels);
+    });
+
+    resumeSavedGame->setText("Resume saved game.");
+    m_actions.push_back(resumeSavedGame);
 }
 
 void GameController::createLevelView(Level* level) {
@@ -75,6 +80,7 @@ void GameController::tileClicked(TileItem* whichTile) {
 }
 Coordinates GameController::GetLastTileClickedCords() { return LAST_TILE_CLICKED_CORDS; }
 
-QGraphicsView* GameController::getGameBoardView() const { return m_gameView->getViewWidget(); }
 
 GameController::~GameController() {}
+
+QWidget* GameController::getWidget() { return m_gameView->getViewWidget(); }
