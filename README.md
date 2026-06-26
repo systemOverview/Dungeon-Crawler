@@ -9,9 +9,7 @@ The game also features a Dijkstra algorithm visualizer as a fun add-on. Enable v
 
 # Preview
 
-<video width="320" height="240" controls>
-  <source src="./preview.mov" type="video/mp4">
-</video>
+https://github.com/user-attachments/assets/65c57acd-6a02-4900-8d30-c20e9eb49ad0
 
 # Features
 
